@@ -10,94 +10,71 @@ import java.util.Map.Entry;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
-public class MSSQL extends Query {
+public class PostgreSQL extends Query {
 
   public ResultSet executeSelectQuery(Connection connection, String sqlQuery, JsonObject body)
       throws SQLException {
     PreparedStatement stmt = connection.prepareStatement(sqlQuery);
-    try {
-      int i = 1;
-      for (Entry<String, JsonValue> entry : body.entrySet()) {
-        Utils.setStatementParam(stmt, i, entry.getKey(), body);
-        i++;
-      }
-      return stmt.executeQuery();
+    int i = 1;
+    for (Entry<String, JsonValue> entry : body.entrySet()) {
+      Utils.setStatementParam(stmt, i, entry.getKey(), body);
+      i++;
     }
-    finally {
-      if (stmt!=null)
-        stmt.close();
-    }
+    return stmt.executeQuery();
   }
 
   public ResultSet executeSelectTrigger(Connection connection, String sqlQuery)
       throws SQLException {
     PreparedStatement stmt = connection.prepareStatement(sqlQuery);
-    try{
     if (pollingValue != null) {
       stmt.setTimestamp(1, pollingValue);
     }
     return stmt.executeQuery();
-    }
-    finally {
-      if (stmt!=null)
-        stmt.close();
-    }
   }
 
   public ResultSet executePolling(Connection connection) throws SQLException {
     validateQuery();
-    String sql = "WITH Results_CTE AS" +
+    String sql = "WITH results_cte AS" +
         "(" +
         "    SELECT" +
         "        *," +
-        "        ROW_NUMBER() OVER (ORDER BY " + pollingField + ") AS RowNum" +
+        "        ROW_NUMBER() OVER (ORDER BY " + pollingField + ") AS rownum" +
         "    FROM " + tableName +
         "    WHERE " + pollingField + " > ?" +
         " )" +
         " SELECT *" +
-        " FROM Results_CTE" +
-        " WHERE RowNum > ?" +
-        " AND RowNum < ?";
+        " FROM results_cte" +
+        " WHERE rownum > ?" +
+        " AND rownum < ?";
     PreparedStatement stmt = connection.prepareStatement(sql);
-    try{
     stmt.setTimestamp(1, pollingValue);
     stmt.setInt(2, skipNumber);
     stmt.setInt(3, countNumber + skipNumber);
     return stmt.executeQuery();
-    }
-    finally {
-      if (stmt!=null)
-        stmt.close();
-    }
   }
 
   public ResultSet executeLookup(Connection connection, JsonObject body) throws SQLException {
     validateQuery();
-    String sql = "WITH Results_CTE AS" +
+    String sql = "WITH results_cte AS" +
         "(" +
         "    SELECT" +
         "        *," +
-        "        ROW_NUMBER() OVER (ORDER BY " + lookupField + ") AS RowNum" +
+        "        ROW_NUMBER() OVER (ORDER BY " + lookupField + ") AS rownum" +
         "    FROM " + tableName +
         "    WHERE " + lookupField + " = ?" +
         " )" +
         " SELECT *" +
-        " FROM Results_CTE" +
-        " WHERE RowNum > ?" +
-        " AND RowNum < ?";
+        " FROM results_cte" +
+        " WHERE rownum > ?" +
+        " AND rownum < ?";
     PreparedStatement stmt = connection.prepareStatement(sql);
-    try{
+    //stmt.setString(1, lookupValue);
     for (Map.Entry<String, JsonValue> entry : body.entrySet()) {
       Utils.setStatementParam(stmt, 1, entry.getKey(), body);
     }
     stmt.setInt(2, skipNumber);
     stmt.setInt(3, countNumber + skipNumber);
     return stmt.executeQuery();
-    }
-    finally {
-      if (stmt!=null)
-        stmt.close();
-    }
   }
 
   public int executeDelete(Connection connection, JsonObject body) throws SQLException {
@@ -106,14 +83,10 @@ public class MSSQL extends Query {
         " FROM " + tableName +
         " WHERE " + lookupField + " = ?";
     PreparedStatement stmt = connection.prepareStatement(sql);
-    try{
-    stmt.setString(1, lookupValue);
+    for (Map.Entry<String, JsonValue> entry : body.entrySet()) {
+      Utils.setStatementParam(stmt, 1, entry.getKey(), body);
+    }
     return stmt.executeUpdate();
-    }
-    finally {
-      if (stmt!=null)
-        stmt.close();
-    }
   }
 
   public boolean executeRecordExists(Connection connection, JsonObject body) throws SQLException {
@@ -122,16 +95,10 @@ public class MSSQL extends Query {
         " FROM " + tableName +
         " WHERE " + lookupField + " = ?";
     PreparedStatement stmt = connection.prepareStatement(sql);
-    try{
-    Utils.setStatementParam(stmt, 1, lookupField, body);
+      Utils.setStatementParam(stmt, 1, lookupField, body);
     ResultSet rs = stmt.executeQuery();
     rs.next();
     return rs.getInt(1) > 0;
-    }
-    finally {
-      if (stmt!=null)
-        stmt.close();
-    }
   }
 
   public void executeInsert(Connection connection, String tableName, JsonObject body)
@@ -153,18 +120,12 @@ public class MSSQL extends Query {
         " (" + keys.toString() + ")" +
         " VALUES (" + values.toString() + ")";
     PreparedStatement stmt = connection.prepareStatement(sql);
-    try{
     int i = 1;
     for (Map.Entry<String, JsonValue> entry : body.entrySet()) {
       Utils.setStatementParam(stmt, i, entry.getKey(), body);
       i++;
     }
     stmt.execute();
-    }
-    finally {
-      if (stmt!=null)
-        stmt.close();
-    }
   }
 
   public void executeUpdate(Connection connection, String tableName, String idColumn,
@@ -181,7 +142,6 @@ public class MSSQL extends Query {
         " SET " + setString.toString() +
         " WHERE " + idColumn + " = ?";
     PreparedStatement stmt = connection.prepareStatement(sql);
-    try{
     int i = 1;
     for (Map.Entry<String, JsonValue> entry : body.entrySet()) {
       Utils.setStatementParam(stmt, i, entry.getKey(), body);
@@ -189,10 +149,5 @@ public class MSSQL extends Query {
     }
     Utils.setStatementParam(stmt, i, idColumn, body);
     stmt.execute();
-    }
-    finally {
-      if (stmt!=null)
-        stmt.close();
-    }
   }
 }

@@ -1,46 +1,57 @@
 package io.elastic.jdbc
 
-import com.google.gson.JsonObject
-import spock.lang.Ignore
-import spock.lang.Shared
-import spock.lang.Specification
+import spock.lang.*
 
+import javax.json.Json
+import javax.json.JsonObject
+import javax.json.JsonObjectBuilder
 import java.sql.Connection
 import java.sql.DriverManager
 
 @Ignore
 class ColumnNamesProviderMSSQLSpec extends Specification {
-    @Shared def connectionString = ""
-    @Shared def user = ""
-    @Shared def password = ""
-    @Shared Connection connection
 
-    def setup() {
-        connection = DriverManager.getConnection(connectionString, user, password);
-        String sql = "IF OBJECT_ID('stars', 'U') IS NOT NULL\n" +
-                "  DROP TABLE stars;"
-        connection.createStatement().execute(sql)
-        sql = "CREATE TABLE stars (ID int, name varchar(255) NOT NULL, radius int, destination float)"
-        connection.createStatement().execute(sql);
-    }
-    def cleanupSpec() {
-        String sql = "IF OBJECT_ID('stars', 'U') IS NOT NULL\n" +
-                "  DROP TABLE stars;"
-        connection.createStatement().execute(sql)
-        connection.close()
-    }
-    def "get metadata model, given table name" () {
+  @Shared
+  def connectionString = System.getenv("CONN_URI_MSSQL")
+  @Shared
+  def user = System.getenv("CONN_USER_MSSQL")
+  @Shared
+  def password = System.getenv("CONN_PASSWORD_MSSQL")
+  @Shared
+  def databaseName = System.getenv("CONN_DBNAME_MSSQL")
+  @Shared
+  def host = System.getenv("CONN_HOST_MSSQL")
 
-        JsonObject config = new JsonObject()
-        config.addProperty("tableName", "stars")
-        config.addProperty("user", user)
-        config.addProperty("password", password)
-        config.addProperty("dbEngine", "mssql")
-        config.addProperty("host", "")
-        config.addProperty("databaseName", "")
-        ColumnNamesProvider provider = new ColumnNamesProvider()
-        JsonObject meta = provider.getMetaModel((config));
-        print meta
-        expect: meta.toString() == "{\"out\":{\"type\":\"object\",\"properties\":{\"ID\":{\"required\":false,\"title\":\"ID\",\"type\":\"number\"},\"name\":{\"required\":true,\"title\":\"name\",\"type\":\"string\"},\"radius\":{\"required\":false,\"title\":\"radius\",\"type\":\"number\"},\"destination\":{\"required\":false,\"title\":\"destination\",\"type\":\"number\"}}},\"in\":{\"type\":\"object\",\"properties\":{\"ID\":{\"required\":false,\"title\":\"ID\",\"type\":\"number\"},\"name\":{\"required\":true,\"title\":\"name\",\"type\":\"string\"},\"radius\":{\"required\":false,\"title\":\"radius\",\"type\":\"number\"},\"destination\":{\"required\":false,\"title\":\"destination\",\"type\":\"number\"}}}}"
-    }
+  @Shared
+  Connection connection
+
+  def setup() {
+    connection = DriverManager.getConnection(connectionString, user, password);
+    String sql = " DROP TABLE IF EXISTS stars;"
+    connection.createStatement().execute(sql)
+    sql = "CREATE TABLE stars (ID int, name varchar(255) NOT NULL, radius int, destination float, createdat DATETIME)"
+    connection.createStatement().execute(sql);
+  }
+
+  def cleanupSpec() {
+    String sql = " DROP TABLE IF EXISTS stars;"
+    connection.createStatement().execute(sql)
+    connection.close()
+  }
+
+  def "get metadata model, given table name"() {
+
+    JsonObjectBuilder config = Json.createObjectBuilder()
+    config.add("user", user)
+        .add("password", password)
+        .add("dbEngine", "mssql")
+        .add("host", host)
+        .add("databaseName", databaseName)
+        .add("tableName", "stars")
+    ColumnNamesProvider provider = new ColumnNamesProvider()
+    JsonObject meta = provider.getMetaModel(config.build())
+    print meta
+    expect:
+    meta.toString() == "{\"out\":{\"type\":\"object\",\"properties\":{\"ID\":{\"required\":false,\"title\":\"ID\",\"type\":\"number\"},\"name\":{\"required\":true,\"title\":\"name\",\"type\":\"string\"},\"radius\":{\"required\":false,\"title\":\"radius\",\"type\":\"number\"},\"destination\":{\"required\":false,\"title\":\"destination\",\"type\":\"number\"},\"createdat\":{\"required\":false,\"title\":\"createdat\",\"type\":\"string\"}}},\"in\":{\"type\":\"object\",\"properties\":{\"ID\":{\"required\":false,\"title\":\"ID\",\"type\":\"number\"},\"name\":{\"required\":true,\"title\":\"name\",\"type\":\"string\"},\"radius\":{\"required\":false,\"title\":\"radius\",\"type\":\"number\"},\"destination\":{\"required\":false,\"title\":\"destination\",\"type\":\"number\"},\"createdat\":{\"required\":false,\"title\":\"createdat\",\"type\":\"string\"}}}}"
+  }
 }

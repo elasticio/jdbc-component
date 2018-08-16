@@ -1,104 +1,181 @@
 {
-    "title": "Database",
-    "description": "Database connector",
-    "credentials": {
-        "verifier" : "io.elastic.jdbc.JdbcCredentialsVerifier",
-        "fields": {
-            "dbEngine": {
-                "viewClass": "SelectView",
-                "label": "DB Engine",
-                "required": true,
-                "model": {
-                    "MySQL": "MySQL",
-                    "PostgreSQL" : "PostgreSQL",
-                    "oracle": "Oracle",
-                    "mssql": "MSSQL"
-                },
-                "prompt": "Please Select Database Type"
-            },
-            "host": {
-                "viewClass": "TextFieldView",
-                "label": "Connection URI (host)",
-                "required": true,
-                "placeholder": "Connection URI"
-            },
-            "port": {
-                "viewClass": "TextFieldView",
-                "label": "Connection port",
-                "required": false,
-                "placeholder": "Connection port"
-            },
-            "databaseName": {
-                "viewClass": "TextFieldView",
-                "label": "Database Name",
-                "required": true,
-                "placeholder": "Database Name"
-            },
-            "user": {
-                "viewClass": "TextFieldView",
-                "label": "User",
-                "required": true,
-                "placeholder": "User"
-            },
-            "password": {
-                "viewClass": "PasswordFieldView",
-                "label": "Password",
-                "required": true,
-                "placeholder": "Password"
-            }
-        }
-    },
-    "triggers": {
-        "select": {
-            "main": "io.elastic.jdbc.SelectTrigger",
-            "title": "SELECT",
-            "type": "polling",
-            "fields": {
-                "tableName": {
-                    "viewClass": "SelectView",
-                    "prompt": "Select a Table",
-                    "label": "Tables List",
-                    "required": true,
-                    "model": "io.elastic.jdbc.TableNameProvider"
-                },
-                 "orderField": {
-                     "viewClass": "SelectView",
-                     "prompt": "Select a field to order rows",
-                     "label": "Order Column",
-                     "model": "io.elastic.jdbc.ColumnNamesProvider",
-                     "required": true,
-                     "require":[
-                         "tableName"
-                     ]
-                 }
-            },
-            "dynamicMetadata": "io.elastic.jdbc.ColumnNamesProvider"
-        }
-    },
-    "actions": {
-        "createOrUpdateRecord": {
-            "main": "io.elastic.jdbc.actions.CreateOrUpdateRecord",
-            "title": "Create or update record",
-            "fields": {
-                "tableName": {
-                    "viewClass": "SelectView",
-                    "prompt": "Select a Table",
-                    "label": "Tables",
-                    "required": true,
-                    "model": "io.elastic.jdbc.TableNameProvider"
-                },
-                "idColumn": {
-                     "viewClass": "SelectView",
-                     "prompt": "Select an ID column",
-                     "label": "ID Column",
-                     "model": "io.elastic.jdbc.ColumnNamesProvider",
-                    "required": true,
-                     "require":[
-                         "tableName"
-                     ]
-                }
-            },
-            "dynamicMetadata": "io.elastic.jdbc.ColumnNamesProvider"
-        }
+  "title": "Database v2",
+  "description": "Database JDBC connector (v2)",
+  "credentials": {
+    "verifier": "io.elastic.jdbc.JdbcCredentialsVerifier",
+    "fields": {
+      "dbEngine": {
+        "viewClass": "SelectView",
+        "label": "DB Engine",
+        "required": true,
+        "model": {
+          "mysql": "MySQL",
+          "postgresql": "PostgreSQL",
+          "oracle": "Oracle",
+          "mssql": "MSSQL"
+        },
+        "prompt": "Please Select Database Type"
+      },
+      "host": {
+        "viewClass": "TextFieldView",
+        "label": "Connection URI (host)",
+        "required": true,
+        "placeholder": "Connection URI"
+      },
+      "port": {
+        "viewClass": "TextFieldView",
+        "label": "Connection port",
+        "required": false,
+        "placeholder": "Connection port"
+      },
+      "databaseName": {
+        "viewClass": "TextFieldView",
+        "label": "Database Name",
+        "required": true,
+        "placeholder": "Database Name"
+      },
+      "user": {
+        "viewClass": "TextFieldView",
+        "label": "User",
+        "required": true,
+        "placeholder": "User"
+      },
+      "password": {
+        "viewClass": "PasswordFieldView",
+        "label": "Password",
+        "required": true,
+        "placeholder": "Password"
+      }
     }
+  },
+  "triggers": {
+    "getRowsPolling": {
+      "main": "io.elastic.jdbc.triggers.GetRowsPollingTrigger",
+      "title": "Get Rows Polling",
+      "description": "Executes an operation that polling potentially multiple rows from the database from last timestamp snapshot",
+      "type": "polling",
+      "fields": {
+        "tableName": {
+          "viewClass": "SelectView",
+          "prompt": "Select a Table",
+          "label": "Tables List",
+          "required": true,
+          "model": "io.elastic.jdbc.TableNameProvider"
+        },
+        "pollingField": {
+          "viewClass": "SelectView",
+          "prompt": "Select a Timestamp (or similar) Column",
+          "label": "Timestamp (or similar) Column",
+          "model": "io.elastic.jdbc.ColumnNamesProvider",
+          "required": true,
+          "require": [
+            "tableName"
+          ]
+        },
+        "pollingValue": {
+          "viewClass": "TextFieldView",
+          "label": "Start Polling From (optional)",
+          "required": false,
+          "placeholder": "1970-01-01 00:00:00.000"
+        }
+      },
+      "dynamicMetadata": "io.elastic.jdbc.ColumnNamesProvider"
+    },
+    "selectTrigger": {
+      "main": "io.elastic.jdbc.triggers.SelectTrigger",
+      "title": "Select",
+      "description": "Executes a SELECT statement that fetches potentially multiple rows from the database",
+      "type": "polling",
+      "fields": {
+        "sqlQuery": {
+          "viewClass": "TextAreaView",
+          "label": "SQL Query",
+          "required": true,
+          "placeholder": "SELECT * FROM films WHERE created > '%%EIO_LAST_POLL%%'",
+          "note": "Before executing the statement the %%EIO_LAST_POLL%% will be replaced with ISO Date of the last execution"
+        },
+        "pollingValue": {
+          "viewClass": "TextFieldView",
+          "label": "Start Polling From (optional)",
+          "required": false,
+          "placeholder": "1970-01-01 00:00:00.000"
+        }
+      },
+      "dynamicMetadata": "io.elastic.jdbc.ColumnNamesProvider"
+    }
+  },
+  "actions": {
+    "lookupRowByPrimaryKey": {
+      "main": "io.elastic.jdbc.actions.LookupRowByPrimaryKey",
+      "title": "Lookup Row By Primary Key",
+      "description": "Executes an operation that should fetch exactly one row from the database by primary key",
+      "fields": {
+        "tableName": {
+          "viewClass": "SelectView",
+          "prompt": "Select a Table",
+          "label": "Table",
+          "required": true,
+          "model": "io.elastic.jdbc.TableNameProvider"
+        },
+        "nullableResult": {
+          "label": "Don`t throw Error on an Empty Result",
+          "viewClass": "CheckBoxView"
+        }
+      },
+      "dynamicMetadata": "io.elastic.jdbc.PrimaryColumnNamesProvider"
+    },
+    "upsertRowByPrimaryKey": {
+      "main": "io.elastic.jdbc.actions.UpsertRowByPrimaryKey",
+      "title": "Upsert Row By Primary Key",
+      "description": "Executes upsert by primary key",
+      "fields": {
+        "tableName": {
+          "viewClass": "SelectView",
+          "prompt": "Select a Table",
+          "label": "Table",
+          "required": true,
+          "model": "io.elastic.jdbc.TableNameProvider"
+        }
+      },
+      "dynamicMetadata": "io.elastic.jdbc.ColumnNamesProvider"
+    },
+    "deleteRowByPrimaryKey": {
+      "main": "io.elastic.jdbc.actions.DeleteRowByPrimaryKey",
+      "title": "Delete Row By Primary Key",
+      "description": "Executes an operation that should remove exactly one row from the database by primary key",
+      "fields": {
+        "tableName": {
+          "viewClass": "SelectView",
+          "prompt": "Select a Table",
+          "label": "Tables",
+          "required": true,
+          "model": "io.elastic.jdbc.TableNameProvider"
+        },
+        "nullableResult": {
+          "label": "Don`t throw Error on an Empty Result",
+          "viewClass": "CheckBoxView"
+        }
+      },
+      "dynamicMetadata": "io.elastic.jdbc.PrimaryColumnNamesProvider"
+    },
+    "selectAction": {
+      "main": "io.elastic.jdbc.actions.SelectAction",
+      "title": "Select",
+      "description": "Executes a SELECT statement that fetches potentially multiple rows from the database",
+      "fields": {
+        "sqlQuery": {
+          "viewClass": "TextAreaView",
+          "label": "SQL Query",
+          "required": true,
+          "placeholder": "SELECT * FROM films WHERE watched = @watched:boolean AND created = @created:date",
+          "note": "You can use parameters of message body as <i>@value:type</i>"
+        },
+        "nullableResult": {
+          "label": "Don`t throw Error on an Empty Result",
+          "viewClass": "CheckBoxView"
+        }
+      },
+      "dynamicMetadata": "io.elastic.jdbc.QueryColumnNamesProvider"
+    }
+  }
 }

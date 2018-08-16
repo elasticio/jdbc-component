@@ -1,12 +1,12 @@
 group = 'io.elastic'
-version = '2.0.2-SNAPSHOT'
+version = '2.2.0-SNAPSHOT'
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     maven {
@@ -17,18 +17,21 @@ repositories {
 }
 
 dependencies {
-    compile "io.elastic:sailor-jvm:1.1.2"
-    compile "mysql:mysql-connector-java:5.1.6"
-    compile "postgresql:postgresql:9.0-801.jdbc4"
+    compile "io.elastic:sailor-jvm:2.1.0"
+    compile "mysql:mysql-connector-java:8.0.11"
+    compile group: 'org.postgresql', name: 'postgresql', version: '42.2.4'
     compile files("./lib/ojdbc6.jar")
-    compile files("./lib/sqljdbc4.jar")
+    compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre8'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
 
-    testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
-    testCompile 'org.eclipse.jetty:jetty-server:8.1.9.v20130131'
-    testCompile 'org.eclipse.jetty:jetty-servlet:8.1.9.v20130131'
+    testCompile "org.spockframework:spock-core:1.1-groovy-2.4"
+    testCompile 'org.eclipse.jetty:jetty-server:9.4.11.v20180605'
+    testCompile 'org.eclipse.jetty:jetty-servlet:9.4.11.v20180605'
     testCompile 'org.hsqldb:hsqldb:2.0.0'
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.1'
+    gradleVersion = '4.9'
 }

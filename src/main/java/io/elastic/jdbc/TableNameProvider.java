@@ -1,84 +1,88 @@
 package io.elastic.jdbc;
 
-import com.google.gson.JsonObject;
 import io.elastic.api.SelectModelProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TableNameProvider implements SelectModelProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(TableNameProvider.class);
+  private static final Logger logger = LoggerFactory.getLogger(TableNameProvider.class);
 
-    public JsonObject getSelectModel(JsonObject configuration) {
-        logger.info("About to retrieve table name");
+  @Override
+  public JsonObject getSelectModel(JsonObject configuration) {
+    logger.info("About to retrieve table name");
 
-        JsonObject result = new JsonObject();
-        Connection connection = null;
-        ResultSet rs = null;
+    JsonObjectBuilder result = Json.createObjectBuilder();
+    Connection connection = null;
+    ResultSet rs = null;
 
-        try {
-            connection = Utils.getConnection(configuration);
-            logger.info("Successfully connected to DB");
+    try {
+      connection = Utils.getConnection(configuration);
+      logger.info("Successfully connected to DB");
 
-            // get metadata
-            DatabaseMetaData md = connection.getMetaData();
+      // get metadata
+      DatabaseMetaData md = connection.getMetaData();
 
-            // get table names
-            String[] types = {"TABLE", "VIEW"};
-            rs = md.getTables(null, "%", "%", types);
+      // get table names
+      String[] types = {"TABLE", "VIEW"};
+      rs = md.getTables(null, "%", "%", types);
 
-            // put table names to result
-            String tableName;
-            String schemaName;
-            Boolean isEmpty = true;
+      // put table names to result
+      String tableName;
+      String schemaName;
+      boolean isEmpty = true;
 
-            while (rs.next()) {
-                tableName = rs.getString("TABLE_NAME");
-                schemaName = rs.getString("TABLE_SCHEM");
-                if (configuration.get("dbEngine").getAsString().toLowerCase().equals("oracle")
-                        && isOracleServiceSchema(schemaName)) {
-                    continue;
-                }
-                if (schemaName != null) {
-                    tableName = schemaName + "." + tableName;
-                }
-                result.addProperty(tableName, tableName);
-                isEmpty = false;
-            }
-            if (isEmpty) {
-                result.addProperty("", "no tables");
-            }
-        } catch (SQLException e) {
-            logger.error("Unexpected error", e);
-            throw new RuntimeException(e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    logger.error(e.toString());
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    logger.error(e.toString());
-                }
-            }
+      while (rs.next()) {
+        tableName = rs.getString("TABLE_NAME");
+        schemaName = rs.getString("TABLE_SCHEM");
+        if (configuration.getString("dbEngine").toLowerCase().equals("oracle")
+            && isOracleServiceSchema(schemaName)) {
+          continue;
         }
-        return result;
+        if (schemaName != null) {
+          tableName = schemaName + "." + tableName;
+        }
+        result.add(tableName, tableName);
+        isEmpty = false;
+      }
+      if (isEmpty) {
+        result.add("empty dataset", "no tables");
+      }
+    } catch (SQLException e) {
+      logger.error("Unexpected error {}", e);
+      throw new RuntimeException(e);
+    } finally {
+      if (rs != null) {
+        try {
+          rs.close();
+        } catch (SQLException e) {
+          logger.error(e.toString());
+        }
+      }
+      if (connection != null) {
+        try {
+          connection.close();
+        } catch (SQLException e) {
+          logger.error(e.toString());
+        }
+      }
     }
+    return result.build();
+  }
 
-    private boolean isOracleServiceSchema(String schema) {
-        List<String> schemas = Arrays.asList("APPQOSSYS", "CTXSYS", "DBSNMP", "DIP", "OUTLN", "RDSADMIN", "SYS", "SYSTEM");
-        return schemas.indexOf(schema) > -1;
-    }
+  private boolean isOracleServiceSchema(String schema) {
+    List<String> schemas = Arrays
+        .asList("ANONYMOUS", "APEX_040000", "APEX_PUBLIC_USER", "MDSYS", "XDB", "XS$NULL",
+            "APPQOSSYS", "CTXSYS", "DBSNMP", "DIP", "OUTLN", "RDSADMIN", "SYS", "SYSTEM");
+    return schemas.indexOf(schema) > -1;
+  }
 }
