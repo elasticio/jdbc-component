@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 public class PrimaryColumnNamesProvider implements DynamicMetadataProvider, SelectModelProvider {
 
-  private static final Logger logger = LoggerFactory.getLogger(PrimaryColumnNamesProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(PrimaryColumnNamesProvider.class);
 
   public JsonObject getSelectModel(JsonObject configuration) {
     JsonObject result = Json.createObjectBuilder().build();
@@ -57,8 +57,8 @@ public class PrimaryColumnNamesProvider implements DynamicMetadataProvider, Sele
     ResultSet rs = null;
     String schemaName = null;
     Boolean isEmpty = true;
-    Boolean isOracle = (configuration.getString("dbEngine").equals("oracle")) ? true : false;
-    Boolean isMssql = (configuration.getString("dbEngine").equals("mssql")) ? true : false;
+    Boolean isOracle = configuration.getString("dbEngine").equals("oracle");
+    Boolean isMssql = configuration.getString("dbEngine").equals("mssql");
     List<String> primaryKeys = new ArrayList();
     try {
       connection = Utils.getConnection(configuration);
@@ -74,7 +74,7 @@ public class PrimaryColumnNamesProvider implements DynamicMetadataProvider, Sele
               tableName);
       while (rs.next()) {
         primaryKeys.add(rs.getString("COLUMN_NAME"));
-        logger.info("Primary Key: {}", rs.getString("COLUMN_NAME"));
+        LOGGER.info("Primary Key: {}", rs.getString("COLUMN_NAME"));
       }
       rs = dbMetaData
           .getColumns(null, ((isOracle && !schemaName.isEmpty()) ? schemaName : null), tableName,
@@ -100,7 +100,7 @@ public class PrimaryColumnNamesProvider implements DynamicMetadataProvider, Sele
         }
       }
       if (isEmpty) {
-        logger.info("Empty PK list - no primary keys");
+        LOGGER.info("Empty PK list - no primary keys");
         throw new IllegalStateException("No Primary Keys");
       }
 
@@ -111,14 +111,14 @@ public class PrimaryColumnNamesProvider implements DynamicMetadataProvider, Sele
         try {
           rs.close();
         } catch (SQLException e) {
-          logger.error("Failed to close result set", e.toString());
+          LOGGER.error("Failed to close result set", e);
         }
       }
       if (connection != null) {
         try {
           connection.close();
         } catch (SQLException e) {
-          logger.error("Failed to close connection", e.toString());
+          LOGGER.error("Failed to close connection", e);
         }
       }
     }

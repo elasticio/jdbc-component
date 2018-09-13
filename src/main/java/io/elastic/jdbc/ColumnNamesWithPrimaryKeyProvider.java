@@ -15,16 +15,17 @@ import javax.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ColumnNamesProvider implements DynamicMetadataProvider, SelectModelProvider {
+public class ColumnNamesWithPrimaryKeyProvider implements DynamicMetadataProvider,
+    SelectModelProvider {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ColumnNamesProvider.class);
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(ColumnNamesWithPrimaryKeyProvider.class);
 
   @Override
   public JsonObject getSelectModel(JsonObject configuration) {
     JsonObjectBuilder result = Json.createObjectBuilder();
     JsonObject properties = getColumns(configuration);
     for (Map.Entry<String, JsonValue> entry : properties.entrySet()) {
-      JsonValue field = entry.getValue();
       result.add(entry.getKey(), entry.getKey());
     }
     return result.build();
@@ -55,30 +56,30 @@ public class ColumnNamesProvider implements DynamicMetadataProvider, SelectModel
     JsonObjectBuilder properties = Json.createObjectBuilder();
     Connection connection = null;
     ResultSet rs = null;
+    ResultSet rsPrimaryKeys = null;
     String schemaName = null;
     boolean isEmpty = true;
     Boolean isOracle = configuration.getString("dbEngine").equals("oracle");
-    Boolean isMssql = configuration.getString("dbEngine").equals("mssql");
     try {
       connection = Utils.getConnection(configuration);
       DatabaseMetaData dbMetaData = connection.getMetaData();
-      rs = dbMetaData.getPrimaryKeys(null, null, tableName);
       if (tableName.contains(".")) {
         schemaName = tableName.split("\\.")[0];
         tableName = tableName.split("\\.")[1];
       }
+      rsPrimaryKeys = dbMetaData
+          .getPrimaryKeys(null, ((isOracle && !schemaName.isEmpty()) ? schemaName : null),
+              tableName);
       rs = dbMetaData.getColumns(null, schemaName, tableName, "%");
       while (rs.next()) {
         JsonObjectBuilder field = Json.createObjectBuilder();
         String name = rs.getString("COLUMN_NAME");
-        Boolean isRequired;
-        Integer isNullable = (rs.getObject("NULLABLE") != null) ? rs.getInt("NULLABLE") : 1;
-        if (isMssql) {
-          String isAutoincrement =
-              (rs.getString("IS_AUTOINCREMENT") != null) ? rs.getString("IS_AUTOINCREMENT") : "";
-          isRequired = isNullable == 0 && !isAutoincrement.equals("YES");
-        } else {
-          isRequired = isNullable == 0;
+        Boolean isRequired = false;
+        while (rsPrimaryKeys.next()) {
+          if (rsPrimaryKeys.getString("COLUMN_NAME").equals(name)) {
+            isRequired = true;
+            break;
+          }
         }
         field.add("required", isRequired)
             .add("title", name)
@@ -96,6 +97,13 @@ public class ColumnNamesProvider implements DynamicMetadataProvider, SelectModel
       if (rs != null) {
         try {
           rs.close();
+        } catch (SQLException e) {
+          LOGGER.error("Failed to close result set {}", e);
+        }
+      }
+      if (rsPrimaryKeys != null) {
+        try {
+          rsPrimaryKeys.close();
         } catch (SQLException e) {
           LOGGER.error("Failed to close result set {}", e);
         }

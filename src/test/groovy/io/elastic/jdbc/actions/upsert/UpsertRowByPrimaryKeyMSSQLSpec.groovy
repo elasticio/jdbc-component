@@ -1,29 +1,32 @@
-package io.elastic.jdbc.actions
+package io.elastic.jdbc.actions.upsert
 
 import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
+import io.elastic.jdbc.actions.UpsertRowByPrimaryKey
 import spock.lang.*
 
+import javax.json.Json
 import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 
-@Ignore
+//@Ignore
 class UpsertRowByPrimaryKeyMSSQLSpec extends Specification {
 
   @Shared
-  def connectionString = System.getenv("CONN_URI_MSSQL")
+  def user = "john"//System.getenv("CONN_USER_MSSQL")
   @Shared
-  def user = System.getenv("CONN_USER_MSSQL")
+  def password = "elastic123"//System.getenv("CONN_PASSWORD_MSSQL")
   @Shared
-  def password = System.getenv("CONN_PASSWORD_MSSQL")
+  def databaseName = "Test2"//System.getenv("CONN_DBNAME_MSSQL")
   @Shared
-  def databaseName = System.getenv("CONN_DBNAME_MSSQL")
+  def host = "eio-mssql-fra.c79g081qpeyv.eu-central-1.rds.amazonaws.com"//System.getenv("CONN_HOST_MSSQL")
   @Shared
-  def host = System.getenv("CONN_HOST_MSSQL")
-
+  def port = "1433"//System.getenv("CONN_PORT_MSSQL")
+  @Shared
+  def connectionString ="jdbc:sqlserver://" + host + ":" + port + ";database=" + databaseName
   @Shared
   Connection connection
 
@@ -36,9 +39,11 @@ class UpsertRowByPrimaryKeyMSSQLSpec extends Specification {
   @Shared
   EventEmitter.Callback reboundCallback
   @Shared
+  EventEmitter.Callback httpReplyCallback
+  @Shared
   EventEmitter emitter
   @Shared
-  LookupRowByPrimaryKey action
+  UpsertRowByPrimaryKey action
 
   def setupSpec() {
     connection = DriverManager.getConnection(connectionString, user, password)
@@ -53,26 +58,28 @@ class UpsertRowByPrimaryKeyMSSQLSpec extends Specification {
     snapshotCallback = Mock(EventEmitter.Callback)
     dataCallback = Mock(EventEmitter.Callback)
     reboundCallback = Mock(EventEmitter.Callback)
-    emitter = new EventEmitter.Builder().onData(dataCallback).onSnapshot(snapshotCallback).onError(errorCallback).onRebound(reboundCallback).build()
-    action = new LookupRowByPrimaryKey(emitter)
+    httpReplyCallback = Mock(EventEmitter.Callback)
+    emitter = new EventEmitter.Builder().onData(dataCallback).onSnapshot(snapshotCallback).onError(errorCallback)
+            .onRebound(reboundCallback).onHttpReplyCallback(httpReplyCallback).build()
+    action = new UpsertRowByPrimaryKey()
   }
 
   def runAction(JsonObject config, JsonObject body, JsonObject snapshot) {
     Message msg = new Message.Builder().body(body).build()
-    ExecutionParameters params = new ExecutionParameters(msg, config, snapshot)
+    ExecutionParameters params = new ExecutionParameters(msg, emitter, config, snapshot)
     action.execute(params);
   }
 
   def getStarsConfig() {
-    JsonObject config = Json.createObjectBuilder().build()
-
-    config.addProperty("idColumn", "id")
-    config.addProperty("tableName", "stars")
-    config.addProperty("user", user)
-    config.addProperty("password", password)
-    config.addProperty("dbEngine", "mssql")
-    config.addProperty("host", host)
-    config.addProperty("databaseName", databaseName)
+    JsonObject config = Json.createObjectBuilder()
+    .add("tableName", "stars")
+    .add("user", user)
+    .add("password", password)
+    .add("dbEngine", "mssql")
+    .add("host", host)
+    .add("port", port)
+    .add("databaseName", databaseName)
+    .build();
     return config;
   }
 
@@ -80,7 +87,8 @@ class UpsertRowByPrimaryKeyMSSQLSpec extends Specification {
     String sql = "IF OBJECT_ID('stars', 'U') IS NOT NULL\n" +
         "  DROP TABLE stars;"
     connection.createStatement().execute(sql);
-    connection.createStatement().execute("CREATE TABLE stars (id int, name varchar(255) NOT NULL, date datetime, radius int, destination int)");
+    connection.createStatement().execute("CREATE TABLE stars (id int PRIMARY KEY, name varchar(255) NOT NULL, " +
+            "date datetime, radius int, destination int, visible bit, visibledate date)");
   }
 
   def getRecords(tableName) {
@@ -111,11 +119,14 @@ class UpsertRowByPrimaryKeyMSSQLSpec extends Specification {
 
     JsonObject snapshot = Json.createObjectBuilder().build()
 
-    JsonObject body = Json.createObjectBuilder().build()
-    body.addProperty("id", "1")
-    body.addProperty("name", "Taurus")
-    body.addProperty("date", "2015-02-19 10:10:10.0")
-    body.addProperty("radius", "123")
+    JsonObject body = Json.createObjectBuilder()
+    .add("id", 1)
+    .add("name", "Taurus")
+    .add("date", "2015-02-19 10:10:10.0")
+    .add("radius", 123)
+    .add("visible", true)
+    .add("visibledate", "2015-02-19")
+    .build();
 
     runAction(getStarsConfig(), body, snapshot)
 
@@ -123,7 +134,8 @@ class UpsertRowByPrimaryKeyMSSQLSpec extends Specification {
 
     expect:
     records.size() == 1
-    records.get(0) == '{id=1, name=Taurus, date=2015-02-19 10:10:10.0, radius=123, destination=null}'
+    records.get(0) == '{id=1, name=Taurus, date=2015-02-19 10:10:10.0, radius=123, destination=null, visible=true, ' +
+            'visibledate=2015-02-19}'
   }
 
   def "one insert, incorrect value: string in integer field"() {
@@ -132,11 +144,11 @@ class UpsertRowByPrimaryKeyMSSQLSpec extends Specification {
 
     JsonObject snapshot = Json.createObjectBuilder().build()
 
-    JsonObject body = Json.createObjectBuilder().build()
-    body.addProperty("id", "1")
-    body.addProperty("name", "Taurus")
-    body.addProperty("radius", "test")
-
+    JsonObject body = Json.createObjectBuilder()
+    .add("id", "1")
+    .add("name", "Taurus")
+    .add("radius", "test")
+    .build()
     String exceptionClass = "";
 
     try {
@@ -155,17 +167,18 @@ class UpsertRowByPrimaryKeyMSSQLSpec extends Specification {
 
     JsonObject snapshot = Json.createObjectBuilder().build()
 
-    JsonObject body1 = Json.createObjectBuilder().build()
-    body1.addProperty("id", "1")
-    body1.addProperty("name", "Taurus")
-    body1.addProperty("radius", "123")
-
+    JsonObject body1 = Json.createObjectBuilder()
+    .add("id", 1)
+    .add("name", "Taurus")
+    .add("radius", 123)
+    .build()
     runAction(getStarsConfig(), body1, snapshot)
 
-    JsonObject body2 = Json.createObjectBuilder().build()
-    body2.addProperty("id", "2")
-    body2.addProperty("name", "Eridanus")
-    body2.addProperty("radius", "456")
+    JsonObject body2 = Json.createObjectBuilder()
+    .add("id", 2)
+    .add("name", "Eridanus")
+    .add("radius", 456)
+    .build()
 
     runAction(getStarsConfig(), body2, snapshot)
 
@@ -173,8 +186,8 @@ class UpsertRowByPrimaryKeyMSSQLSpec extends Specification {
 
     expect:
     records.size() == 2
-    records.get(0) == '{id=1, name=Taurus, date=null, radius=123, destination=null}'
-    records.get(1) == '{id=2, name=Eridanus, date=null, radius=456, destination=null}'
+    records.get(0) == '{id=1, name=Taurus, date=null, radius=123, destination=null, visible=null, visibledate=null}'
+    records.get(1) == '{id=2, name=Eridanus, date=null, radius=456, destination=null, visible=null, visibledate=null}'
   }
 
   def "one insert, one update by ID"() {
@@ -183,44 +196,46 @@ class UpsertRowByPrimaryKeyMSSQLSpec extends Specification {
 
     JsonObject snapshot = Json.createObjectBuilder().build()
 
-    JsonObject body1 = Json.createObjectBuilder().build()
-    body1.addProperty("id", "1")
-    body1.addProperty("name", "Taurus")
-    body1.addProperty("radius", "123")
-
+    JsonObject body1 = Json.createObjectBuilder()
+    .add("id", 1)
+    .add("name", "Taurus")
+    .add("radius", 123)
+    .build()
     runAction(getStarsConfig(), body1, snapshot)
 
-    JsonObject body2 = Json.createObjectBuilder().build()
-    body2.addProperty("id", "1")
-    body2.addProperty("name", "Eridanus")
-
+    JsonObject body2 = Json.createObjectBuilder()
+    .add("id", 1)
+    .add("name", "Eridanus")
+    .build()
     runAction(getStarsConfig(), body2, snapshot)
 
     ArrayList<String> records = getRecords("stars")
 
     expect:
     records.size() == 1
-    records.get(0) == '{id=1, name=Eridanus, date=null, radius=123, destination=null}'
+    records.get(0) == '{id=1, name=Eridanus, date=null, radius=123, destination=null, visible=null, visibledate=null}'
   }
 
 
   def getPersonsConfig() {
-    JsonObject config = Json.createObjectBuilder().build()
-    config.addProperty("idColumn", "email")
-    config.addProperty("tableName", "persons")
-    config.addProperty("user", user)
-    config.addProperty("password", password)
-    config.addProperty("dbEngine", "mssql")
-    config.addProperty("host", host)
-    config.addProperty("databaseName", databaseName)
-    return config;
+    JsonObject config = Json.createObjectBuilder()
+    .add("tableName", "persons")
+    .add("user", user)
+    .add("password", password)
+    .add("dbEngine", "mssql")
+    .add("host", host)
+    .add("port", port)
+    .add("databaseName", databaseName)
+    .build()
+    return config
   }
 
   def preparePersonsTable() {
     String sql = "IF OBJECT_ID('persons', 'U') IS NOT NULL\n" +
         "  DROP TABLE persons;"
     connection.createStatement().execute(sql);
-    connection.createStatement().execute("CREATE TABLE persons (id int, name varchar(255) NOT NULL, email varchar(255) NOT NULL)");
+    connection.createStatement().execute("CREATE TABLE persons (id int, name varchar(255) NOT NULL, " +
+            "email varchar(255) NOT NULL PRIMARY KEY)");
   }
 
   def "one insert, name with quote"() {
@@ -229,10 +244,11 @@ class UpsertRowByPrimaryKeyMSSQLSpec extends Specification {
 
     JsonObject snapshot = Json.createObjectBuilder().build()
 
-    JsonObject body1 = Json.createObjectBuilder().build()
-    body1.addProperty("id", "1")
-    body1.addProperty("name", "O'Henry")
-    body1.addProperty("email", "ohenry@elastic.io")
+    JsonObject body1 = Json.createObjectBuilder()
+    .add("id", 1)
+    .add("name", "O'Henry")
+    .add("email", "ohenry@elastic.io")
+    .build()
     runAction(getPersonsConfig(), body1, snapshot)
 
     ArrayList<String> records = getRecords("persons")
@@ -248,22 +264,25 @@ class UpsertRowByPrimaryKeyMSSQLSpec extends Specification {
 
     JsonObject snapshot = Json.createObjectBuilder().build()
 
-    JsonObject body1 = Json.createObjectBuilder().build()
-    body1.addProperty("id", "1")
-    body1.addProperty("name", "User1")
-    body1.addProperty("email", "user1@elastic.io")
+    JsonObject body1 = Json.createObjectBuilder()
+    .add("id", 1)
+    .add("name", "User1")
+    .add("email", "user1@elastic.io")
+    .build()
     runAction(getPersonsConfig(), body1, snapshot)
 
-    JsonObject body2 = Json.createObjectBuilder().build()
-    body2.addProperty("id", "2")
-    body2.addProperty("name", "User2")
-    body2.addProperty("email", "user2@elastic.io")
+    JsonObject body2 = Json.createObjectBuilder()
+    .add("id", 2)
+    .add("name", "User2")
+    .add("email", "user2@elastic.io")
+    .build()
     runAction(getPersonsConfig(), body2, snapshot)
 
-    JsonObject body3 = Json.createObjectBuilder().build()
-    body3.addProperty("id", "3")
-    body3.addProperty("name", "User3")
-    body3.addProperty("email", "user2@elastic.io")
+    JsonObject body3 = Json.createObjectBuilder()
+    .add("id", 3)
+    .add("name", "User3")
+    .add("email", "user2@elastic.io")
+    .build()
     runAction(getPersonsConfig(), body3, snapshot)
 
     ArrayList<String> records = getRecords("persons")
@@ -273,6 +292,4 @@ class UpsertRowByPrimaryKeyMSSQLSpec extends Specification {
     records.get(0) == '{id=1, name=User1, email=user1@elastic.io}'
     records.get(1) == '{id=3, name=User3, email=user2@elastic.io}'
   }
-
-
 }

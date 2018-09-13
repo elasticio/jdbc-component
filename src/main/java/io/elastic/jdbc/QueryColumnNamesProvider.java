@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 public class QueryColumnNamesProvider implements DynamicMetadataProvider, SelectModelProvider {
 
-  private static final Logger logger = LoggerFactory.getLogger(QueryColumnNamesProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(QueryColumnNamesProvider.class);
 
   public JsonObject getSelectModel(JsonObject configuration) {
     JsonObject result = Json.createObjectBuilder().build();
@@ -49,13 +49,13 @@ public class QueryColumnNamesProvider implements DynamicMetadataProvider, Select
     Boolean isEmpty = true;
     if (matcher.find()) {
       do {
-        logger.info("Var = {}", matcher.group());
+        LOGGER.info("Var = {}", matcher.group());
         JsonObjectBuilder field = Json.createObjectBuilder();
         String result[] = matcher.group().split(":");
         String name = result[0].substring(1);
         String type = result[1];
         field.add("title", name)
-             .add("type", type);
+            .add("type", type);
         properties.add(name, field);
         isEmpty = false;
       } while (matcher.find());

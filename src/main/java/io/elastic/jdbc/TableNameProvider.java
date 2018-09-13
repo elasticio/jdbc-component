@@ -15,11 +15,11 @@ import org.slf4j.LoggerFactory;
 
 public class TableNameProvider implements SelectModelProvider {
 
-  private static final Logger logger = LoggerFactory.getLogger(TableNameProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(TableNameProvider.class);
 
   @Override
   public JsonObject getSelectModel(JsonObject configuration) {
-    logger.info("About to retrieve table name");
+    LOGGER.info("About to retrieve table name");
 
     JsonObjectBuilder result = Json.createObjectBuilder();
     Connection connection = null;
@@ -27,7 +27,7 @@ public class TableNameProvider implements SelectModelProvider {
 
     try {
       connection = Utils.getConnection(configuration);
-      logger.info("Successfully connected to DB");
+      LOGGER.info("Successfully connected to DB");
 
       // get metadata
       DatabaseMetaData md = connection.getMetaData();
@@ -58,21 +58,21 @@ public class TableNameProvider implements SelectModelProvider {
         result.add("empty dataset", "no tables");
       }
     } catch (SQLException e) {
-      logger.error("Unexpected error {}", e);
+      LOGGER.error("Unexpected error {}", e);
       throw new RuntimeException(e);
     } finally {
       if (rs != null) {
         try {
           rs.close();
         } catch (SQLException e) {
-          logger.error(e.toString());
+          LOGGER.error(e.toString());
         }
       }
       if (connection != null) {
         try {
           connection.close();
         } catch (SQLException e) {
-          logger.error(e.toString());
+          LOGGER.error(e.toString());
         }
       }
     }

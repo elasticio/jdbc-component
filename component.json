@@ -124,6 +124,21 @@
       },
       "dynamicMetadata": "io.elastic.jdbc.PrimaryColumnNamesProvider"
     },
+    "upsertRowByPrimaryKey": {
+      "main": "io.elastic.jdbc.actions.UpsertRowByPrimaryKey",
+      "title": "Upsert Row By Primary Key",
+      "description": "Executes upsert by primary key",
+      "fields": {
+        "tableName": {
+          "viewClass": "SelectView",
+          "prompt": "Select a Table",
+          "label": "Table",
+          "required": true,
+          "model": "io.elastic.jdbc.TableNameProvider"
+        }
+      },
+      "dynamicMetadata": "io.elastic.jdbc.ColumnNamesWithPrimaryKeyProvider"
+    },
     "deleteRowByPrimaryKey": {
       "main": "io.elastic.jdbc.actions.DeleteRowByPrimaryKey",
       "title": "Delete Row By Primary Key",

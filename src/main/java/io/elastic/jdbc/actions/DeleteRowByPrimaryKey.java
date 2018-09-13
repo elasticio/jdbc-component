@@ -8,12 +8,10 @@ import io.elastic.jdbc.QueryBuilders.Query;
 import io.elastic.jdbc.QueryFactory;
 import io.elastic.jdbc.Utils;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import org.slf4j.Logger;
@@ -21,31 +19,24 @@ import org.slf4j.LoggerFactory;
 
 public class DeleteRowByPrimaryKey implements Module {
 
-  private static final Logger logger = LoggerFactory.getLogger(LookupRowByPrimaryKey.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LookupRowByPrimaryKey.class);
   private static final String PROPERTY_DB_ENGINE = "dbEngine";
   private static final String PROPERTY_TABLE_NAME = "tableName";
   private static final String PROPERTY_ID_COLUMN = "idColumn";
   private static final String PROPERTY_LOOKUP_VALUE = "lookupValue";
   private static final String PROPERTY_NULLABLE_RESULT = "nullableResult";
 
-  private Connection connection = null;
-  private Map<String, String> columnTypes = null;
-  public boolean isOracle = false;
-
   @Override
   public void execute(ExecutionParameters parameters) {
     final JsonObject body = parameters.getMessage().getBody();
     final JsonObject configuration = parameters.getConfiguration();
     JsonObject snapshot = parameters.getSnapshot();
-    JsonObjectBuilder row = Json.createObjectBuilder();
-    ResultSet rs = null;
     StringBuilder primaryKey = new StringBuilder();
     StringBuilder primaryValue = new StringBuilder();
     Integer primaryKeysCount = 0;
     String tableName = "";
     String dbEngine = "";
     Boolean nullableResult = false;
-    Integer rowsCount = 0;
 
     if (configuration.containsKey(PROPERTY_TABLE_NAME)
         && Utils.getNonNullString(configuration, PROPERTY_TABLE_NAME).length() != 0) {
@@ -71,86 +62,66 @@ public class DeleteRowByPrimaryKey implements Module {
       nullableResult = true;
     }
 
-    boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
-
     for (Map.Entry<String, JsonValue> entry : body.entrySet()) {
-      logger.info("{} = {}", entry.getKey(), entry.getValue());
+      LOGGER.info("{} = {}", entry.getKey(), entry.getValue());
       primaryKey.append(entry.getKey());
       primaryValue.append(entry.getValue());
       primaryKeysCount++;
     }
 
     if (primaryKeysCount == 1) {
-      logger.info("Executing delete row by primary key action");
-      Connection connection = Utils.getConnection(configuration);
-      Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
-      logger.info("Detected column types: " + Utils.columnTypes);
-      try {
-        QueryFactory queryFactory = new QueryFactory();
-        Query query = queryFactory.getQuery(dbEngine);
-        logger.info("Lookup parameters: {} = {}", primaryKey.toString(), primaryValue.toString());
-        query.from(tableName).lookup(primaryKey.toString(), primaryValue.toString());
-        checkConfig(configuration);
-        rs = query.executeLookup(connection, body);
-        while (rs.next()) {
-          rowsCount++;
-          if (rowsCount > 1) {
-            logger.error("Error: the number of matching rows is not exactly one");
-            throw new RuntimeException("Error: the number of matching rows is not exactly one");
+      try (Connection connection = Utils.getConnection(configuration)) {
+        LOGGER.info("Executing delete row by primary key action");
+        boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
+        Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
+        LOGGER.info("Detected column types: " + Utils.columnTypes);
+        try {
+          QueryFactory queryFactory = new QueryFactory();
+          Query query = queryFactory.getQuery(dbEngine);
+          LOGGER.info("Lookup parameters: {} = {}", primaryKey.toString(), primaryValue.toString());
+          query.from(tableName).lookup(primaryKey.toString(), primaryValue.toString());
+          checkConfig(configuration);
+          JsonObject row = query.executeLookup(connection, body);
+
+          for (Map.Entry<String, JsonValue> entry : configuration.entrySet()) {
+            LOGGER.info("Key = " + entry.getKey() + " Value = " + entry.getValue());
           }
-        }
 
-        for (Map.Entry<String, JsonValue> entry : configuration.entrySet()) {
-          logger.info("Key = " + entry.getKey() + " Value = " + entry.getValue());
-        }
-
-        if (rowsCount == 1) {
-          int result = query.executeDelete(connection, body);
-
-          if (result == 1) {
-            row.add("result", result);
-            logger.info("Emitting data");
-            parameters.getEventEmitter().emitData(new Message.Builder().body(row.build()).build());
-          } else {
-            logger.info("Unexpected result");
-            throw new RuntimeException("Unexpected result");
+          if (row.size() != 0) {
+            int result = query.executeDelete(connection, body);
+            if (result == 1) {
+              LOGGER.info("Emitting data {}", row);
+              parameters.getEventEmitter().emitData(new Message.Builder().body(row).build());
+            } else {
+              LOGGER.info("Unexpected result");
+              throw new RuntimeException("Unexpected result");
+            }
+          } else if (row.size() == 0 && nullableResult) {
+            JsonObject emptyRow = Json.createObjectBuilder()
+                .add("empty dataset", "nothing to delete")
+                .build();
+            LOGGER.info("Emitting data {}", emptyRow);
+            parameters.getEventEmitter().emitData(new Message.Builder().body(emptyRow).build());
+          } else if (row.size() == 0 && !nullableResult) {
+            LOGGER.info("Empty response. Error message will be returned");
+            throw new RuntimeException("Empty response");
           }
-        } else if (rowsCount == 0 && nullableResult) {
-          row.add("empty dataset", "nothing to delete");
-          logger.info("Emitting data");
-          parameters.getEventEmitter().emitData(new Message.Builder().body(row.build()).build());
-        } else if (rowsCount == 0 && !nullableResult) {
-          logger.info("Empty response. Error message will be returned");
-          throw new RuntimeException("Empty response");
-        }
 
-        snapshot = Json.createObjectBuilder().add(PROPERTY_TABLE_NAME, tableName)
-            .add(PROPERTY_ID_COLUMN, primaryKey.toString())
-            .add(PROPERTY_LOOKUP_VALUE, primaryValue.toString())
-            .add(PROPERTY_NULLABLE_RESULT, nullableResult).build();
-        logger.info("Emitting new snapshot {}", snapshot.toString());
-        parameters.getEventEmitter().emitSnapshot(snapshot);
+          snapshot = Json.createObjectBuilder().add(PROPERTY_TABLE_NAME, tableName)
+              .add(PROPERTY_ID_COLUMN, primaryKey.toString())
+              .add(PROPERTY_LOOKUP_VALUE, primaryValue.toString())
+              .add(PROPERTY_NULLABLE_RESULT, nullableResult).build();
+          LOGGER.info("Emitting new snapshot {}", snapshot.toString());
+          parameters.getEventEmitter().emitSnapshot(snapshot);
+        } catch (SQLException e) {
+          LOGGER.error("Failed to make request", e.toString());
+          throw new RuntimeException(e);
+        }
       } catch (SQLException e) {
-        logger.error("Failed to make request", e.toString());
-        throw new RuntimeException(e);
-      } finally {
-        if (rs != null) {
-          try {
-            rs.close();
-          } catch (SQLException e) {
-            logger.error("Failed to close result set", e.toString());
-          }
-        }
-        if (connection != null) {
-          try {
-            connection.close();
-          } catch (SQLException e) {
-            logger.error("Failed to close connection", e.toString());
-          }
-        }
+        LOGGER.error("Failed to close connection", e.toString());
       }
     } else {
-      logger.error("Error: Should be one Primary Key");
+      LOGGER.error("Error: Should be one Primary Key");
       throw new IllegalStateException("Should be one Primary Key");
     }
   }
