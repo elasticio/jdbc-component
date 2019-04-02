@@ -1,6 +1,12 @@
 # JDBC-component
 ## Description
 This is an open source component for working with object-relational database management systems on [elastic.io platform](http://www.elastic.io "elastic.io platform").
+
+### Completeness Matrix
+![JDBC Component Completeness Matrix](https://user-images.githubusercontent.com/5710732/55414696-e7c7bf80-556b-11e9-8aa9-bfe2ebca4303.png)
+
+[JDBC Component Completeness Matrix](https://docs.google.com/spreadsheets/d/1sZr9ydJbMK8v-TguctmFDiqgjRKcrpbdj4CeFuZEkQU/edit?usp=sharing)
+
 ### Purpose
 With this component you will have following triggers:
 
