@@ -1,6 +1,7 @@
 package io.elastic.jdbc.QueryBuilders;
 
 import io.elastic.jdbc.Utils;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -331,6 +332,21 @@ public abstract class Query {
         return row.build();
       }
     }
+  }
+
+  public void callProcedure(Connection connection, String procedureName, String... params)
+      throws SQLException {
+    validateQuery();
+    StringBuilder statementArgsStructure = new StringBuilder("(?");
+    for (int i = 0; i < params.length - 1; i++) {
+      statementArgsStructure.append(",?");
+    }
+    statementArgsStructure.append(")");
+
+    CallableStatement stmt = connection.prepareCall(
+        String.format("{call %s%s}", procedureName, statementArgsStructure.toString()));
+
+    stmt.execute();
   }
 
 }

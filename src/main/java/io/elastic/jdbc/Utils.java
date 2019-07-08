@@ -140,7 +140,7 @@ public class Utils {
     }
   }
 
-  private static String detectColumnType(Integer sqlType, String sqlTypeName) {
+  public static String detectColumnType(Integer sqlType, String sqlTypeName) {
     if (sqlType == Types.NUMERIC || sqlType == Types.DECIMAL || sqlType == Types.TINYINT
         || sqlType == Types.SMALLINT || sqlType == Types.INTEGER || sqlType == Types.BIGINT
         || sqlType == Types.REAL || sqlType == Types.FLOAT || sqlType == Types.DOUBLE) {

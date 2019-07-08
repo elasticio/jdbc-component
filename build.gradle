@@ -1,5 +1,5 @@
 group = 'io.elastic'
-version = '2.0.1'
+version = '2.1.0'
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'

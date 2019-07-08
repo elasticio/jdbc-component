@@ -230,6 +230,31 @@
         }
       },
       "dynamicMetadata": "io.elastic.jdbc.ColumnNamesProviderOld"
+    },
+    "executeStoredProcedure": {
+      "main": "io.elastic.jdbc.actions.ExecuteStoredProcedure",
+      "title": "Execute stored procedure",
+      "description": "Executing selected stored procedure from selected DB schema",
+      "fields": {
+        "schemaName": {
+          "viewClass": "SelectView",
+          "prompt": "Select a Schema",
+          "label": "DB Schema",
+          "required": true,
+          "model": "io.elastic.jdbc.SchemasProvider"
+        },
+        "procedureName": {
+          "viewClass": "SelectView",
+          "prompt": "Select a stored procedure name",
+          "label": "Stored procedure",
+          "model": "io.elastic.jdbc.ProcedureFieldsNameProvider",
+          "required": true,
+          "require": [
+            "schemaName"
+          ]
+        }
+      },
+      "dynamicMetadata": "io.elastic.jdbc.ProcedureFieldsNameProvider"
     }
   }
 }
