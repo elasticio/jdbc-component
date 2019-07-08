@@ -1,5 +1,8 @@
 package io.elastic.jdbc.QueryBuilders;
 
+import io.elastic.jdbc.ProcedureFieldsNameProvider;
+import io.elastic.jdbc.ProcedureParameter;
+import io.elastic.jdbc.ProcedureParameter.Direction;
 import io.elastic.jdbc.Utils;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -9,6 +12,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.json.Json;
@@ -19,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class Query {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(Query.class);
 
   protected Integer skipNumber = 0;
@@ -334,19 +340,48 @@ public abstract class Query {
     }
   }
 
-  public void callProcedure(Connection connection, String procedureName, String... params)
+  public JsonObject callProcedure(Connection connection, JsonObject body, JsonObject configuration)
       throws SQLException {
-    validateQuery();
+
+    List<ProcedureParameter> procedureParams = ProcedureFieldsNameProvider
+        .getProcedureMetadata(configuration);
+
     StringBuilder statementArgsStructure = new StringBuilder("(?");
-    for (int i = 0; i < params.length - 1; i++) {
+    for (int i = 0; i < procedureParams.size() - 1; i++) {
       statementArgsStructure.append(",?");
     }
     statementArgsStructure.append(")");
 
     CallableStatement stmt = connection.prepareCall(
-        String.format("{call %s%s}", procedureName, statementArgsStructure.toString()));
+        String.format("{call %s%s}", configuration.getString("procedureName"),
+            statementArgsStructure.toString()));
+
+    Map<String, Integer> args = new HashMap<>();
+    for (int i = 0; i < procedureParams.size(); i++) {
+      ProcedureParameter parameter = procedureParams.get(i);
+      if (parameter.getDirection() == Direction.IN || parameter.getDirection() == Direction.INOUT) {
+        stmt.setObject(i + 1, body.getString(parameter.getName()), parameter.getType());
+      } else if (parameter.getDirection() == Direction.OUT
+          || parameter.getDirection() == Direction.INOUT) {
+        stmt.registerOutParameter(i + 1, parameter.getType());
+        args.put(parameter.getName(), i + 1);
+      }
+    }
 
     stmt.execute();
+
+    JsonObjectBuilder resultBuilder = Json.createObjectBuilder();
+    args.forEach((key, value) -> {
+      try {
+        resultBuilder.add(key, stmt.getString(value));
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    });
+
+    stmt.close();
+
+    return resultBuilder.build();
   }
 
 }
