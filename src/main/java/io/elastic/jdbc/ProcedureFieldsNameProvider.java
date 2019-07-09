@@ -30,17 +30,20 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
 
   @Override
   public JsonObject getMetaModel(JsonObject configuration) {
+    List<ProcedureParameter> parameters = getProcedureMetadata(configuration);
+    return paramsListToMetadata(parameters);
+  }
+
+  public static JsonObject paramsListToMetadata(List<ProcedureParameter> parameters) {
     JsonObjectBuilder result = Json.createObjectBuilder();
     JsonObjectBuilder inFields = Json.createObjectBuilder();
     JsonObjectBuilder outFields = Json.createObjectBuilder();
-
-    List<ProcedureParameter> parameters = getProcedureMetadata(configuration);
 
     parameters.stream()
         .filter(p -> p.getDirection() == Direction.IN || p.getDirection() == Direction.INOUT)
         .forEach(p -> {
           JsonObjectBuilder valueContent = Json.createObjectBuilder()
-              .add("type", Utils.detectColumnType(p.getType(), ""))
+              .add("type", Utils.cleanJsonType(Utils.detectColumnType(p.getType(), "")))
               .add("name", p.getName())
               .add("required", true);
           inFields.add(p.getName(), valueContent.build());
@@ -54,7 +57,7 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
         .filter(p -> p.getDirection() == Direction.OUT || p.getDirection() == Direction.INOUT)
         .forEach(p -> {
           JsonObjectBuilder valueContent = Json.createObjectBuilder()
-              .add("type", Utils.detectColumnType(p.getType(), ""))
+              .add("type", Utils.cleanJsonType(Utils.detectColumnType(p.getType(), "")))
               .add("name", p.getName())
               .add("required", true);
           outFields.add(p.getName(), valueContent.build());

@@ -310,4 +310,15 @@ public class Utils {
     }
     return row;
   }
+
+  public static String cleanJsonType(String rawType) {
+    switch (rawType) {
+      case ("number"):
+        return "number";
+      case ("boolean"):
+        return "boolean";
+      default:
+        return "string";
+    }
+  }
 }

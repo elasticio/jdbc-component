@@ -360,7 +360,18 @@ public abstract class Query {
     for (int i = 0; i < procedureParams.size(); i++) {
       ProcedureParameter parameter = procedureParams.get(i);
       if (parameter.getDirection() == Direction.IN || parameter.getDirection() == Direction.INOUT) {
-        stmt.setObject(i + 1, body.getString(parameter.getName()), parameter.getType());
+        String type = Utils.cleanJsonType(Utils.detectColumnType(parameter.getType(), ""));
+        switch (type) {
+          case("number"):
+            stmt.setObject(i + 1, body.getJsonNumber(parameter.getName()).toString(), parameter.getType());
+            break;
+          case("boolean"):
+            stmt.setObject(i + 1, body.getBoolean(parameter.getName()), parameter.getType());
+            break;
+          default:
+            stmt.setObject(i + 1, body.getString(parameter.getName()), parameter.getType());
+        }
+
       } else if (parameter.getDirection() == Direction.OUT
           || parameter.getDirection() == Direction.INOUT) {
         stmt.registerOutParameter(i + 1, parameter.getType());
