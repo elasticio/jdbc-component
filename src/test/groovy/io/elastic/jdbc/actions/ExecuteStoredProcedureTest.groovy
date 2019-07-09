@@ -10,7 +10,6 @@ import javax.json.Json
 import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
-import java.sql.ResultSet
 
 @Ignore
 class ExecuteStoredProcedureTest extends Specification {
@@ -71,21 +70,21 @@ class ExecuteStoredProcedureTest extends Specification {
 
     def getStarsConfig() {
         JsonObject config = Json.createObjectBuilder()
-                .add("tableName", "STARS")
+                .add("schemaName", "ELASTICIO")
+                .add("procedureName", "GET_CUSTOMER_BY_ID_AND_NAME")
                 .add("user", user)
                 .add("password", password)
                 .add("dbEngine", "oracle")
                 .add("host", host)
                 .add("port", port)
                 .add("databaseName", databaseName)
-                .add("nullableResult", "true")
                 .build();
         return config;
     }
 
     def prepareStarsTable() {
         String sql = "BEGIN" +
-                "   EXECUTE IMMEDIATE 'DROP TABLE stars';" +
+                "   EXECUTE IMMEDIATE 'DROP TABLE CUSTOMERS';" +
                 "EXCEPTION" +
                 "   WHEN OTHERS THEN" +
                 "      IF SQLCODE != -942 THEN" +
@@ -93,27 +92,37 @@ class ExecuteStoredProcedureTest extends Specification {
                 "      END IF;" +
                 "END;"
         connection.createStatement().execute(sql);
-        connection.createStatement().execute("CREATE TABLE stars (id number, name varchar(255) NOT NULL, " +
-                "radius number, destination float,visible number(1), " +
-                "CONSTRAINT pk_stars PRIMARY KEY (id))");
-        connection.createStatement().execute("INSERT INTO stars (ID,NAME,RADIUS,DESTINATION, VISIBLE) VALUES (1,'Taurus',321,44.4,1)")
-        connection.createStatement().execute("INSERT INTO stars (ID,NAME,RADIUS,DESTINATION, VISIBLE) VALUES (2,'Boston',581,94.4,0)")
-    }
+        connection.createStatement().execute("create table CUSTOMERS\n" +
+                "(\n" +
+                "    PID      NUMBER not null\n" +
+                "        constraint CUSTOMERS_PK\n" +
+                "            primary key,\n" +
+                "    NAME     VARCHAR2(128),\n" +
+                "    CITY     VARCHAR2(256),\n" +
+                "    JOINDATE TIMESTAMP(6)\n" +
+                ")");
 
-    def getRecords(tableName) {
-        ArrayList<String> records = new ArrayList<String>();
-        String sql = "SELECT * FROM " + tableName;
-        ResultSet rs = connection.createStatement().executeQuery(sql);
-        while (rs.next()) {
-            records.add(rs.toRowResult().toString());
-        }
-        rs.close();
-        return records;
+        connection.createStatement().execute("create or replace PROCEDURE \"GET_CUSTOMER_BY_ID_AND_NAME\"(\n" +
+                "\t   p_cus_id IN CUSTOMERS.PID%TYPE,\n" +
+                "\t   o_name IN OUT CUSTOMERS.NAME%TYPE,\n" +
+                "\t   o_city OUT  CUSTOMERS.CITY%TYPE,\n" +
+                "\t   o_date OUT CUSTOMERS.JOINDATE%TYPE)\n" +
+                "IS\n" +
+                "BEGIN\n" +
+                "  SELECT NAME , CITY, JOINDATE\n" +
+                "  INTO o_name, o_city, o_date\n" +
+                "  from  CUSTOMERS\n" +
+                "  WHERE PID = p_cus_id\n" +
+                "  AND NAME = o_name;\n" +
+                "END;");
+
+        connection.createStatement().execute("INSERT INTO CUSTOMERS (PID,NAME,CITY,JOINDATE) VALUES (1,'Alice','Kyiv',TO_TIMESTAMP('2019-07-09 09:20:30.307000', 'YYYY-MM-DD HH24:MI:SS.FF6'))")
+        connection.createStatement().execute("INSERT INTO CUSTOMERS (PID,NAME,CITY,JOINDATE) VALUES (2,'Bob','London',TO_TIMESTAMP('2019-07-09 09:20:30.307000', 'YYYY-MM-DD HH24:MI:SS.FF6'))")
     }
 
     def cleanupSpec() {
         String sql = "BEGIN" +
-                "   EXECUTE IMMEDIATE 'DROP TABLE stars';" +
+                "   EXECUTE IMMEDIATE 'DROP TABLE CUSTOMERS';" +
                 "EXCEPTION" +
                 "   WHEN OTHERS THEN" +
                 "      IF SQLCODE != -942 THEN" +
@@ -124,26 +133,21 @@ class ExecuteStoredProcedureTest extends Specification {
         connection.close()
     }
 
-    def "one delete"() {
+    def "call procedure"() {
 
         prepareStarsTable();
 
         JsonObject snapshot = Json.createObjectBuilder().build()
 
         JsonObject body = Json.createObjectBuilder()
-                .add("ID", 1)
+                .add("P_CUS_ID", 2)
+                .add("O_NAME", "Bob")
                 .build();
 
+        when:
         runAction(getStarsConfig(), body, snapshot)
-        int first = getRecords("stars").size()
-        JsonObject body2 = Json.createObjectBuilder()
-                .add("ID", 2)
-                .build()
-        runAction(getStarsConfig(), body2, snapshot)
-        int second = getRecords("stars").size()
-
-        expect:
-        first == 1
-        second == 0
+        then:
+        1 * dataCallback.receive(_)
+        0 * errorCallback.receive(_)
     }
 }

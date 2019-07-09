@@ -357,25 +357,29 @@ public abstract class Query {
             statementArgsStructure.toString()));
 
     Map<String, Integer> args = new HashMap<>();
-    for (int i = 0; i < procedureParams.size(); i++) {
-      ProcedureParameter parameter = procedureParams.get(i);
+
+    int index = 1;
+    for (ProcedureParameter parameter : procedureParams) {
       if (parameter.getDirection() == Direction.IN || parameter.getDirection() == Direction.INOUT) {
+        if (parameter.getDirection() == Direction.INOUT) {
+          stmt.registerOutParameter(index, parameter.getType());
+          args.put(parameter.getName(), index);
+        }
+
         String type = Utils.cleanJsonType(Utils.detectColumnType(parameter.getType(), ""));
         switch (type) {
           case("number"):
-            stmt.setObject(i + 1, body.getJsonNumber(parameter.getName()).toString(), parameter.getType());
+            stmt.setObject(index++, body.getJsonNumber(parameter.getName()).toString(), parameter.getType());
             break;
           case("boolean"):
-            stmt.setObject(i + 1, body.getBoolean(parameter.getName()), parameter.getType());
+            stmt.setObject(index++, body.getBoolean(parameter.getName()), parameter.getType());
             break;
           default:
-            stmt.setObject(i + 1, body.getString(parameter.getName()), parameter.getType());
+            stmt.setObject(index++, body.getString(parameter.getName()), parameter.getType());
         }
-
-      } else if (parameter.getDirection() == Direction.OUT
-          || parameter.getDirection() == Direction.INOUT) {
-        stmt.registerOutParameter(i + 1, parameter.getType());
-        args.put(parameter.getName(), i + 1);
+      } else if (parameter.getDirection() == Direction.OUT) {
+        stmt.registerOutParameter(index, parameter.getType());
+        args.put(parameter.getName(), index++);
       }
     }
 
