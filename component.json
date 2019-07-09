@@ -132,7 +132,6 @@
     }
   },
   "actions": {
-
     "lookupRowByPrimaryKey": {
       "main": "io.elastic.jdbc.actions.LookupRowByPrimaryKey",
       "title": "Lookup Row By Primary Key",

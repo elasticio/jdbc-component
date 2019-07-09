@@ -6,7 +6,6 @@ import io.elastic.jdbc.ProcedureParameter.Direction;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,7 +69,7 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
     result.add("in", inMetadata.build()).add("out", outMetadata.build());
 
     JsonObject metadataResponse = result.build();
-    System.out.println(metadataResponse);
+    LOGGER.trace(metadataResponse.toString());
     return metadataResponse;
   }
 
@@ -79,7 +78,6 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
     try (Connection conn = Utils.getConnection(config)) {
       DatabaseMetaData meta = conn.getMetaData();
       ResultSet res = meta.getProcedures(null, config.getString("schemaName"), null);
-      System.out.println("List of procedures: ");
       while (res.next()) {
         String cat = res.getString("PROCEDURE_CAT");
         String schem = res.getString("PROCEDURE_SCHEM");
@@ -99,8 +97,6 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
     List<ProcedureParameter> parameters = new LinkedList<>();
 
     try (Connection conn = Utils.getConnection(config)) {
-      Statement st = conn.createStatement();
-
       DatabaseMetaData dbMetaData = conn.getMetaData();
       ResultSet rs = dbMetaData.getProcedureColumns(conn.getCatalog(),
           config.getString("schemaName"),
@@ -125,9 +121,6 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
 
         parameters.add(new ProcedureParameter(columnName, columnReturn, columnDataType));
       }
-
-      st.close();
-
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

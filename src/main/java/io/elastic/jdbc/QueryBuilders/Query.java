@@ -368,10 +368,11 @@ public abstract class Query {
 
         String type = Utils.cleanJsonType(Utils.detectColumnType(parameter.getType(), ""));
         switch (type) {
-          case("number"):
-            stmt.setObject(index++, body.getJsonNumber(parameter.getName()).toString(), parameter.getType());
+          case ("number"):
+            stmt.setObject(index++, body.getJsonNumber(parameter.getName()).toString(),
+                parameter.getType());
             break;
-          case("boolean"):
+          case ("boolean"):
             stmt.setObject(index++, body.getBoolean(parameter.getName()), parameter.getType());
             break;
           default:
@@ -395,10 +396,10 @@ public abstract class Query {
             .findFirst().orElse("string");
 
         switch (type) {
-          case("boolean"):
+          case ("boolean"):
             resultBuilder.add(key, stmt.getBoolean(value));
             break;
-          case("number"):
+          case ("number"):
             resultBuilder.add(key, stmt.getDouble(value));
             break;
           default:

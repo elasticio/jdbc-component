@@ -28,8 +28,8 @@ public class ProcedureParameter {
 
     return inputTypes.contains(direction) ? Direction.IN
         : outputTypes.contains(direction) ? Direction.OUT
-        : inOutputTypes.contains(direction) ? Direction.INOUT
-        : Direction.UNDEFINED;
+            : inOutputTypes.contains(direction) ? Direction.INOUT
+                : Direction.UNDEFINED;
   }
 
   public enum Direction {
@@ -43,8 +43,6 @@ public class ProcedureParameter {
     Direction(String dirName) {
       this.dirName = dirName;
     }
-
-    ;
 
     @Override
     public String toString() {

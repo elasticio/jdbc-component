@@ -30,7 +30,6 @@ public class SchemasProvider implements SelectModelProvider {
     try (Connection conn = Utils.getConnection(configuration)) {
       DatabaseMetaData meta = conn.getMetaData();
       ResultSet res = meta.getSchemas();
-      System.out.println("List of schemas: ");
       while (res.next()) {
         result.add(res.getString("TABLE_SCHEM"));
       }
