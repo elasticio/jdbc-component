@@ -388,7 +388,23 @@ public abstract class Query {
     JsonObjectBuilder resultBuilder = Json.createObjectBuilder();
     args.forEach((key, value) -> {
       try {
-        resultBuilder.add(key, stmt.getString(value));
+        String type = procedureParams.stream()
+            .filter(p -> p.getName().equals(key))
+            .map(ProcedureParameter::getType)
+            .map(t -> Utils.cleanJsonType(Utils.detectColumnType(t, "")))
+            .findFirst().orElse("string");
+
+        switch (type) {
+          case("boolean"):
+            resultBuilder.add(key, stmt.getBoolean(value));
+            break;
+          case("number"):
+            resultBuilder.add(key, stmt.getDouble(value));
+            break;
+          default:
+            resultBuilder.add(key, stmt.getString(value));
+        }
+
       } catch (SQLException e) {
         e.printStackTrace();
       }
