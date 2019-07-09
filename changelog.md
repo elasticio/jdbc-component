@@ -9,6 +9,13 @@
 ### Fixed 
 ### Security 
 
+## [V2.1.0] 2019-07-10 elastic.io 
+
+### Added
+
+Actions
+- EXECUTE STORED PROCEDURE
+
 ## [V2.0.1] 2019-06-24 elastic.io 
 
 ### Fixed 

@@ -206,6 +206,14 @@ Checkbox ``Don't throw Error on an Empty Result`` allows to emit an empty respon
 ![image](https://user-images.githubusercontent.com/40201204/43644579-f593d1c8-9737-11e8-9b97-ee9e575a19f7.png)
 As an input metadata you will get a Primary Key field to provide the data inside as a clause value.
 
+### Execute stored procedure
+This action calls stored procedure from selected `DB Schema` and `Stored procedure` name
+#### Input fields description
+- **DB Schema** - schema that contains procedure to call. Must be selected from dropdown list before `Stored procedure` name
+- **Stored procedure** - name of procedure to call, can be selected from dropdown list
+
+Metadata generates automatically using `IN` & `IN OUT` procedure parameters for input, and `OUT` & `IN OUT` procedure parameters for output.
+
 ### Create or update record action (Deprecated)
 This action exists in JDBC component only for backward compatibility. [**Upsert row by primary key**](#upsert-row-by-primary-key-action) Action is recommended to use.
 
@@ -219,6 +227,7 @@ This action exists in JDBC component only for backward compatibility. [**Upsert 
 - ``Oracle`` - compatible with Oracle Database 8.1.7 - 12.1.0.2
 - ``MSSQL`` - compatible with Microsoft SQL Server 2008 R2 and higher
 3. The current implementation of the action ``Upsert By Primary Key`` doesn't mark non-nullable fields as required fields at a dynamic metadata. In case of updating such fields with an empty value you will get SQL Exception ``Cannot insert the value NULL into...``. You should manually fill in all non-nullable fields with previous data, if you want to update part of columns in a row, even if data in that fields doesn't change. 
+4. The current implementation of the action ``Execute stored procedure`` doesn't support ResultSet response type parameters for stored procedure output. 
 
 ## License
 Apache-2.0 © [elastic.io GmbH](https://www.elastic.io "elastic.io GmbH")
