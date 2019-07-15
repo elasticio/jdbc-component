@@ -12,10 +12,10 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -343,77 +343,105 @@ public abstract class Query {
   public JsonObject callProcedure(Connection connection, JsonObject body, JsonObject configuration)
       throws SQLException {
 
-    List<ProcedureParameter> procedureParams = ProcedureFieldsNameProvider
-        .getProcedureMetadata(configuration);
+    Map<String, ProcedureParameter> procedureParams = ProcedureFieldsNameProvider
+        .getProcedureMetadata(configuration).stream()
+        .collect(Collectors.toMap(ProcedureParameter::getName, Function.identity()));
 
-    StringBuilder statementArgsStructure = new StringBuilder("(?");
-    for (int i = 0; i < procedureParams.size() - 1; i++) {
-      statementArgsStructure.append(",?");
+    CallableStatement stmt = prepareCallableStatement(connection,
+        configuration.getString("procedureName"), procedureParams, body);
+
+    stmt.execute();
+
+    JsonObjectBuilder resultBuilder = Json.createObjectBuilder();
+
+    procedureParams.values().stream()
+        .filter(param -> param.getDirection() == Direction.OUT
+            || param.getDirection() == Direction.INOUT)
+        .forEach(param -> {
+          try {
+            addValueToResultJson(resultBuilder, stmt, procedureParams, param.getName());
+          } catch (SQLException e) {
+            e.printStackTrace();
+          }
+        });
+
+    stmt.close();
+
+    return resultBuilder.build();
+  }
+
+  private String generateStatementParamsMask(Map<String, ProcedureParameter> procedureParams) {
+    StringBuilder statementArgsStructure = new StringBuilder("(");
+    procedureParams.keySet()
+        .forEach(p -> statementArgsStructure
+            .append(p)
+            .append(" => :")
+            .append(p)
+            .append(", ")
+        );
+
+    String result = statementArgsStructure.toString();
+    if (procedureParams.size() > 0) {
+      result = statementArgsStructure.substring(0, statementArgsStructure.length() - 2);
     }
-    statementArgsStructure.append(")");
+    return result + ")";
+  }
 
+  private CallableStatement prepareCallableStatement(Connection connection, String procedureName,
+      Map<String, ProcedureParameter> procedureParams, JsonObject messageBody)
+      throws SQLException {
     CallableStatement stmt = connection.prepareCall(
-        String.format("{call %s%s}", configuration.getString("procedureName"),
-            statementArgsStructure.toString()));
+        String.format("{call %s%s}", procedureName,
+            generateStatementParamsMask(procedureParams)));
 
-    Map<String, Integer> args = new HashMap<>();
-
-    int index = 1;
-    for (ProcedureParameter parameter : procedureParams) {
+    for (ProcedureParameter parameter : procedureParams.values()) {
       if (parameter.getDirection() == Direction.IN || parameter.getDirection() == Direction.INOUT) {
         if (parameter.getDirection() == Direction.INOUT) {
-          stmt.registerOutParameter(index, parameter.getType());
-          args.put(parameter.getName(), index);
+          stmt.registerOutParameter(parameter.getName(), parameter.getType());
         }
 
         String type = Utils.cleanJsonType(Utils.detectColumnType(parameter.getType(), ""));
         switch (type) {
           case ("number"):
-            stmt.setObject(index++, body.getJsonNumber(parameter.getName()).toString(),
+            stmt.setObject(parameter.getName(),
+                messageBody.getJsonNumber(parameter.getName()).toString(),
                 parameter.getType());
             break;
           case ("boolean"):
-            stmt.setObject(index++, body.getBoolean(parameter.getName()), parameter.getType());
+            stmt.setObject(parameter.getName(), messageBody.getBoolean(parameter.getName()),
+                parameter.getType());
             break;
           default:
-            stmt.setObject(index++, body.getString(parameter.getName()), parameter.getType());
+            stmt.setObject(parameter.getName(), messageBody.getString(parameter.getName()),
+                parameter.getType());
         }
       } else if (parameter.getDirection() == Direction.OUT) {
-        stmt.registerOutParameter(index, parameter.getType());
-        args.put(parameter.getName(), index++);
+        stmt.registerOutParameter(parameter.getName(), parameter.getType());
       }
     }
 
-    stmt.execute();
+    return stmt;
+  }
 
-    JsonObjectBuilder resultBuilder = Json.createObjectBuilder();
-    args.forEach((key, value) -> {
-      try {
-        String type = procedureParams.stream()
-            .filter(p -> p.getName().equals(key))
-            .map(ProcedureParameter::getType)
-            .map(t -> Utils.cleanJsonType(Utils.detectColumnType(t, "")))
-            .findFirst().orElse("string");
+  private JsonObjectBuilder addValueToResultJson(JsonObjectBuilder resultBuilder,
+      CallableStatement stmt, Map<String, ProcedureParameter> procedureParams, String name)
+      throws SQLException {
 
-        switch (type) {
-          case ("boolean"):
-            resultBuilder.add(key, stmt.getBoolean(value));
-            break;
-          case ("number"):
-            resultBuilder.add(key, stmt.getDouble(value));
-            break;
-          default:
-            resultBuilder.add(key, stmt.getString(value));
-        }
+    String type = Utils
+        .cleanJsonType(Utils.detectColumnType(procedureParams.get(name).getType(), ""));
 
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-    });
+    switch (type) {
+      case ("boolean"):
+        resultBuilder.add(name, stmt.getBoolean(name));
+        break;
+      case ("number"):
+        resultBuilder.add(name, stmt.getDouble(name));
+        break;
+      default:
+        resultBuilder.add(name, stmt.getString(name));
+    }
 
-    stmt.close();
-
-    return resultBuilder.build();
+    return resultBuilder;
   }
 
 }
