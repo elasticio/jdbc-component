@@ -119,6 +119,10 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
         short columnNullable = rs.getShort(12);
         String columnRemarks = rs.getString(13);
 
+        if (columnReturnTypeName.equals("REF CURSOR")) {
+          columnDataType = -10;
+        }
+
         parameters.add(new ProcedureParameter(columnName, columnReturn, columnDataType));
       }
     } catch (Exception e) {

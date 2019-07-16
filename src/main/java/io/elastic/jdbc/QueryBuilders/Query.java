@@ -16,7 +16,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
@@ -436,6 +438,51 @@ public abstract class Query {
         break;
       case ("number"):
         resultBuilder.add(name, stmt.getDouble(name));
+        break;
+      case ("array"):
+        ResultSet cursorSet = (ResultSet) stmt.getObject(name);
+        JsonArrayBuilder array = Json.createArrayBuilder();
+
+        Map<String, String> params =
+            IntStream.range(1, cursorSet.getMetaData().getColumnCount() + 1)
+                .mapToObj(i -> {
+                  try {
+                    return new ProcedureParameter(cursorSet.getMetaData().getColumnName(i),
+                        Direction.OUT, cursorSet.getMetaData().getColumnType(i));
+                  } catch (SQLException e) {
+                    throw new IllegalArgumentException(e);
+                  }
+                })
+                .collect(Collectors.toMap(ProcedureParameter::getName, p -> Utils
+                    .cleanJsonType(
+                        Utils.detectColumnType(p.getType(), ""))));
+
+        while (cursorSet.next()) {
+          JsonObjectBuilder entity = Json.createObjectBuilder();
+
+          params.keySet().forEach(key -> {
+            try {
+              switch (params.get(key)) {
+                case ("number"):
+                  entity.add(key, cursorSet.getDouble(key));
+                  break;
+                case ("boolean"):
+                  entity.add(key, cursorSet.getBoolean(key));
+                  break;
+                default:
+                  entity.add(key, cursorSet.getString(key));
+                  break;
+              }
+              entity.add(key, cursorSet.getString(key));
+            } catch (SQLException e) {
+              e.printStackTrace();
+            }
+          });
+
+          array.add(entity.build());
+        }
+
+        resultBuilder.add(name, array.build());
         break;
       default:
         resultBuilder.add(name, stmt.getString(name));

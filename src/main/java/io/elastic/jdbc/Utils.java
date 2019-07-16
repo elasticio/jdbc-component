@@ -160,6 +160,9 @@ public class Utils {
         return "timestamp";
       }
     }
+    if (sqlType == -10) {
+      return "array";
+    }
     return "string";
   }
 
@@ -317,6 +320,10 @@ public class Utils {
         return "number";
       case ("boolean"):
         return "boolean";
+      case ("array"):
+        return "array";
+      case ("object"):
+        return "object";
       default:
         return "string";
     }
