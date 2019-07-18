@@ -103,6 +103,7 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
           config.getString("procedureName"),
           null);
 
+      int order = 1;
       while (rs.next()) {
         // get stored procedure metadata
         String procedureCatalog = rs.getString(1);
@@ -123,7 +124,11 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
           columnDataType = -10;
         }
 
-        parameters.add(new ProcedureParameter(columnName, columnReturn, columnDataType));
+        if (columnName.equals("@RETURN_VALUE")) {
+          continue;
+        }
+
+        parameters.add(new ProcedureParameter(columnName, columnReturn, columnDataType, order++));
       }
     } catch (Exception e) {
       throw new RuntimeException(e);

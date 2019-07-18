@@ -160,7 +160,7 @@ public class Utils {
         return "timestamp";
       }
     }
-    if (sqlType == -10) {
+    if (sqlType == -10 || sqlType == Types.REF_CURSOR) {
       return "array";
     }
     return "string";

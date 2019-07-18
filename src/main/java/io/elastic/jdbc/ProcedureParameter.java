@@ -8,6 +8,7 @@ public class ProcedureParameter {
   private String name;
   private Direction direction;
   private int type;
+  private int order;
 
   public ProcedureParameter(String name, Direction direction, int type) {
     this.name = name;
@@ -21,9 +22,23 @@ public class ProcedureParameter {
     this.type = type;
   }
 
+  public ProcedureParameter(String name, Direction direction, int type, int order) {
+    this.name = name;
+    this.direction = direction;
+    this.type = type;
+    this.order = order;
+  }
+
+  public ProcedureParameter(String name, short direction, int type, int order) {
+    this.name = name;
+    this.direction = jdbcColTypeToDirection(direction);
+    this.type = type;
+    this.order = order;
+  }
+
   private Direction jdbcColTypeToDirection(short direction) {
     List<Short> inputTypes = Arrays.asList((short) 1);
-    List<Short> outputTypes = Arrays.asList((short) 3, (short) 4);
+    List<Short> outputTypes = Arrays.asList((short) 3, (short) 4, (short) 5);
     List<Short> inOutputTypes = Arrays.asList((short) 2);
 
     return inputTypes.contains(direction) ? Direction.IN
@@ -60,5 +75,9 @@ public class ProcedureParameter {
 
   public int getType() {
     return type;
+  }
+
+  public int getOrder() {
+    return order;
   }
 }

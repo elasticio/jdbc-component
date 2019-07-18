@@ -1,12 +1,20 @@
 package io.elastic.jdbc.QueryBuilders;
 
+import io.elastic.jdbc.ProcedureFieldsNameProvider;
+import io.elastic.jdbc.ProcedureParameter;
+import io.elastic.jdbc.ProcedureParameter.Direction;
 import io.elastic.jdbc.Utils;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
 public class Oracle extends Query {
@@ -93,6 +101,72 @@ public class Oracle extends Query {
       Utils.setStatementParam(stmt, i, idColumn, body);
       stmt.execute();
     }
+  }
+
+  protected CallableStatement prepareCallableStatement(Connection connection, String procedureName,
+      Map<String, ProcedureParameter> procedureParams, JsonObject messageBody)
+      throws SQLException {
+    CallableStatement stmt = connection.prepareCall(
+        String.format("{call %s%s}", procedureName,
+            generateStatementParamsMask(procedureParams)));
+
+    for (ProcedureParameter parameter : procedureParams.values()) {
+      if (parameter.getDirection() == Direction.IN || parameter.getDirection() == Direction.INOUT) {
+        if (parameter.getDirection() == Direction.INOUT) {
+          stmt.registerOutParameter(parameter.getName(), parameter.getType());
+        }
+
+        String type = Utils.cleanJsonType(Utils.detectColumnType(parameter.getType(), ""));
+        switch (type) {
+          case ("number"):
+            stmt.setObject(parameter.getName(),
+                messageBody.getJsonNumber(parameter.getName()).toString(),
+                parameter.getType());
+            break;
+          case ("boolean"):
+            stmt.setObject(parameter.getName(), messageBody.getBoolean(parameter.getName()),
+                parameter.getType());
+            break;
+          default:
+            stmt.setObject(parameter.getName(), messageBody.getString(parameter.getName()),
+                parameter.getType());
+        }
+      } else if (parameter.getDirection() == Direction.OUT) {
+        stmt.registerOutParameter(parameter.getName(), parameter.getType());
+      }
+    }
+
+    return stmt;
+  }
+
+  public JsonObject callProcedure(Connection connection, JsonObject body, JsonObject configuration)
+      throws SQLException {
+
+    Map<String, ProcedureParameter> procedureParams = ProcedureFieldsNameProvider
+        .getProcedureMetadata(configuration).stream()
+        .collect(Collectors.toMap(ProcedureParameter::getName, Function.identity()));
+
+    CallableStatement stmt = prepareCallableStatement(connection,
+        configuration.getString("procedureName"), procedureParams, body);
+
+    stmt.execute();
+
+    JsonObjectBuilder resultBuilder = Json.createObjectBuilder();
+
+    procedureParams.values().stream()
+        .filter(param -> param.getDirection() == Direction.OUT
+            || param.getDirection() == Direction.INOUT)
+        .forEach(param -> {
+          try {
+            addValueToResultJson(resultBuilder, stmt, procedureParams, param.getName());
+          } catch (SQLException e) {
+            e.printStackTrace();
+          }
+        });
+
+    stmt.close();
+
+    return resultBuilder.build();
   }
 
 }
