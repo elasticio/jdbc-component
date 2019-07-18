@@ -203,16 +203,18 @@ public class PostgreSQL extends Query {
       CallableStatement stmt, Map<String, ProcedureParameter> procedureParams, String name)
       throws SQLException {
 
+    if (stmt.getObject(procedureParams.get(name).getOrder()) == null) {
+      return resultBuilder.addNull(name);
+    }
+
     String type = Utils
         .cleanJsonType(Utils.detectColumnType(procedureParams.get(name).getType(), ""));
 
     switch (type) {
       case ("boolean"):
-        resultBuilder.add(name, stmt.getBoolean(procedureParams.get(name).getOrder()));
-        break;
+        return resultBuilder.add(name, stmt.getBoolean(procedureParams.get(name).getOrder()));
       case ("number"):
-        resultBuilder.add(name, stmt.getDouble(procedureParams.get(name).getOrder()));
-        break;
+        return resultBuilder.add(name, stmt.getDouble(procedureParams.get(name).getOrder()));
       case ("array"):
         ResultSet cursorSet = (ResultSet) stmt.getObject(procedureParams.get(name).getOrder());
         JsonArrayBuilder array = Json.createArrayBuilder();
@@ -239,6 +241,11 @@ public class PostgreSQL extends Query {
 
           params.keySet().forEach(key -> {
             try {
+              if (cursorSet.getObject(params.get(key).getOrder()) == null) {
+                entity.addNull(key);
+                return;
+              }
+
               switch (typesMap.get(key)) {
                 case ("number"):
                   entity.add(key, cursorSet.getDouble(params.get(key).getOrder()));
@@ -258,12 +265,9 @@ public class PostgreSQL extends Query {
           array.add(entity.build());
         }
 
-        resultBuilder.add(name, array.build());
-        break;
+        return resultBuilder.add(name, array.build());
       default:
-        resultBuilder.add(name, stmt.getString(procedureParams.get(name).getOrder()));
+        return resultBuilder.add(name, stmt.getString(procedureParams.get(name).getOrder()));
     }
-
-    return resultBuilder;
   }
 }

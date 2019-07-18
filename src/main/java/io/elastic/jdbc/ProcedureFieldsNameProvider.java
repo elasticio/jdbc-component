@@ -83,6 +83,8 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
         String schem = res.getString("PROCEDURE_SCHEM");
         String name = res.getString("PROCEDURE_NAME");
 
+        name = name.indexOf(';') == -1 ? name : name.substring(0, name.indexOf(';'));
+
         result.add(name);
       }
       res.close();

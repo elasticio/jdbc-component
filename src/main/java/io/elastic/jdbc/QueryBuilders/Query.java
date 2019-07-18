@@ -382,16 +382,18 @@ public abstract class Query {
       CallableStatement stmt, Map<String, ProcedureParameter> procedureParams, String name)
       throws SQLException {
 
+    if (stmt.getObject(name) == null) {
+      return resultBuilder.addNull(name);
+    }
+
     String type = Utils
         .cleanJsonType(Utils.detectColumnType(procedureParams.get(name).getType(), ""));
 
     switch (type) {
       case ("boolean"):
-        resultBuilder.add(name, stmt.getBoolean(name));
-        break;
+        return resultBuilder.add(name, stmt.getBoolean(name));
       case ("number"):
-        resultBuilder.add(name, stmt.getDouble(name));
-        break;
+        return resultBuilder.add(name, stmt.getDouble(name));
       case ("array"):
         ResultSet cursorSet = (ResultSet) stmt.getObject(name);
         JsonArrayBuilder array = Json.createArrayBuilder();
@@ -415,6 +417,11 @@ public abstract class Query {
 
           params.keySet().forEach(key -> {
             try {
+              if (cursorSet.getObject(key) == null) {
+                entity.addNull(key);
+                return;
+              }
+
               switch (params.get(key)) {
                 case ("number"):
                   entity.add(key, cursorSet.getDouble(key));
@@ -434,13 +441,10 @@ public abstract class Query {
           array.add(entity.build());
         }
 
-        resultBuilder.add(name, array.build());
-        break;
+        return resultBuilder.add(name, array.build());
       default:
-        resultBuilder.add(name, stmt.getString(name));
+        return resultBuilder.add(name, stmt.getString(name));
     }
-
-    return resultBuilder;
   }
 
 }
