@@ -1,19 +1,16 @@
-package io.elastic.jdbc;
+package io.elastic.jdbc
 
-import io.elastic.api.EventEmitter;
-import io.elastic.api.ExecutionParameters;
-import io.elastic.jdbc.actions.ExecuteStoredProcedure
-import org.junit.Ignore;
+import org.junit.Ignore
 import spock.lang.Shared
-import spock.lang.Specification;
+import spock.lang.Specification
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import java.sql.Connection;
-import java.sql.DriverManager;
+import javax.json.Json
+import javax.json.JsonObject
+import java.sql.Connection
+import java.sql.DriverManager
 
 @Ignore
-class ProcedureFieldsNameProviderSpec  extends Specification {
+class ProcedureFieldsNameProviderSpec extends Specification {
     @Shared
     def user = System.getenv("CONN_USER_ORACLE")
     @Shared
@@ -26,21 +23,10 @@ class ProcedureFieldsNameProviderSpec  extends Specification {
     def port = System.getenv("CONN_PORT_ORACLE")
     @Shared
     def connectionString = "jdbc:oracle:thin:@//" + host + ":" + port + "/XE"
+
     @Shared
     Connection connection
 
-    @Shared
-    EventEmitter.Callback errorCallback
-    @Shared
-    EventEmitter.Callback snapshotCallback
-    @Shared
-    EventEmitter.Callback dataCallback
-    @Shared
-    EventEmitter.Callback reboundCallback
-    @Shared
-    EventEmitter.Callback httpReplyCallback
-    @Shared
-    EventEmitter emitter
     @Shared
     SchemasProvider schemasProvider
     @Shared
@@ -51,18 +37,10 @@ class ProcedureFieldsNameProviderSpec  extends Specification {
     }
 
     def setup() {
-        createAction()
+        prepareAction()
     }
 
-    def createAction() {
-        errorCallback = Mock(EventEmitter.Callback)
-        snapshotCallback = Mock(EventEmitter.Callback)
-        dataCallback = Mock(EventEmitter.Callback)
-        reboundCallback = Mock(EventEmitter.Callback)
-        httpReplyCallback = Mock(EventEmitter.Callback)
-        emitter = new EventEmitter.Builder().onData(dataCallback).onSnapshot(snapshotCallback).onError(errorCallback)
-                .onRebound(reboundCallback).onHttpReplyCallback(httpReplyCallback).build()
-
+    def prepareAction() {
         schemasProvider = new SchemasProvider()
         procedureProvider = new ProcedureFieldsNameProvider()
     }
@@ -76,7 +54,7 @@ class ProcedureFieldsNameProviderSpec  extends Specification {
     }
 
     def runProcedureMetadata(JsonObject config) {
-        return procedureProvider.getProceduresList(config);
+        return procedureProvider.getMetaModel(config);
     }
 
     def getStarsConfig() {
@@ -127,7 +105,7 @@ class ProcedureFieldsNameProviderSpec  extends Specification {
                 "  AND NAME = o_name;\n" +
                 "END;");
 
-        connection.createStatement().execute("create PROCEDURE \"GET_CUSTOMER_BY_ID\"(\n" +
+        connection.createStatement().execute("create or replace  PROCEDURE \"GET_CUSTOMER_BY_ID\"(\n" +
                 "\t   p_cus_id IN OUT CUSTOMERS.PID%TYPE,\n" +
                 "\t   o_name OUT CUSTOMERS.NAME%TYPE,\n" +
                 "\t   o_city OUT  CUSTOMERS.CITY%TYPE,\n" +
@@ -161,53 +139,29 @@ class ProcedureFieldsNameProviderSpec  extends Specification {
 
         prepareStarsTable();
 
-        JsonObject snapshot = Json.createObjectBuilder().build()
-
-        JsonObject body = Json.createObjectBuilder()
-                .add("P_CUS_ID", 2)
-                .add("O_NAME", "Bob")
-                .build();
-
         when:
-        runSchemasList(getStarsConfig(), body, snapshot)
+        def result = runSchemasList(getStarsConfig())
         then:
-        1 * dataCallback.receive(_)
-        0 * errorCallback.receive(_)
+        result.contains("ELASTICIO")
     }
 
     def "get procedure list"() {
 
         prepareStarsTable();
 
-        JsonObject snapshot = Json.createObjectBuilder().build()
-
-        JsonObject body = Json.createObjectBuilder()
-                .add("P_CUS_ID", 2)
-                .add("O_NAME", "Bob")
-                .build();
-
-        when:
-        runProcedureList(getStarsConfig(), body, snapshot)
-        then:
-        1 * dataCallback.receive(_)
-        0 * errorCallback.receive(_)
+        def result = runProcedureList(getStarsConfig())
+        expect:
+        result.contains("GET_CUSTOMER_BY_ID")
+        result.contains("GET_CUSTOMER_BY_ID_AND_NAME")
     }
 
     def "get procedure metadata"() {
 
         prepareStarsTable();
 
-        JsonObject snapshot = Json.createObjectBuilder().build()
-
-        JsonObject body = Json.createObjectBuilder()
-                .add("P_CUS_ID", 2)
-                .add("O_NAME", "Bob")
-                .build();
-
         when:
-        runProcedureMetadata(getStarsConfig(), body, snapshot)
+        def result = runProcedureMetadata(getStarsConfig())
         then:
-        1 * dataCallback.receive(_)
-        0 * errorCallback.receive(_)
+        result.toString() == "{\"in\":{\"type\":\"object\",\"properties\":{\"P_CUS_ID\":{\"type\":\"number\",\"name\":\"P_CUS_ID\",\"required\":true},\"O_NAME\":{\"type\":\"string\",\"name\":\"O_NAME\",\"required\":true}}},\"out\":{\"type\":\"object\",\"properties\":{\"O_NAME\":{\"type\":\"string\",\"name\":\"O_NAME\",\"required\":true},\"O_CITY\":{\"type\":\"string\",\"name\":\"O_CITY\",\"required\":true},\"O_DATE\":{\"type\":\"string\",\"name\":\"O_DATE\",\"required\":true}}}}"
     }
 }

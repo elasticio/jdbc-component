@@ -1,6 +1,5 @@
 package io.elastic.jdbc.QueryBuilders;
 
-import io.elastic.jdbc.ProcedureFieldsNameProvider;
 import io.elastic.jdbc.ProcedureParameter;
 import io.elastic.jdbc.ProcedureParameter.Direction;
 import io.elastic.jdbc.Utils;
@@ -14,7 +13,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.json.Json;
@@ -371,11 +369,13 @@ public abstract class Query {
     return result + ")";
   }
 
-  protected abstract CallableStatement prepareCallableStatement(Connection connection, String procedureName,
+  protected abstract CallableStatement prepareCallableStatement(Connection connection,
+      String procedureName,
       Map<String, ProcedureParameter> procedureParams, JsonObject messageBody)
       throws SQLException;
 
-  public abstract JsonObject callProcedure(Connection connection, JsonObject body, JsonObject configuration)
+  public abstract JsonObject callProcedure(Connection connection, JsonObject body,
+      JsonObject configuration)
       throws SQLException;
 
   protected JsonObjectBuilder addValueToResultJson(JsonObjectBuilder resultBuilder,
