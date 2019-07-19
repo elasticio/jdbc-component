@@ -1,6 +1,6 @@
 # jdbc Component Change Log 
 
-## 2.1.0 (2019-07-10)
+## 2.1.0 (2019-07-22)
 
 * Add Execute stored procedure action
 

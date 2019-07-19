@@ -214,6 +214,13 @@ This action calls stored procedure from selected `DB Schema` and `Stored procedu
 
 Metadata generates automatically using `IN` & `IN OUT` procedure parameters for input, and `OUT` & `IN OUT` procedure parameters for output.
 
+As array fields this action now support ONLY:
+- CURSOR (as SQL type)
+- REF CURSOR (as ORACLE type)
+The result for this type of fields would be returned as array of json objects.
+
+This action DOES NOT processing MSSql @RETURN_VALUE.
+
 ### Create or update record action (Deprecated)
 This action exists in JDBC component only for backward compatibility. [**Upsert row by primary key**](#upsert-row-by-primary-key-action) Action is recommended to use.
 
