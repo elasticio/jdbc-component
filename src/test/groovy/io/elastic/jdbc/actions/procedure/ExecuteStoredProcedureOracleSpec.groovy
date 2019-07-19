@@ -1,3 +1,5 @@
+package io.elastic.jdbc.actions.procedure
+
 import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
@@ -12,7 +14,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 
 @Ignore
-class ExecuteStoredProcedureTest extends Specification {
+class ExecuteStoredProcedureOracleSpec extends Specification {
     @Shared
     def user = System.getenv("CONN_USER_ORACLE")
     @Shared
@@ -24,7 +26,7 @@ class ExecuteStoredProcedureTest extends Specification {
     @Shared
     def port = System.getenv("CONN_PORT_ORACLE")
     @Shared
-    def connectionString = "jdbc:oracle:thin:@//" + host + ":" + port + "/XE"
+    def connectionString = "jdbc:oracle:thin:@//" + host + ":" + port + "/" + databaseName
     @Shared
     Connection connection
 

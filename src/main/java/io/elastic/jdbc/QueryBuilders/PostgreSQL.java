@@ -267,6 +267,9 @@ public class PostgreSQL extends Query {
 
         return resultBuilder.add(name, array.build());
       default:
+         if (procedureParams.get(name).getType() == 93) {
+           return resultBuilder.add(name, stmt.getTimestamp(procedureParams.get(name).getOrder()).toString());
+         }
         return resultBuilder.add(name, stmt.getString(procedureParams.get(name).getOrder()));
     }
   }
