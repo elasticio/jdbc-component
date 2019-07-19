@@ -209,15 +209,15 @@ As an input metadata you will get a Primary Key field to provide the data inside
 ### Execute stored procedure
 This action calls stored procedure from selected `DB Schema` and `Stored procedure` name
 #### Input fields description
-- **DB Schema** - schema that contains procedure to call. Must be selected from dropdown list before `Stored procedure` name
-- **Stored procedure** - name of procedure to call, can be selected from dropdown list
+- **DB Schema** - a schema that contains a procedure to call. Must be selected from the dropdown list before `Stored procedure` name
+- **Stored procedure** - a name of a procedure to call, can be selected from the dropdown list
 
 Metadata generates automatically using `IN` & `IN OUT` procedure parameters for input, and `OUT` & `IN OUT` procedure parameters for output.
 
 As array fields this action now support ONLY:
 - CURSOR (as SQL type)
 - REF CURSOR (as ORACLE type)
-The result for this type of fields would be returned as array of json objects.
+The result for this type of fields would be returned as an array of JSON objects.
 
 This action DOES NOT processing MSSql @RETURN_VALUE.
 
