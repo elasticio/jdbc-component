@@ -18,7 +18,7 @@
 * Add Upsert by primary key action (for migration)
 * Add Delete by primary key action
 
-* Removed CreateOrUpdateRecord action
+* Remove CreateOrUpdateRecord action
 
 * Fix issue in postgresql - getDate(null)
 * Fix null values as input for select
