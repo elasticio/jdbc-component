@@ -221,6 +221,11 @@ The result for this type of fields would be returned as an array of JSON objects
 
 This action DOES NOT processing MSSql @RETURN_VALUE.
 
+For MySQL component same to DATABASE is same to SCHEMA by it's 
+[definition](https://dev.mysql.com/doc/refman/8.0/en/getting-information.html), so DB Schema dropdown is empty for MySQL. 
+
+[MSSQL DB](https://docs.microsoft.com/en-us/sql/t-sql/statements/create-procedure-transact-sql?view=sql-server-2017) stored procedures has only IN and INOUT fields.
+
 ### Create or update record action (Deprecated)
 This action exists in JDBC component only for backward compatibility. [**Upsert row by primary key**](#upsert-row-by-primary-key-action) Action is recommended to use.
 
