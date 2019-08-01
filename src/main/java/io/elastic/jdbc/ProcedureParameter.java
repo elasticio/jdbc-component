@@ -80,4 +80,9 @@ public class ProcedureParameter {
   public int getOrder() {
     return order;
   }
+
+  public ProcedureParameter setOrder(int order) {
+    this.order = order;
+    return this;
+  }
 }

@@ -6,11 +6,12 @@ import io.elastic.api.Module;
 import io.elastic.jdbc.QueryBuilders.Query;
 import io.elastic.jdbc.QueryFactory;
 import io.elastic.jdbc.Utils;
-import java.sql.Connection;
-import java.sql.SQLException;
-import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.json.JsonObject;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class ExecuteStoredProcedure implements Module {
 
