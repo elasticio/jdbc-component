@@ -441,7 +441,7 @@ public abstract class Query {
               break;
           }
         } catch (SQLException e) {
-          e.printStackTrace();
+          throw new RuntimeException(e);
         }
       });
 

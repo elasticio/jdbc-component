@@ -17,8 +17,12 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MSSQL extends Query {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(MSSQL.class);
 
   public ArrayList executePolling(Connection connection) throws SQLException {
     validateQuery();
@@ -139,7 +143,7 @@ public class MSSQL extends Query {
         }
 
         String type = Utils.cleanJsonType(Utils.detectColumnType(parameter.getType(), ""));
-        System.out.println("Processing: " + parameter.getName());
+        LOGGER.info("Processing: " + parameter.getName());
         switch (type) {
           case ("number"):
             stmt.setObject(inc,
@@ -176,7 +180,7 @@ public class MSSQL extends Query {
     try {
       functionResultSet = stmt.executeQuery();
     } catch (SQLException e) {
-      if (e.getErrorCode() != 0) {
+      if (e.getErrorCode() != 0) { // Ensuring that procedure was executed, but functionResultSet is empty
         throw e;
       }
     }
