@@ -4,12 +4,11 @@ import io.elastic.jdbc.ProcedureFieldsNameProvider;
 import io.elastic.jdbc.ProcedureParameter;
 import io.elastic.jdbc.ProcedureParameter.Direction;
 import io.elastic.jdbc.Utils;
-
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.Function;
@@ -117,31 +116,22 @@ public class MSSQL extends Query {
     }
   }
 
-  private Map<String, ProcedureParameter> injectReturnValue(Map<String, ProcedureParameter> procedureParams) {
-    procedureParams.values()
-            .forEach(v -> v.setOrder(v.getOrder() + 1));
-
-    procedureParams.put("@RETURN_VALUE", new ProcedureParameter("@RETURN_VALUE", Direction.OUT, Types.REF_CURSOR, 1));
-    return procedureParams;
-  }
-
   @Override
   protected CallableStatement prepareCallableStatement(Connection connection, String procedureName,
       Map<String, ProcedureParameter> procedureParams, JsonObject messageBody)
       throws SQLException {
 
     CallableStatement stmt = connection.prepareCall(
-        String.format("{? = call %s%s}", procedureName,
+        String.format("{call %s%s}", procedureName,
             generateStatementWildcardMask(procedureParams)));
-
-    this.injectReturnValue(procedureParams);
 
     for (int inc = 1; inc <= procedureParams.size(); inc++) {
       final int order = inc;
       ProcedureParameter parameter = procedureParams.values()
           .stream()
           .filter(p -> p.getOrder() == order)
-          .findFirst().orElseThrow(() -> new IllegalStateException("Can't find parameter by order"));
+          .findFirst()
+          .orElseThrow(() -> new IllegalStateException("Can't find parameter by order"));
 
       if (parameter.getDirection() == Direction.IN || parameter.getDirection() == Direction.INOUT) {
         if (parameter.getDirection() == Direction.INOUT) {
@@ -182,9 +172,20 @@ public class MSSQL extends Query {
     CallableStatement stmt = prepareCallableStatement(connection,
         configuration.getString("procedureName"), procedureParams, body);
 
-    stmt.execute();
+    ResultSet functionResultSet = null;
+    try {
+      functionResultSet = stmt.executeQuery();
+    } catch (SQLException e) {
+      if (e.getErrorCode() != 0) {
+        throw e;
+      }
+    }
 
     JsonObjectBuilder resultBuilder = Json.createObjectBuilder();
+
+    if (functionResultSet != null) {
+      addResultSetToJson(resultBuilder, functionResultSet, "@RETURN_VALUE");
+    }
 
     procedureParams.values().stream()
         .filter(param -> param.getDirection() == Direction.OUT
