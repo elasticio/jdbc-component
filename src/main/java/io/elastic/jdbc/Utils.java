@@ -47,7 +47,8 @@ public class Utils {
     final String databaseName = getRequiredNonEmptyString(config, CFG_DATABASE_NAME,
         "Database name is required");
     engineType.loadDriverClass();
-    final String connectionString = engineType.getConnectionString(host, port, databaseName);
+    final String configurationProperties = config.getString("configurationProperties");
+    final String connectionString = engineType.getConnectionString(host, port, databaseName) + "?" + configurationProperties;
     LOGGER.info("Connecting to {}", connectionString);
     try {
       return DriverManager.getConnection(connectionString, user, password);

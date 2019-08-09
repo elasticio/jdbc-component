@@ -45,6 +45,12 @@
         "label": "Password",
         "required": true,
         "placeholder": "Password"
+      },
+      "configurationProperties": {
+        "viewClass": "TextFieldView",
+        "label": "Configuration properties",
+        "required": true,
+        "placeholder": "useUnicode=true&serverTimezone=UTC"
       }
     }
   },
