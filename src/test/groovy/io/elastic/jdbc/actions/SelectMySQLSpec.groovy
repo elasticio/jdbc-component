@@ -4,6 +4,7 @@ import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
 import io.elastic.jdbc.TestUtils
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -12,6 +13,7 @@ import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 
+@Ignore
 class SelectMySQLSpec extends Specification {
 
   @Shared

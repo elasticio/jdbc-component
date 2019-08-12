@@ -10,6 +10,7 @@ import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 
+@Ignore
 class TriggerSelectMSSQLSpec extends Specification {
 
   @Shared
