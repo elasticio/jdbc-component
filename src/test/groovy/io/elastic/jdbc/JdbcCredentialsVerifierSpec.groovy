@@ -1,43 +1,78 @@
 package io.elastic.jdbc
 
-import com.google.gson.JsonObject
-import io.elastic.api.InvalidCredentialsException
-import spock.lang.Ignore
 import spock.lang.Specification
 
-@Ignore
+import javax.json.Json
+import javax.json.JsonObject
+import io.elastic.api.InvalidCredentialsException
+
+
 class JdbcCredentialsVerifierSpec extends Specification {
 
-    def "should verify successfully when connection succeeds"() {
-        setup:
-        JsonObject config = new JsonObject()
-        config.addProperty("user", "sa")
-        config.addProperty("password", "")
-        config.addProperty("dbEngine", "hsqldb")
-        config.addProperty("host", "localhost")
-        config.addProperty("databaseName", "mem:tests")
+  def "should verify successfully when connection succeeds"() {
+    setup:
+    JsonObject mssqlConfig = TestUtils.getMssqlConfigurastionBuilder()
+        .add("configurationProperties", "encrypt=false&integratedSecurity=false")
+        .build()
+    when:
+    new JdbcCredentialsVerifier().verify(mssqlConfig)
 
-        when:
-        new JdbcCredentialsVerifier().verify(SailorVersionsAdapter.gsonToJavax(config))
+    then:
+    notThrown(Throwable.class)
+  }
 
-        then:
-        notThrown(Throwable.class)
-    }
+  def "should verify successfully MySql"() {
+    setup:
+    JsonObject mysqlConfig = TestUtils.getMysqlConfigurastionBuilder()
+        .add("configurationProperties", "serverTimezone=UTC&ssl=true")
+        .build()
+    when:
+    new JdbcCredentialsVerifier().verify(mysqlConfig)
 
-    def "should not verify when connection fails"() {
-        setup:
-        JsonObject config = new JsonObject()
-        config.addProperty("user", "admin")
-        config.addProperty("password", "secret")
-        config.addProperty("dbEngine", "mysql")
-        config.addProperty("host", "localhost")
-        config.addProperty("databaseName", "testdb")
+    then:
+    notThrown(Throwable.class)
+  }
 
-        when:
-        new JdbcCredentialsVerifier().verify(SailorVersionsAdapter.gsonToJavax(config))
+  def "should verify successfully Postgresql"() {
+    setup:
+    JsonObject postgresqlConfig = TestUtils.getPostgresqlConfigurastionBuilder()
+        .add("configurationProperties", "readOnly=true&logUnclosedConnections=true")
+        .build()
+    when:
+    new JdbcCredentialsVerifier().verify(postgresqlConfig)
 
-        then:
-        def e = thrown(InvalidCredentialsException.class)
-        e.message == "Failed to connect to database"
-    }
+    then:
+    notThrown(Throwable.class)
+  }
+
+  def "should verify successfully Oracle"() {
+    setup:
+    JsonObject oracleConfig = TestUtils.getOracleConfigurastionBuilder()
+        .add("configurationProperties", "CatalogOptions=0&ConnectionRetryCount=3")
+        .build()
+    when:
+    new JdbcCredentialsVerifier().verify(oracleConfig)
+
+    then:
+    notThrown(Throwable.class)
+  }
+
+  def "should not verify when connection fails"() {
+    setup:
+    JsonObject config = Json.createObjectBuilder()
+        .add("dbEngine", "mysql")
+        .add("host", "localhost")
+        .add("port", "3306")
+        .add("databaseName", "testdb")
+        .add("user", "admin")
+        .add("password", "secret")
+        .build()
+
+    when:
+    new JdbcCredentialsVerifier().verify(config)
+
+    then:
+    def e = thrown(InvalidCredentialsException.class)
+    e.message == "Failed to connect to database"
+  }
 }

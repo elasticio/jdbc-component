@@ -3,7 +3,7 @@ package io.elastic.jdbc.actions
 import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
-import spock.lang.Ignore
+import io.elastic.jdbc.TestUtils
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -12,21 +12,22 @@ import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 
-@Ignore
 class SelectMySQLSpec extends Specification {
 
   @Shared
-  def connectionString = System.getenv("CONN_URI_MYSQL")
+  def credentials = TestUtils.getMysqlConfigurastionBuilder().build()
   @Shared
-  def user = System.getenv("CONN_USER_MYSQL")
+  def host = credentials.getString("host")
   @Shared
-  def password = System.getenv("CONN_PASSWORD_MYSQL")
+  def port = credentials.getString("port")
   @Shared
-  def databaseName = System.getenv("CONN_DBNAME_MYSQL")
+  def databaseName = credentials.getString("databaseName")
   @Shared
-  def host = System.getenv("CONN_HOST_MYSQL")
+  def user = credentials.getString("user")
   @Shared
-  def port = System.getenv("CONN_PORT_MYSQL")
+  def password = credentials.getString("password")
+  @Shared
+  def connectionString = "jdbc:mysql://" + host + ":" + port + "/" + databaseName
 
   @Shared
   Connection connection
@@ -76,22 +77,18 @@ class SelectMySQLSpec extends Specification {
   }
 
   def getStarsConfig() {
-    JsonObject config = Json.createObjectBuilder()
+    JsonObject config = TestUtils.getMysqlConfigurastionBuilder()
         .add("sqlQuery", "SELECT * from stars where @id:number =id AND name=@name")
-        .add("user", user)
-        .add("password", password)
-        .add("dbEngine", "mysql")
-        .add("host", host)
-        .add("port", port)
-        .add("databaseName", databaseName)
-    .build()
+        .build()
     return config;
   }
+
   def prepareStarsTable() {
     String sql = "DROP TABLE IF EXISTS stars"
     connection.createStatement().execute(sql);
     connection.createStatement().execute("CREATE TABLE stars (id int, name varchar(255) NOT NULL, date datetime, radius int, destination int)");
     connection.createStatement().execute("INSERT INTO stars (id, name) VALUES (1,'Hello')");
+    connection.createStatement().execute("INSERT INTO stars (id, name) VALUES (2,'World')");
   }
 
   def cleanupSpec() {
@@ -106,7 +103,7 @@ class SelectMySQLSpec extends Specification {
     JsonObject body = Json.createObjectBuilder()
         .add("id", 1)
         .add("name", "Hello")
-    .build()
+        .build()
     when:
     runAction(getStarsConfig(), body, snapshot)
     then:

@@ -1,6 +1,7 @@
 import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
+import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.triggers.SelectTrigger
 import spock.lang.*
 
@@ -9,19 +10,20 @@ import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 
-@Ignore
 class TriggerSelectMSSQLSpec extends Specification {
 
   @Shared
-  def user = System.getenv("CONN_USER_MSSQL")
+  def credentials = TestUtils.getMssqlConfigurastionBuilder().build()
   @Shared
-  def password = System.getenv("CONN_PASSWORD_MSSQL")
+  def host = credentials.getString("host")
   @Shared
-  def databaseName = System.getenv("CONN_DBNAME_MSSQL")
+  def port = credentials.getString("port")
   @Shared
-  def host = System.getenv("CONN_HOST_MSSQL")
+  def databaseName = credentials.getString("databaseName")
   @Shared
-  def port = System.getenv("CONN_PORT_MSSQL")
+  def user = credentials.getString("user")
+  @Shared
+  def password = credentials.getString("password")
   @Shared
   def connectionString = "jdbc:sqlserver://" + host + ":" + port + ";database=" + databaseName
   @Shared
