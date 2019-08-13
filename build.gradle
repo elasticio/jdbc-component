@@ -1,9 +1,47 @@
 group = 'io.elastic'
-version = '2.1.0'
+version = '2.1.1'
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
+
+sourceSets {
+    integrationTest {
+        java.outputDir = file('build/classes/integrationtest')
+        java { srcDir file('src/integration-test/java') }
+        resources { srcDir file('src/integration-test/resources') }
+    }
+    main {
+        java.outputDir = file('build/classes/main')
+    }
+    test {
+        java.outputDir = file('build/classes/test')
+    }
+}
+
+test {
+    exclude 'io/elastic/jdbc/integration/**'
+    testLogging {
+        showStandardStreams = true
+    }
+    maxParallelForks 4
+}
+
+task integrationTest(type: Test) {
+    testLogging {
+        showStandardStreams = true
+    }
+    filter() {
+        includeTestsMatching "io.elastic.jdbc.integration.*"
+    }
+}
+
+task downloadDependencies() {
+    description 'Download all dependencies to the Gradle cache'
+    doLast {
+        configurations.findAll { it.canBeResolved }.files
+    }
+}
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -33,6 +71,7 @@ dependencies {
     testCompile 'org.hsqldb:hsqldb:2.0.0'
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.9'
+
+wrapper {
+    gradleVersion = '5.4.1'
 }
