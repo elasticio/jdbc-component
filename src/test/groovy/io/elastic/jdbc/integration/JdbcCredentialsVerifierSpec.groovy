@@ -2,14 +2,12 @@ package io.elastic.jdbc.integration
 
 import io.elastic.jdbc.JdbcCredentialsVerifier
 import io.elastic.jdbc.TestUtils
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import javax.json.Json
 import javax.json.JsonObject
 import io.elastic.api.InvalidCredentialsException
 
-@Ignore
 class JdbcCredentialsVerifierSpec extends Specification {
 
   def "should verify successfully when connection succeeds"() {
