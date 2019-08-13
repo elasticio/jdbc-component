@@ -49,7 +49,7 @@
       "configurationProperties": {
         "viewClass": "TextFieldView",
         "label": "Configuration properties",
-        "required": true,
+        "required": false,
         "placeholder": "useUnicode=true&serverTimezone=UTC"
       }
     }

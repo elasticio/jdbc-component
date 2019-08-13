@@ -112,7 +112,7 @@ public class Utils {
   }
 
   private static Integer getPort(final JsonObject config, final Engines engineType) {
-    final String value = config.getString(CFG_PORT);
+    final String value = getNonNullString(config, CFG_PORT);
     if (value != null && !value.isEmpty()) {
       return Integer.valueOf(value);
     }
