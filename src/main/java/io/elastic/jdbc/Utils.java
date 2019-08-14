@@ -1,5 +1,7 @@
 package io.elastic.jdbc;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Date;
@@ -14,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,17 +43,17 @@ public class Utils {
     final String engine = getRequiredNonEmptyString(config, CFG_DB_ENGINE, "Engine is required")
         .toLowerCase();
     final String host = getRequiredNonEmptyString(config, CFG_HOST, "Host is required");
-    final String user = getRequiredNonEmptyString(config, CFG_USER, "User is required");
     final Engines engineType = Engines.valueOf(engine.toUpperCase());
     final Integer port = getPort(config, engineType);
-    final String password = getPassword(config, engineType);
     final String databaseName = getRequiredNonEmptyString(config, CFG_DATABASE_NAME,
         "Database name is required");
     engineType.loadDriverClass();
     final String connectionString = engineType.getConnectionString(host, port, databaseName);
+    Properties properties = getConfigurationProperties(config, engineType);
     LOGGER.info("Connecting to {}", connectionString);
+    LOGGER.trace("Connecting to {} with configuration properties {}", connectionString, properties);
     try {
-      return DriverManager.getConnection(connectionString, user, password);
+      return DriverManager.getConnection(connectionString, properties);
     } catch (Exception e) {
       LOGGER.error("Failed while connecting. Error: " + e.getMessage());
       throw new RuntimeException(e);
@@ -64,6 +67,24 @@ public class Utils {
     }
 
     return password;
+  }
+
+  private static Properties getConfigurationProperties(final JsonObject config, final Engines engineType) {
+    final String user = getRequiredNonEmptyString(config, CFG_USER, "User is required");
+    final String password = getPassword(config, engineType);
+    final String configurationProperties = getNonNullString(config,"configurationProperties");
+    Properties properties = new Properties();
+    if (!configurationProperties.isEmpty()) {
+      try {
+        properties.load(new StringReader(configurationProperties.replaceAll("&", "\n")));
+      } catch (IOException e) {
+        LOGGER.error("Failed while parsing configuration properties. Error: " + e.getMessage());
+        throw new RuntimeException(e);
+      }
+    }
+    properties.setProperty("user",user);
+    properties.setProperty("password",password);
+    return properties;
   }
 
   private static String getRequiredNonEmptyString(final JsonObject config, final String key,
@@ -91,7 +112,7 @@ public class Utils {
   }
 
   private static Integer getPort(final JsonObject config, final Engines engineType) {
-    final String value = config.getString(CFG_PORT);
+    final String value = getNonNullString(config, CFG_PORT);
     if (value != null && !value.isEmpty()) {
       return Integer.valueOf(value);
     }
