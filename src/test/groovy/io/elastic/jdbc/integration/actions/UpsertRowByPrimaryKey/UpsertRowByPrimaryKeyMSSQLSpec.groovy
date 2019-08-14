@@ -87,8 +87,8 @@ class UpsertRowByPrimaryKeyMSSQLSpec extends Specification {
     String sql = "IF OBJECT_ID('stars', 'U') IS NOT NULL\n" +
         "  DROP TABLE stars;"
     connection.createStatement().execute(sql);
-    connection.createStatement().execute("CREATE TABLE stars (id int PRIMARY KEY, name varchar(255) NOT NULL, " +
-            "date datetime, radius int, destination int, visible bit, visibledate date)");
+    connection.createStatement().execute("CREATE TABLE stars (id int PRIMARY KEY, " +
+            "name varchar(255) NOT NULL, date datetime, radius int, destination int, visible bit, visibledate date)");
   }
 
   def getRecords(tableName) {
