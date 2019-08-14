@@ -7,6 +7,7 @@ import io.elastic.jdbc.Utils;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
@@ -16,8 +17,12 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MSSQL extends Query {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(MSSQL.class);
 
   public ArrayList executePolling(Connection connection) throws SQLException {
     validateQuery();
@@ -119,6 +124,7 @@ public class MSSQL extends Query {
   protected CallableStatement prepareCallableStatement(Connection connection, String procedureName,
       Map<String, ProcedureParameter> procedureParams, JsonObject messageBody)
       throws SQLException {
+
     CallableStatement stmt = connection.prepareCall(
         String.format("{call %s%s}", procedureName,
             generateStatementWildcardMask(procedureParams)));
@@ -128,7 +134,8 @@ public class MSSQL extends Query {
       ProcedureParameter parameter = procedureParams.values()
           .stream()
           .filter(p -> p.getOrder() == order)
-          .findFirst().orElseThrow(() -> new IllegalStateException("Can't find parameter by order"));
+          .findFirst()
+          .orElseThrow(() -> new IllegalStateException("Can't find parameter by order"));
 
       if (parameter.getDirection() == Direction.IN || parameter.getDirection() == Direction.INOUT) {
         if (parameter.getDirection() == Direction.INOUT) {
@@ -136,6 +143,7 @@ public class MSSQL extends Query {
         }
 
         String type = Utils.cleanJsonType(Utils.detectColumnType(parameter.getType(), ""));
+        LOGGER.info("Processing: " + parameter.getName());
         switch (type) {
           case ("number"):
             stmt.setObject(inc,
@@ -168,9 +176,20 @@ public class MSSQL extends Query {
     CallableStatement stmt = prepareCallableStatement(connection,
         configuration.getString("procedureName"), procedureParams, body);
 
-    stmt.execute();
+    ResultSet functionResultSet = null;
+    try {
+      functionResultSet = stmt.executeQuery();
+    } catch (SQLException e) {
+      if (e.getErrorCode() != 0) { // Ensuring that procedure was executed, but functionResultSet is empty
+        throw e;
+      }
+    }
 
     JsonObjectBuilder resultBuilder = Json.createObjectBuilder();
+
+    if (functionResultSet != null) {
+      addResultSetToJson(resultBuilder, functionResultSet, "@RETURN_VALUE");
+    }
 
     procedureParams.values().stream()
         .filter(param -> param.getDirection() == Direction.OUT

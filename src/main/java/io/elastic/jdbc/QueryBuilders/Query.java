@@ -396,55 +396,59 @@ public abstract class Query {
         return resultBuilder.add(name, stmt.getDouble(name));
       case ("array"):
         ResultSet cursorSet = (ResultSet) stmt.getObject(name);
-        JsonArrayBuilder array = Json.createArrayBuilder();
-
-        Map<String, String> params =
-            IntStream.range(1, cursorSet.getMetaData().getColumnCount() + 1)
-                .mapToObj(i -> {
-                  try {
-                    return new ProcedureParameter(cursorSet.getMetaData().getColumnName(i),
-                        Direction.OUT, cursorSet.getMetaData().getColumnType(i));
-                  } catch (SQLException e) {
-                    throw new IllegalArgumentException(e);
-                  }
-                })
-                .collect(Collectors.toMap(ProcedureParameter::getName, p -> Utils
-                    .cleanJsonType(
-                        Utils.detectColumnType(p.getType(), ""))));
-
-        while (cursorSet.next()) {
-          JsonObjectBuilder entity = Json.createObjectBuilder();
-
-          params.keySet().forEach(key -> {
-            try {
-              if (cursorSet.getObject(key) == null) {
-                entity.addNull(key);
-                return;
-              }
-
-              switch (params.get(key)) {
-                case ("number"):
-                  entity.add(key, cursorSet.getDouble(key));
-                  break;
-                case ("boolean"):
-                  entity.add(key, cursorSet.getBoolean(key));
-                  break;
-                default:
-                  entity.add(key, cursorSet.getString(key));
-                  break;
-              }
-            } catch (SQLException e) {
-              e.printStackTrace();
-            }
-          });
-
-          array.add(entity.build());
-        }
-
-        return resultBuilder.add(name, array.build());
+        return addResultSetToJson(resultBuilder, cursorSet, name);
       default:
         return resultBuilder.add(name, stmt.getString(name));
     }
+  }
+
+  protected JsonObjectBuilder addResultSetToJson(JsonObjectBuilder jsonBuilder, ResultSet resultSet, String name)  throws SQLException{
+    JsonArrayBuilder array = Json.createArrayBuilder();
+
+    Map<String, String> params =
+        IntStream.range(1, resultSet.getMetaData().getColumnCount() + 1)
+            .mapToObj(i -> {
+              try {
+                return new ProcedureParameter(resultSet.getMetaData().getColumnName(i),
+                    Direction.OUT, resultSet.getMetaData().getColumnType(i));
+              } catch (SQLException e) {
+                throw new IllegalArgumentException(e);
+              }
+            })
+            .collect(Collectors.toMap(ProcedureParameter::getName, p -> Utils
+                .cleanJsonType(
+                    Utils.detectColumnType(p.getType(), ""))));
+
+    while (resultSet.next()) {
+      JsonObjectBuilder entity = Json.createObjectBuilder();
+
+      params.keySet().forEach(key -> {
+        try {
+          if (resultSet.getObject(key) == null) {
+            entity.addNull(key);
+            return;
+          }
+
+          switch (params.get(key)) {
+            case ("number"):
+              entity.add(key, resultSet.getDouble(key));
+              break;
+            case ("boolean"):
+              entity.add(key, resultSet.getBoolean(key));
+              break;
+            default:
+              entity.add(key, resultSet.getString(key));
+              break;
+          }
+        } catch (SQLException e) {
+          throw new RuntimeException(e);
+        }
+      });
+
+      array.add(entity.build());
+    }
+
+    return jsonBuilder.add(name, array.build());
   }
 
 }
