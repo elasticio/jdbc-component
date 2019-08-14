@@ -28,7 +28,7 @@ Following actions are inside:
 ### Requirements
 Before you can deploy any code into elastic.io **you must be a registered elastic.io platform user**. Please see our home page at [http://www.elastic.io](http://www.elastic.io) to learn how. 
 #### Environment variables
-For unit-testing is needed to specify following environment variables:
+For integration-testing is needed to specify following environment variables:
 1. Connection to MSSQL:
  - ``CONN_USER_MSSQL`` - user login
  - ``CONN_PASSWORD_MSSQL`` - user password
@@ -56,7 +56,7 @@ For unit-testing is needed to specify following environment variables:
 #### Others
 ## Credentials
 You may use following properties to configure a connection:
-![image](https://user-images.githubusercontent.com/40201204/43577550-ce99efe6-9654-11e8-87ed-f3e0839d618a.png)
+![image](https://user-images.githubusercontent.com/16806832/63022425-929da200-beab-11e9-996d-e75e64c65217.png)
 You can add the authorisation methods during the integration flow design or by going to your Settings > Security credentials > REST client and adding there.
 ### DB Engine
 You are able to choose one of existing database types:
@@ -76,6 +76,8 @@ In the Database Name field please provide name of database at the instance that 
 In the User field please provide a username that has permissions to interact with the Database.
 ### Password
 In the Password field please provide a password of the user that has permissions to interact with the Database.
+### Configuration properties
+Optional field. There is possible provide a configuration properties for connections to the Database, e.g. ``useUnicode=true&serverTimezone=UTC``
 
 Validation will start right after click on a Save button. You will be able to continue working with component after validation if all provided credentials will be valid.
 ## Triggers
