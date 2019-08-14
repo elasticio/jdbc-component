@@ -5,6 +5,7 @@ import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
 import io.elastic.jdbc.SailorVersionsAdapter
 import io.elastic.jdbc.triggers.SelectTriggerOld
+import spock.lang.Ignore
 import spock.lang.Specification
 import com.google.gson.JsonObject
 
@@ -12,6 +13,7 @@ import com.google.gson.JsonObject
 import io.elastic.api.EventEmitter.Callback
 import java.sql.*
 
+@Ignore
 @Deprecated
 class SelectTriggerOldSpec extends Specification {
 

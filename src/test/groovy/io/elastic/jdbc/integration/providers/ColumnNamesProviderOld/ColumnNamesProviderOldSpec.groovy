@@ -2,11 +2,13 @@ package io.elastic.jdbc.integration.providers.ColumnNamesProviderOld
 
 import io.elastic.jdbc.ColumnNamesProviderOld
 import io.elastic.jdbc.SailorVersionsAdapter
+import spock.lang.Ignore
 import spock.lang.Specification
 import com.google.gson.JsonObject
 
 import java.sql.*
 
+@Ignore
 @Deprecated
 class ColumnNamesProviderOldSpec extends Specification {
 
