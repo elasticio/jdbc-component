@@ -1,4 +1,5 @@
 # JDBC-component
+
 ## Description
 This is an open source component for working with object-relational database management systems on [elastic.io platform](http://www.elastic.io "elastic.io platform").
 
@@ -27,6 +28,7 @@ Following actions are inside:
 
 ### Requirements
 Before you can deploy any code into elastic.io **you must be a registered elastic.io platform user**. Please see our home page at [http://www.elastic.io](http://www.elastic.io) to learn how. 
+
 #### Environment variables
 For integration-testing is needed to specify following environment variables:
 1. Connection to MSSQL:
@@ -55,31 +57,31 @@ For integration-testing is needed to specify following environment variables:
  - ``CONN_PORT_POSTGRESQL`` - DataBase port
 #### Others
 ## Credentials
-You may use following properties to configure a connection:
-![image](https://user-images.githubusercontent.com/16806832/63022425-929da200-beab-11e9-996d-e75e64c65217.png)
-You can add the authorisation methods during the integration flow design or by going to your Settings > Security credentials > REST client and adding there.
+You need to use following properties to configure credentials:
+
 ### DB Engine
-You are able to choose one of existing database types:
+Choose one of existing database types:
 ![image](https://user-images.githubusercontent.com/40201204/43577772-6f85bdea-9655-11e8-96e1-368493a36c9d.png)
 
 ### Connection URI
-In the Connection URI field please provide hostname of the server, e.g. ``acme.com``
+Provide hostname of the server, e.g. ``acme.com``
 ### Connection port
-In the Connection port field please provide port of the server instance, as by default:
+Optional field. Provide port of the server instance, as by default:
 - ``3306`` - MySQL
 - ``5432`` - PostgreSQL
 - ``1521`` - Oracle
 - ``1433`` - MSSQL
 ### Database Name
-In the Database Name field please provide name of database at the instance that you want to interact with.
+Provide name of database at the instance that you want to interact with.
 ### User
-In the User field please provide a username that has permissions to interact with the Database.
+Provide a username that has permissions to interact with the Database.
 ### Password
-In the Password field please provide a password of the user that has permissions to interact with the Database.
+Provide a password of the user that has permissions to interact with the Database.
 ### Configuration properties
-Optional field. There is possible provide a configuration properties for connections to the Database, e.g. ``useUnicode=true&serverTimezone=UTC``
+Optional field. Provide a configuration properties for connections to the Database, e.g. ``useUnicode=true&serverTimezone=UTC``
 
-Validation will start right after click on a Save button. You will be able to continue working with component after validation if all provided credentials will be valid.
+**Limitation:** `Configuration properties` value may not be checked during Credentials Verifacation, so in case of using this field make sure that it contains correct input. 
+
 ## Triggers
 ### Select trigger
 You are able to provide SELECT query with last execution timestamp as WHERE clause criteria.
@@ -114,7 +116,6 @@ The format of ``Start Polling From (optional)`` field should be like ``yyyy-mm-d
 
 ### SELECT trigger (Deprecated)
 This action exists in JDBC component only for backward compatibility. New [**Select trigger**](#select-trigger) is recommended to use.
-
 
 ## Actions
 ### Select action
@@ -250,7 +251,8 @@ Component generates next metadata:
 
 
 ### Create or update record action (Deprecated)
-This action exists in JDBC component only for backward compatibility. [**Upsert row by primary key**](#upsert-row-by-primary-key-action) Action is recommended to use.
+This action exists in JDBC component only for backward compatibility. 
+Please use [**Upsert row by primary key**](#upsert-row-by-primary-key-action) instead.
 
 ## Current limitations
 1. Only tables with one [PRIMARY KEY](https://en.wikipedia.org/wiki/Primary_key "PRIMARY KEY") is supported. You will see the message ``Table has not Primary Key. Should be one Primary Key
