@@ -18,7 +18,7 @@ import java.sql.DriverManager
 class SelectMySQLSpec extends Specification {
 
   @Shared
-  def credentials = TestUtils.getMysqlConfigurastionBuilder().build()
+  def credentials = TestUtils.getMysqlConfigurationBuilder().build()
   @Shared
   def host = credentials.getString("host")
   @Shared
@@ -80,7 +80,7 @@ class SelectMySQLSpec extends Specification {
   }
 
   def getStarsConfig() {
-    JsonObject config = TestUtils.getMysqlConfigurastionBuilder()
+    JsonObject config = TestUtils.getMysqlConfigurationBuilder()
         .add("sqlQuery", "SELECT * from stars where @id:number =id AND name=@name")
         .build()
     return config;

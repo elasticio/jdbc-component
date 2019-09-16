@@ -12,7 +12,7 @@ class JdbcCredentialsVerifierSpec extends Specification {
 
   def "should verify successfully when connection succeeds"() {
     setup:
-    JsonObject mssqlConfig = TestUtils.getMssqlConfigurastionBuilder()
+    JsonObject mssqlConfig = TestUtils.getMssqlConfigurationBuilder()
         .add("configurationProperties", "encrypt=false&integratedSecurity=false")
         .build()
     when:
@@ -24,7 +24,7 @@ class JdbcCredentialsVerifierSpec extends Specification {
 
   def "should verify successfully MySql"() {
     setup:
-    JsonObject mysqlConfig = TestUtils.getMysqlConfigurastionBuilder()
+    JsonObject mysqlConfig = TestUtils.getMysqlConfigurationBuilder()
         .add("configurationProperties", "serverTimezone=UTC&ssl=true")
         .build()
     when:
@@ -36,7 +36,7 @@ class JdbcCredentialsVerifierSpec extends Specification {
 
   def "should verify successfully Postgresql"() {
     setup:
-    JsonObject postgresqlConfig = TestUtils.getPostgresqlConfigurastionBuilder()
+    JsonObject postgresqlConfig = TestUtils.getPostgresqlConfigurationBuilder()
         .add("configurationProperties", "readOnly=true&logUnclosedConnections=true")
         .build()
     when:
@@ -48,7 +48,7 @@ class JdbcCredentialsVerifierSpec extends Specification {
 
   def "should verify successfully Oracle"() {
     setup:
-    JsonObject oracleConfig = TestUtils.getOracleConfigurastionBuilder()
+    JsonObject oracleConfig = TestUtils.getOracleConfigurationBuilder()
         .add("configurationProperties", "CatalogOptions=0&ConnectionRetryCount=3")
         .build()
     when:

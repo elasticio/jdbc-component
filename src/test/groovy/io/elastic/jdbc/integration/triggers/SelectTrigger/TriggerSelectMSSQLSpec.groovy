@@ -16,7 +16,7 @@ import java.sql.DriverManager
 class TriggerSelectMSSQLSpec extends Specification {
 
   @Shared
-  def credentials = TestUtils.getMssqlConfigurastionBuilder().build()
+  def credentials = TestUtils.getMssqlConfigurationBuilder().build()
   @Shared
   def host = credentials.getString("host")
   @Shared
