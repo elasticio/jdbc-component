@@ -24,7 +24,6 @@ public class ColumnNamesProvider implements DynamicMetadataProvider, SelectModel
     JsonObjectBuilder result = Json.createObjectBuilder();
     JsonObject properties = getColumns(configuration);
     for (Map.Entry<String, JsonValue> entry : properties.entrySet()) {
-      JsonValue field = entry.getValue();
       result.add(entry.getKey(), entry.getKey());
     }
     return result.build();
@@ -46,7 +45,7 @@ public class ColumnNamesProvider implements DynamicMetadataProvider, SelectModel
     return result.build();
   }
 
-  public JsonObject getColumns(JsonObject configuration) {
+  private JsonObject getColumns(JsonObject configuration) {
     if (configuration.getString("tableName") == null || configuration.getString("tableName")
         .isEmpty()) {
       throw new RuntimeException("Table name is required");
@@ -58,8 +57,8 @@ public class ColumnNamesProvider implements DynamicMetadataProvider, SelectModel
     String catalog = null;
     String schemaName = null;
     boolean isEmpty = true;
-    Boolean isMssql = configuration.getString("dbEngine").equals("mssql");
-    Boolean isMysql = configuration.getString("dbEngine").equals("mysql");
+    boolean isMssql = configuration.getString("dbEngine").equals("mssql");
+    boolean isMysql = configuration.getString("dbEngine").equals("mysql");
     try {
       connection = Utils.getConnection(configuration);
       DatabaseMetaData dbMetaData = connection.getMetaData();
@@ -75,8 +74,8 @@ public class ColumnNamesProvider implements DynamicMetadataProvider, SelectModel
       while (rs.next()) {
         JsonObjectBuilder field = Json.createObjectBuilder();
         String name = rs.getString("COLUMN_NAME");
-        Boolean isRequired;
-        Integer isNullable = (rs.getObject("NULLABLE") != null) ? rs.getInt("NULLABLE") : 1;
+        boolean isRequired;
+        int isNullable = (rs.getObject("NULLABLE") != null) ? rs.getInt("NULLABLE") : 1;
         if (isMssql) {
           String isAutoincrement =
               (rs.getString("IS_AUTOINCREMENT") != null) ? rs.getString("IS_AUTOINCREMENT") : "";
@@ -119,7 +118,6 @@ public class ColumnNamesProvider implements DynamicMetadataProvider, SelectModel
    * Converts JDBC column type name to js type according to http://db.apache.org/ojb/docu/guides/jdbc-types.html
    *
    * @param sqlType JDBC column type
-   * @url http://db.apache.org/ojb/docu/guides/jdbc-types.html
    */
   private String convertType(Integer sqlType) {
     if (sqlType == Types.NUMERIC || sqlType == Types.DECIMAL || sqlType == Types.TINYINT

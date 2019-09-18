@@ -81,7 +81,7 @@ public class ColumnNamesWithPrimaryKeyProvider implements DynamicMetadataProvide
         String name = rs.getString("COLUMN_NAME");
         Boolean isRequired = false;
         while (rsPrimaryKeys.next()) {
-          if (rsPrimaryKeys.getString("COLUMN_NAME").equals(name) && rs.getString("IS_AUTOINCREMENT").equals("NO")) {
+          if (rsPrimaryKeys.getString("COLUMN_NAME").equals(name)) {
             isRequired = true;
             break;
           }

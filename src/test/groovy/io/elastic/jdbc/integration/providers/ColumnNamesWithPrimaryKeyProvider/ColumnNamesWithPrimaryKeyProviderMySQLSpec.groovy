@@ -41,6 +41,6 @@ class ColumnNamesWithPrimaryKeyProviderMySQLSpec extends Specification {
     JsonObject meta = provider.getMetaModel(config)
     print meta
     expect:
-    meta.getJsonObject("in").toString() == "{\"type\":\"object\",\"properties\":{\"id\":{\"required\":false,\"title\":\"id\",\"type\":\"number\"},\"isDead\":{\"required\":false,\"title\":\"isDead\",\"type\":\"boolean\"},\"name\":{\"required\":false,\"title\":\"name\",\"type\":\"string\"},\"radius\":{\"required\":false,\"title\":\"radius\",\"type\":\"number\"},\"destination\":{\"required\":false,\"title\":\"destination\",\"type\":\"number\"},\"createdat\":{\"required\":false,\"title\":\"createdat\",\"type\":\"string\"}}}"
+    meta.getJsonObject("in").toString() == "{\"type\":\"object\",\"properties\":{\"id\":{\"required\":true,\"title\":\"id\",\"type\":\"number\"},\"isDead\":{\"required\":false,\"title\":\"isDead\",\"type\":\"boolean\"},\"name\":{\"required\":false,\"title\":\"name\",\"type\":\"string\"},\"radius\":{\"required\":false,\"title\":\"radius\",\"type\":\"number\"},\"destination\":{\"required\":false,\"title\":\"destination\",\"type\":\"number\"},\"createdat\":{\"required\":false,\"title\":\"createdat\",\"type\":\"string\"}}}"
   }
 }

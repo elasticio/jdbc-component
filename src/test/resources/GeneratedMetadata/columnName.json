@@ -1,0 +1,67 @@
+{
+  "out": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "required": false,
+        "title": "id",
+        "type": "number"
+      },
+      "name": {
+        "required": true,
+        "title": "name",
+        "type": "string"
+      },
+      "radius": {
+        "required": true,
+        "title": "radius",
+        "type": "number"
+      },
+      "destination": {
+        "required": false,
+        "title": "destination",
+        "type": "number"
+      },
+      "createdat": {
+        "required": false,
+        "title": "createdat",
+        "type": "string"
+      },
+      "diameter": {
+        "required": false,
+        "title": "diameter",
+        "type": "number"
+      }
+    }
+  },
+  "in": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "required": false,
+        "title": "id",
+        "type": "number"
+      },
+      "name": {
+        "required": true,
+        "title": "name",
+        "type": "string"
+      },
+      "radius": {
+        "required": true,
+        "title": "radius",
+        "type": "number"
+      },
+      "destination": {
+        "required": false,
+        "title": "destination",
+        "type": "number"
+      },
+      "createdat": {
+        "required": false,
+        "title": "createdat",
+        "type": "string"
+      }
+    }
+  }
+}
