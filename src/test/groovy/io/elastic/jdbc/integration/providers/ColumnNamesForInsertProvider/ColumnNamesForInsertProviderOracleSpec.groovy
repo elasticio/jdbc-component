@@ -11,7 +11,7 @@ import javax.json.JsonReader
 import java.sql.Connection
 import java.sql.DriverManager
 
-class ColumnNamesForInsertProviderMSSQLSpec extends Specification {
+class ColumnNamesForInsertProviderOracleSpec extends Specification {
 
   @Shared
   Connection connection
@@ -19,18 +19,32 @@ class ColumnNamesForInsertProviderMSSQLSpec extends Specification {
   JsonObject config
 
   def setup() {
-    config = TestUtils.getMssqlConfigurationBuilder()
-        .add("tableName", "stars")
+    config = TestUtils.getOracleConfigurationBuilder()
+        .add("tableName", "STARS")
         .build()
     connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"));
-    String sql = " DROP TABLE IF EXISTS stars;"
+    String sql = "BEGIN" +
+        "   EXECUTE IMMEDIATE 'DROP TABLE stars';" +
+        "EXCEPTION" +
+        "   WHEN OTHERS THEN" +
+        "      IF SQLCODE != -942 THEN" +
+        "         RAISE;" +
+        "      END IF;" +
+        "END;"
     connection.createStatement().execute(sql)
-    sql = "CREATE TABLE stars (id decimal(15,0) NOT NULL IDENTITY PRIMARY KEY NONCLUSTERED, name varchar(255) NOT NULL, radius int NOT NULL, destination float, createdat DATETIME, diameter AS (radius*2))"
+    sql = "CREATE TABLE stars (id INT PRIMARY KEY, name VARCHAR(255) NOT NULL, radius INT NOT NULL, destination FLOAT, createdat DATE)"
     connection.createStatement().execute(sql);
   }
 
   def cleanupSpec() {
-    String sql = " DROP TABLE IF EXISTS stars;"
+    String sql = "BEGIN" +
+        "   EXECUTE IMMEDIATE 'DROP TABLE stars';" +
+        "EXCEPTION" +
+        "   WHEN OTHERS THEN" +
+        "      IF SQLCODE != -942 THEN" +
+        "         RAISE;" +
+        "      END IF;" +
+        "END;"
     connection.createStatement().execute(sql)
     connection.close()
   }
@@ -48,7 +62,6 @@ class ColumnNamesForInsertProviderMSSQLSpec extends Specification {
     expect:
     meta.containsKey("in")
     meta.containsKey("out")
-    meta.getJsonObject("in") == expectedMetadata.getJsonObject("in")
-    meta.getJsonObject("out") == expectedMetadata.getJsonObject("out")
+    meta.getJsonObject("in").getJsonObject("properties").containsKey("ID")
   }
 }

@@ -11,7 +11,7 @@ import javax.json.JsonReader
 import java.sql.Connection
 import java.sql.DriverManager
 
-class ColumnNamesForInsertProviderMSSQLSpec extends Specification {
+class ColumnNamesForInsertProviderPostgresqlSpec extends Specification {
 
   @Shared
   Connection connection
@@ -19,13 +19,13 @@ class ColumnNamesForInsertProviderMSSQLSpec extends Specification {
   JsonObject config
 
   def setup() {
-    config = TestUtils.getMssqlConfigurationBuilder()
+    config = TestUtils.getPostgresqlConfigurationBuilder()
         .add("tableName", "stars")
         .build()
     connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"));
     String sql = " DROP TABLE IF EXISTS stars;"
     connection.createStatement().execute(sql)
-    sql = "CREATE TABLE stars (id decimal(15,0) NOT NULL IDENTITY PRIMARY KEY NONCLUSTERED, name varchar(255) NOT NULL, radius int NOT NULL, destination float, createdat DATETIME, diameter AS (radius*2))"
+    sql = "CREATE TABLE stars (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, radius INT NOT NULL, destination FLOAT, createdat date);"
     connection.createStatement().execute(sql);
   }
 
@@ -49,6 +49,5 @@ class ColumnNamesForInsertProviderMSSQLSpec extends Specification {
     meta.containsKey("in")
     meta.containsKey("out")
     meta.getJsonObject("in") == expectedMetadata.getJsonObject("in")
-    meta.getJsonObject("out") == expectedMetadata.getJsonObject("out")
   }
 }

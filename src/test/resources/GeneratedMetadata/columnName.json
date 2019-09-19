@@ -3,7 +3,7 @@
     "type": "object",
     "properties": {
       "id": {
-        "required": false,
+        "required": true,
         "title": "id",
         "type": "number"
       },
@@ -37,11 +37,6 @@
   "in": {
     "type": "object",
     "properties": {
-      "id": {
-        "required": false,
-        "title": "id",
-        "type": "number"
-      },
       "name": {
         "required": true,
         "title": "name",
