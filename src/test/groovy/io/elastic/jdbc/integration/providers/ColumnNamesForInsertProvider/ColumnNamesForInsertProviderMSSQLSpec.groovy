@@ -17,27 +17,43 @@ class ColumnNamesForInsertProviderMSSQLSpec extends Specification {
   Connection connection
   @Shared
   JsonObject config
+  @Shared
+  String tableName = "stars"
+  @Shared
+  String sqlCreateTable = "CREATE TABLE " +
+      tableName +
+      " (id decimal(15,0) NOT NULL IDENTITY PRIMARY KEY NONCLUSTERED, " +
+      "name varchar(255) NOT NULL, " +
+      "radius int NOT NULL, " +
+      "destination float, " +
+      "createdat DATETIME, " +
+      "diameter AS (radius*2))"
+  @Shared
+  String sqlDeleteTable = " DROP TABLE IF EXISTS " + tableName
 
   def setup() {
     config = TestUtils.getMssqlConfigurationBuilder()
-        .add("tableName", "stars")
+        .add("tableName", tableName)
         .build()
     connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"));
-    String sql = " DROP TABLE IF EXISTS stars;"
-    connection.createStatement().execute(sql)
-    sql = "CREATE TABLE stars (id decimal(15,0) NOT NULL IDENTITY PRIMARY KEY NONCLUSTERED, name varchar(255) NOT NULL, radius int NOT NULL, destination float, createdat DATETIME, diameter AS (radius*2))"
-    connection.createStatement().execute(sql);
+    createTable()
+  }
+
+  def createTable() {
+    connection.createStatement().execute(sqlCreateTable);
+  }
+
+  def deleteTable() {
+    connection.createStatement().execute(sqlDeleteTable);
   }
 
   def cleanupSpec() {
-    String sql = " DROP TABLE IF EXISTS stars;"
-    connection.createStatement().execute(sql)
+
+    deleteTable()
     connection.close()
   }
 
   def "get metadata model, given table name"() {
-
-
     ColumnNamesForInsertProvider provider = new ColumnNamesForInsertProvider()
     JsonObject meta = provider.getMetaModel(config)
     InputStream fis = new FileInputStream("src/test/resources/GeneratedMetadata/columnName.json");

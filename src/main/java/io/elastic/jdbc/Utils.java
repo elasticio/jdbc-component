@@ -36,6 +36,8 @@ public class Utils {
   public static final String CFG_USER = "user";
   public static final String VARS_REGEXP = "\\B@([\\w_$][\\d\\w_$]*(:(string|boolean|date|number|bigint|float|real))?)";
   public static final String TEMPLATE_REGEXP = "\\B@(?:(?![=\\)\\(])[\\S])+";
+  private static final String PROPERTY_DB_ENGINE = "dbEngine";
+  private static final String PROPERTY_TABLE_NAME = "tableName";
   private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
   public static Map<String, String> columnTypes = null;
 
@@ -347,6 +349,27 @@ public class Utils {
         return "object";
       default:
         return "string";
+    }
+  }
+
+  public static String getTableName(JsonObject configuration, boolean isOracle) {
+    if (configuration.containsKey(PROPERTY_TABLE_NAME)
+        && Utils.getNonNullString(configuration, PROPERTY_TABLE_NAME).length() != 0) {
+      String tableName = configuration.getString(PROPERTY_TABLE_NAME);
+      if (tableName.contains(".")) {
+        tableName = isOracle ? tableName.split("\\.")[1].toUpperCase() : tableName.split("\\.")[1];
+      }
+      return tableName;
+    } else {
+      throw new RuntimeException("Table name is required field");
+    }
+  }
+
+  public static String getDbEngine(JsonObject configuration) {
+    if (Utils.getNonNullString(configuration, PROPERTY_DB_ENGINE).length() != 0) {
+      return configuration.getString(PROPERTY_DB_ENGINE);
+    } else {
+      throw new RuntimeException("DB Engine is required field");
     }
   }
 }
