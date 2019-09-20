@@ -12,6 +12,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,10 +71,11 @@ public class Utils {
     return password;
   }
 
-  private static Properties getConfigurationProperties(final JsonObject config, final Engines engineType) {
+  private static Properties getConfigurationProperties(final JsonObject config,
+      final Engines engineType) {
     final String user = getRequiredNonEmptyString(config, CFG_USER, "User is required");
     final String password = getPassword(config, engineType);
-    final String configurationProperties = getNonNullString(config,"configurationProperties");
+    final String configurationProperties = getNonNullString(config, "configurationProperties");
     Properties properties = new Properties();
     if (!configurationProperties.isEmpty()) {
       try {
@@ -84,8 +86,8 @@ public class Utils {
       }
     }
     LOGGER.info("Got properties: {}", properties);
-    properties.setProperty("user",user);
-    properties.setProperty("password",password);
+    properties.setProperty("user", user);
+    properties.setProperty("password", password);
     return properties;
   }
 
@@ -255,9 +257,9 @@ public class Utils {
         String result[] = matcher.group().split(":");
         String name;
         String type;
-        if (result.length > 0 && result.length < 3){
+        if (result.length > 0 && result.length < 3) {
           name = result[0].substring(1);
-          if (result.length == 1){
+          if (result.length == 1) {
             type = "string";
           } else {
             type = result[1];
@@ -371,5 +373,82 @@ public class Utils {
     } else {
       throw new RuntimeException("DB Engine is required field");
     }
+  }
+
+  /**
+   * Converts JDBC column type name to js type according to http://db.apache.org/ojb/docu/guides/jdbc-types.html
+   *
+   * @param sqlType JDBC column type
+   */
+  static String convertType(Integer sqlType) {
+    if (sqlType == Types.NUMERIC || sqlType == Types.DECIMAL || sqlType == Types.TINYINT
+        || sqlType == Types.SMALLINT || sqlType == Types.INTEGER || sqlType == Types.BIGINT
+        || sqlType == Types.REAL || sqlType == Types.FLOAT || sqlType == Types.DOUBLE) {
+      return "number";
+    }
+    if (sqlType == Types.BIT || sqlType == Types.BOOLEAN) {
+      return "boolean";
+    }
+    return "string";
+  }
+
+  public static ArrayList<String> getColumnNames(ResultSet resultSet) throws SQLException {
+    ArrayList<String> columnNames = new ArrayList<>();
+    while (resultSet.next()) {
+      columnNames.add(resultSet.getString("COLUMN_NAME"));
+    }
+    return columnNames;
+  }
+
+  public static String getTableNamePattern(String tableName) {
+    if (tableName.contains(".")) {
+      tableName = tableName.split("\\.")[1];
+    }
+    return tableName;
+  }
+
+  public static String getSchemaNamePattern(String tableName) {
+    String schemaName = null;
+    if (tableName.contains(".")) {
+      schemaName = tableName.split("\\.")[0];
+    }
+    return schemaName;
+  }
+
+  public static Boolean isAutoincrement(ResultSet resultSet, final boolean isOracle)
+      throws SQLException {
+    boolean isAutoincrement = false;
+    if (!isOracle) {
+      isAutoincrement = resultSet.getString("IS_AUTOINCREMENT").equals("YES");
+    }
+    return isAutoincrement;
+  }
+
+  public static Boolean isNotNull(ResultSet resultSet) throws SQLException {
+    return resultSet.getString("IS_NULLABLE").equals("NO");
+  }
+
+  public static Boolean isCalculated(ResultSet resultSet, final String dbEngine)
+      throws SQLException {
+    switch (dbEngine) {
+      case "mysql":
+        return resultSet.getString("IS_GENERATEDCOLUMN").equals("YES");
+      case "mssql":
+        return resultSet.getString("SS_IS_COMPUTED").equals("1");
+      case "postgresql":
+        String columnDef = resultSet.getString("COLUMN_DEF");
+        return (columnDef != null) && columnDef.contains("nextval(");
+      default:
+        return false;
+    }
+  }
+
+  public static Boolean isPrimaryKey(ArrayList<String> primaryKeys, final String fieldName) {
+    return primaryKeys.contains(fieldName);
+  }
+
+  public static Boolean isRequired(final boolean isPrimaryKey, final boolean isNotNull,
+      final boolean isAutoincrement, final boolean isCalculated) {
+    return isPrimaryKey || (!isAutoincrement && !isCalculated && isNotNull);
   }
 }
