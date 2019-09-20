@@ -12,6 +12,23 @@ public class TestUtils {
   public static final String TEST_TABLE_NAME = "stars";
   private static final String SQL_DELETE_TABLE =
       " DROP TABLE IF EXISTS " + TEST_TABLE_NAME;
+  private static final String ORACLE_DELETE_TABLE = "BEGIN"
+      + "   EXECUTE IMMEDIATE 'DROP TABLE "
+      + TEST_TABLE_NAME + "';"
+      + "EXCEPTION"
+      + "   WHEN OTHERS THEN"
+      + "      IF SQLCODE != -942 THEN"
+      + "         RAISE;"
+      + "      END IF;"
+      + "END;";
+  private static final String POSTGRESQL_CREATE_TABLE = "CREATE TABLE "
+      + TEST_TABLE_NAME
+      + " (id SERIAL PRIMARY KEY, "
+      + "name VARCHAR(255) NOT NULL, "
+      + "radius INT NOT NULL, "
+      + "destination FLOAT, "
+      + "visible boolean, "
+      + "createdat timestamp)";
   private static final String MSSQL_CREATE_TABLE = "CREATE TABLE "
       + TEST_TABLE_NAME
       + " (id decimal(15,0) NOT NULL IDENTITY PRIMARY KEY NONCLUSTERED, "
@@ -21,6 +38,14 @@ public class TestUtils {
       + "visible bit, "
       + "createdat DATETIME, "
       + "diameter AS (radius*2))";
+  private static final String ORACLE_CREATE_TABLE = "CREATE TABLE "
+      + TEST_TABLE_NAME
+      + " (id NUMBER PRIMARY KEY, "
+      + "name VARCHAR(255) NOT NULL, "
+      + "radius number NOT NULL, "
+      + "destination FLOAT, "
+      + "visible number(1), "
+      + "createdat timestamp)";
   private static final String MYSQL_CREATE_TABLE = "CREATE TABLE "
       + TEST_TABLE_NAME
       + " (id INT AUTO_INCREMENT PRIMARY KEY, "
@@ -115,6 +140,12 @@ public class TestUtils {
       case "mssql":
         connection.createStatement().execute(MSSQL_CREATE_TABLE);
         break;
+      case "oracle":
+        connection.createStatement().execute(ORACLE_CREATE_TABLE);
+        break;
+      case "postgresql":
+        connection.createStatement().execute(POSTGRESQL_CREATE_TABLE);
+        break;
       default:
         throw new RuntimeException("Unsupported dbEngine" + dbEngine);
     }
@@ -122,13 +153,10 @@ public class TestUtils {
 
   public static void deleteTestTable(Connection connection, String dbEngine)
       throws SQLException {
-    switch (dbEngine.toLowerCase()) {
-      case "mysql":
-      case "mssql":
-        connection.createStatement().execute(SQL_DELETE_TABLE);
-        break;
-      default:
-        throw new RuntimeException("Unsupported dbEngine" + dbEngine);
+    if (dbEngine.toLowerCase().equals("oracle")){
+      connection.createStatement().execute(ORACLE_DELETE_TABLE);
+    } else {
+      connection.createStatement().execute(SQL_DELETE_TABLE);
     }
   }
 }
