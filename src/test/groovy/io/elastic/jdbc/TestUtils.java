@@ -1,11 +1,35 @@
 package io.elastic.jdbc;
 
+import io.elastic.api.EventEmitter;
 import io.github.cdimascio.dotenv.Dotenv;
+import java.sql.Connection;
+import java.sql.SQLException;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
 public class TestUtils {
 
+  public static final String TEST_TABLE_NAME = "stars";
+  private static final String SQL_DELETE_TABLE =
+      " DROP TABLE IF EXISTS " + TEST_TABLE_NAME;
+  private static final String MSSQL_CREATE_TABLE = "CREATE TABLE "
+      + TEST_TABLE_NAME
+      + " (id decimal(15,0) NOT NULL IDENTITY PRIMARY KEY NONCLUSTERED, "
+      + "name varchar(255) NOT NULL, "
+      + "radius int NOT NULL, "
+      + "destination float, "
+      + "visible bit, "
+      + "createdat DATETIME, "
+      + "diameter AS (radius*2))";
+  private static final String MYSQL_CREATE_TABLE = "CREATE TABLE "
+      + TEST_TABLE_NAME
+      + " (id INT AUTO_INCREMENT PRIMARY KEY, "
+      + "name VARCHAR(255) NOT NULL, "
+      + "radius INT NOT NULL, "
+      + "destination FLOAT, "
+      + "visible bit, "
+      + "createdat DATETIME, "
+      + "diameter INT GENERATED ALWAYS AS (radius * 2));";
   private static Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
   public static JsonObjectBuilder getMssqlConfigurationBuilder() {
@@ -70,5 +94,41 @@ public class TestUtils {
         .add("user", dotenv.get("CONN_USER_ORACLE"))
         .add("password", dotenv.get("CONN_PASSWORD_ORACLE"))
         .add("connectionString", connectionString);
+  }
+
+  public static EventEmitter getFakeEventEmitter(EventEmitter.Callback fakeCallback) {
+    return new EventEmitter.Builder()
+        .onData(fakeCallback)
+        .onSnapshot(fakeCallback)
+        .onError(fakeCallback)
+        .onRebound(fakeCallback)
+        .onHttpReplyCallback(fakeCallback)
+        .build();
+  }
+
+  public static void createTestTable(Connection connection, String dbEngine)
+      throws SQLException {
+    switch (dbEngine.toLowerCase()) {
+      case "mysql":
+        connection.createStatement().execute(MYSQL_CREATE_TABLE);
+        break;
+      case "mssql":
+        connection.createStatement().execute(MSSQL_CREATE_TABLE);
+        break;
+      default:
+        throw new RuntimeException("Unsupported dbEngine" + dbEngine);
+    }
+  }
+
+  public static void deleteTestTable(Connection connection, String dbEngine)
+      throws SQLException {
+    switch (dbEngine.toLowerCase()) {
+      case "mysql":
+      case "mssql":
+        connection.createStatement().execute(SQL_DELETE_TABLE);
+        break;
+      default:
+        throw new RuntimeException("Unsupported dbEngine" + dbEngine);
+    }
   }
 }

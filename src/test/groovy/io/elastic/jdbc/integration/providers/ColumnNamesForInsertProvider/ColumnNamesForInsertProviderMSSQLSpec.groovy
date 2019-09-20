@@ -48,7 +48,6 @@ class ColumnNamesForInsertProviderMSSQLSpec extends Specification {
   }
 
   def cleanupSpec() {
-
     deleteTable()
     connection.close()
   }

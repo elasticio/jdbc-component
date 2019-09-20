@@ -14,7 +14,8 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 
-class InsertActionMySQLSpec extends Specification {
+class InsertActionMSSQLSpec extends Specification {
+
   @Shared
   Connection connection
   @Shared
@@ -24,11 +25,11 @@ class InsertActionMySQLSpec extends Specification {
   @Shared
   InsertAction action = new InsertAction()
   @Shared
-  String dbEngine = "mysql"
+  String dbEngine = "mssql"
 
 
   def setupSpec() {
-    configuration = TestUtils.getMysqlConfigurationBuilder()
+    configuration = TestUtils.getMssqlConfigurationBuilder()
         .add("tableName", TestUtils.TEST_TABLE_NAME)
         .build()
     connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
