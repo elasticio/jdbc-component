@@ -172,6 +172,21 @@
       },
       "dynamicMetadata": "io.elastic.jdbc.ColumnNamesWithPrimaryKeyProvider"
     },
+    "insert": {
+      "main": "io.elastic.jdbc.actions.InsertAction",
+      "title": "Insert",
+      "description": "Executes insert value",
+      "fields": {
+        "tableName": {
+          "viewClass": "SelectView",
+          "prompt": "Select a Table",
+          "label": "Table",
+          "required": true,
+          "model": "io.elastic.jdbc.TableNameProvider"
+        }
+      },
+      "dynamicMetadata": "io.elastic.jdbc.ColumnNamesForInsertProvider"
+    },
     "deleteRowByPrimaryKey": {
       "main": "io.elastic.jdbc.actions.DeleteRowByPrimaryKey",
       "title": "Delete Row By Primary Key",
