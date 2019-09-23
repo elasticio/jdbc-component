@@ -1,6 +1,6 @@
 package io.elastic.jdbc.integration.providers.TableNameProvider
 
-import io.elastic.jdbc.TableNameProvider
+import io.elastic.jdbc.providers.TableNameProvider
 import spock.lang.*
 
 import javax.json.Json

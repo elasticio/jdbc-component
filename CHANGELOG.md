@@ -1,4 +1,4 @@
-# jdbc Component Change Log 
+# JDBC Component
 
 ## 2.3.0 (September 25, 2019)
  

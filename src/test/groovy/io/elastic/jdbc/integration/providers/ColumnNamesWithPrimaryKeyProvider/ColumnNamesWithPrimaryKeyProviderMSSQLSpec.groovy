@@ -1,7 +1,7 @@
 package io.elastic.jdbc.integration.providers.ColumnNamesWithPrimaryKeyProvider
 
 
-import io.elastic.jdbc.ColumnNamesWithPrimaryKeyProvider
+import io.elastic.jdbc.providers.ColumnNamesWithPrimaryKeyProvider
 import io.elastic.jdbc.TestUtils
 import spock.lang.Shared
 import spock.lang.Specification

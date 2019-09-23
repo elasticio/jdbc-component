@@ -1,4 +1,4 @@
-package io.elastic.jdbc;
+package io.elastic.jdbc.Utils;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -42,7 +42,7 @@ public class Utils {
   private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
   public static Map<String, String> columnTypes = null;
 
-  public static Connection getConnection(final JsonObject config) {
+  public static Connection getConnection(final JsonObject config) throws SQLException {
     final String engine = getRequiredNonEmptyString(config, CFG_DB_ENGINE, "Engine is required")
         .toLowerCase();
     final String host = getRequiredNonEmptyString(config, CFG_HOST, "Host is required");
@@ -54,12 +54,7 @@ public class Utils {
     final String connectionString = engineType.getConnectionString(host, port, databaseName);
     Properties properties = getConfigurationProperties(config, engineType);
     LOGGER.info("Connecting to {}", connectionString);
-    try {
-      return DriverManager.getConnection(connectionString, properties);
-    } catch (Exception e) {
-      LOGGER.error("Failed while connecting. Error: " + e.getMessage());
-      throw new RuntimeException(e);
-    }
+    return DriverManager.getConnection(connectionString, properties);
   }
 
   private static String getPassword(final JsonObject config, final Engines engineType) {
@@ -403,12 +398,21 @@ public class Utils {
     return "string";
   }
 
-  static ArrayList<String> getColumnNames(ResultSet resultSet) throws SQLException {
-    ArrayList<String> columnNames = new ArrayList<>();
-    while (resultSet.next()) {
-      columnNames.add(resultSet.getString("COLUMN_NAME"));
+  public static ArrayList<String> getPrimaryKeyNames(String catalog, String schemaName, String tableName,
+      DatabaseMetaData dbMetaData) {
+    ArrayList<String> primaryKeysNames = new ArrayList<>();
+    try (ResultSet resultSet = dbMetaData.getPrimaryKeys(catalog, schemaName, tableName)) {
+      LOGGER.debug("Getting primary keys names...");
+      while (resultSet.next()) {
+        primaryKeysNames.add(resultSet.getString("COLUMN_NAME"));
+      }
+      LOGGER.debug("Found primary key(s): '{}'", primaryKeysNames);
+    } catch (SQLException e) {
+      String errorMessage = "Cannot get Primary Keys Names";
+      LOGGER.error(errorMessage, e);
+      throw new RuntimeException(errorMessage, e);
     }
-    return columnNames;
+    return primaryKeysNames;
   }
 
   /**
@@ -442,11 +446,16 @@ public class Utils {
    * @param resultSet contains column properties
    * @param isOracle flag is Engine type equals `oracle`
    */
-  static Boolean isAutoincrement(ResultSet resultSet, final boolean isOracle)
-      throws SQLException {
+  public static Boolean isAutoincrement(ResultSet resultSet, final boolean isOracle) {
     boolean isAutoincrement = false;
     if (!isOracle) {
-      isAutoincrement = resultSet.getString("IS_AUTOINCREMENT").equals("YES");
+      try {
+        isAutoincrement = resultSet.getString("IS_AUTOINCREMENT").equals("YES");
+      } catch (SQLException e) {
+        String errorMessage = "Cannot get property 'IS_AUTOINCREMENT'";
+        LOGGER.error(errorMessage, e);
+        throw new RuntimeException(errorMessage, e);
+      }
     }
     return isAutoincrement;
   }
@@ -456,8 +465,14 @@ public class Utils {
    *
    * @param resultSet contains column properties
    */
-  static Boolean isNotNull(ResultSet resultSet) throws SQLException {
-    return resultSet.getString("IS_NULLABLE").equals("NO");
+  public static Boolean isNotNull(ResultSet resultSet) {
+    try {
+      return resultSet.getString("IS_NULLABLE").equals("NO");
+    } catch (SQLException e) {
+      String errorMessage = "Cannot get property 'IS_NULLABLE'";
+      LOGGER.error(errorMessage, e);
+      throw new RuntimeException(errorMessage, e);
+    }
   }
 
   /**
@@ -466,15 +481,33 @@ public class Utils {
    * @param resultSet contains column properties
    * @param dbEngine Engine type
    */
-  static Boolean isCalculated(ResultSet resultSet, final String dbEngine)
-      throws SQLException {
+  public static Boolean isCalculated(ResultSet resultSet, final String dbEngine) {
     switch (dbEngine) {
       case "mysql":
-        return resultSet.getString("IS_GENERATEDCOLUMN").equals("YES");
+        try {
+          return resultSet.getString("IS_GENERATEDCOLUMN").equals("YES");
+        } catch (SQLException e) {
+          String errorMessage = "Cannot get property 'IS_GENERATEDCOLUMN'";
+          LOGGER.error(errorMessage, e);
+          throw new RuntimeException(errorMessage, e);
+        }
       case "mssql":
-        return resultSet.getString("SS_IS_COMPUTED").equals("1");
+        try {
+          return resultSet.getString("SS_IS_COMPUTED").equals("1");
+        } catch (SQLException e) {
+          String errorMessage = "Cannot get property 'SS_IS_COMPUTED'";
+          LOGGER.error(errorMessage, e);
+          throw new RuntimeException(errorMessage, e);
+        }
       case "postgresql":
-        String columnDef = resultSet.getString("COLUMN_DEF");
+        String columnDef;
+        try {
+          columnDef = resultSet.getString("COLUMN_DEF");
+        } catch (SQLException e) {
+          String errorMessage = "Cannot get property 'COLUMN_DEF'";
+          LOGGER.error(errorMessage, e);
+          throw new RuntimeException(errorMessage, e);
+        }
         return (columnDef != null) && columnDef.contains("nextval(");
       default:
         return false;
@@ -487,7 +520,7 @@ public class Utils {
    * @param primaryKeys Array of primary keys names
    * @param fieldName column field name
    */
-  static Boolean isPrimaryKey(ArrayList<String> primaryKeys, final String fieldName) {
+  public static Boolean isPrimaryKey(ArrayList<String> primaryKeys, final String fieldName) {
     return primaryKeys.contains(fieldName);
   }
 
@@ -497,7 +530,7 @@ public class Utils {
    * @param isPrimaryKey flag is column Primary Key
    * @param isNotNull flag is column Not Null
    */
-  static Boolean isRequired(final boolean isPrimaryKey, final boolean isNotNull,
+  public static Boolean isRequired(final boolean isPrimaryKey, final boolean isNotNull,
       final boolean isAutoincrement, final boolean isCalculated) {
     return isPrimaryKey || (!isAutoincrement && !isCalculated && isNotNull);
   }

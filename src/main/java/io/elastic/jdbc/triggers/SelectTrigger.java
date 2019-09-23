@@ -4,8 +4,8 @@ import io.elastic.api.ExecutionParameters;
 import io.elastic.api.Message;
 import io.elastic.api.Module;
 import io.elastic.jdbc.QueryBuilders.Query;
-import io.elastic.jdbc.QueryFactory;
-import io.elastic.jdbc.Utils;
+import io.elastic.jdbc.Utils.QueryFactory;
+import io.elastic.jdbc.Utils.Utils;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -37,7 +37,6 @@ public class SelectTrigger implements Module {
     checkConfig(configuration);
     String sqlQuery = configuration.getString(SQL_QUERY_VALUE);
     JsonObject snapshot = parameters.getSnapshot();
-    Connection connection = Utils.getConnection(configuration);
     Integer skipNumber = 0;
 
     Calendar cDate = Calendar.getInstance();
@@ -76,6 +75,7 @@ public class SelectTrigger implements Module {
         query.selectPolling(sqlQuery, pollingValue);
       }
       LOGGER.info("SQL Query: {}", sqlQuery);
+      Connection connection = Utils.getConnection(configuration);
       ArrayList<JsonObject> resultList = query.executeSelectTrigger(connection, sqlQuery);
       for (int i = 0; i < resultList.size(); i++) {
         LOGGER.info("Columns count: {} from {}", i + 1, resultList.size());

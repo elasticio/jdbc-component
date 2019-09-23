@@ -1,4 +1,4 @@
-package io.elastic.jdbc;
+package io.elastic.jdbc.Utils;
 
 import io.elastic.jdbc.QueryBuilders.MSSQLOld;
 import io.elastic.jdbc.QueryBuilders.MySQLOld;

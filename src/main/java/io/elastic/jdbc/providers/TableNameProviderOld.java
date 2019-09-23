@@ -1,7 +1,9 @@
-package io.elastic.jdbc;
+package io.elastic.jdbc.providers;
 
 import com.google.gson.JsonObject;
 import io.elastic.api.SelectModelProvider;
+import io.elastic.jdbc.Utils.SailorVersionsAdapter;
+import io.elastic.jdbc.Utils.UtilsOld;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

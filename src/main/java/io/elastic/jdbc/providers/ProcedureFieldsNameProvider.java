@@ -1,8 +1,10 @@
-package io.elastic.jdbc;
+package io.elastic.jdbc.providers;
 
 import io.elastic.api.DynamicMetadataProvider;
 import io.elastic.api.SelectModelProvider;
-import io.elastic.jdbc.ProcedureParameter.Direction;
+import io.elastic.jdbc.Utils.ProcedureParameter;
+import io.elastic.jdbc.Utils.ProcedureParameter.Direction;
+import io.elastic.jdbc.Utils.Utils;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;

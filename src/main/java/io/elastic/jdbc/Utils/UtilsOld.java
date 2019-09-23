@@ -1,4 +1,4 @@
-package io.elastic.jdbc;
+package io.elastic.jdbc.Utils;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

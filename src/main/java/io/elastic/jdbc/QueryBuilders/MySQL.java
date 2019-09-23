@@ -1,9 +1,9 @@
 package io.elastic.jdbc.QueryBuilders;
 
-import io.elastic.jdbc.ProcedureFieldsNameProvider;
-import io.elastic.jdbc.ProcedureParameter;
-import io.elastic.jdbc.ProcedureParameter.Direction;
-import io.elastic.jdbc.Utils;
+import io.elastic.jdbc.providers.ProcedureFieldsNameProvider;
+import io.elastic.jdbc.Utils.ProcedureParameter;
+import io.elastic.jdbc.Utils.ProcedureParameter.Direction;
+import io.elastic.jdbc.Utils.Utils;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

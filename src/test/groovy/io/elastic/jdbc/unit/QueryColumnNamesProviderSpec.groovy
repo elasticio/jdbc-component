@@ -1,6 +1,6 @@
 package io.elastic.jdbc.unit
 
-import io.elastic.jdbc.QueryColumnNamesProvider
+import io.elastic.jdbc.providers.QueryColumnNamesProvider
 import spock.lang.*
 
 import javax.json.Json

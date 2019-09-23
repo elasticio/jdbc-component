@@ -1,4 +1,4 @@
-package io.elastic.jdbc;
+package io.elastic.jdbc.Utils;
 
 import java.util.Arrays;
 import java.util.List;

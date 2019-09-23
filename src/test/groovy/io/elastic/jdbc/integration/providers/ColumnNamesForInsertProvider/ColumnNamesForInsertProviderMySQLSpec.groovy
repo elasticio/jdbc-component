@@ -1,6 +1,6 @@
 package io.elastic.jdbc.integration.providers.ColumnNamesForInsertProvider
 
-import io.elastic.jdbc.ColumnNamesForInsertProvider
+import io.elastic.jdbc.providers.ColumnNamesForInsertProvider
 import io.elastic.jdbc.TestUtils
 import spock.lang.Shared
 import spock.lang.Specification

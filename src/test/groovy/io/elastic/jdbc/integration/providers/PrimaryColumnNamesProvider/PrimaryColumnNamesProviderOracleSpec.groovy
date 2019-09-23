@@ -1,6 +1,6 @@
 package io.elastic.jdbc.integration.providers.PrimaryColumnNamesProvider
 
-import io.elastic.jdbc.PrimaryColumnNamesProvider
+import io.elastic.jdbc.providers.PrimaryColumnNamesProvider
 import spock.lang.*
 
 import javax.json.Json

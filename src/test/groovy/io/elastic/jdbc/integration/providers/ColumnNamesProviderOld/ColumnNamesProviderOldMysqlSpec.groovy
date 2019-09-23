@@ -1,8 +1,8 @@
 package io.elastic.jdbc.integration.providers.ColumnNamesProviderOld
 
 import com.google.gson.JsonObject
-import io.elastic.jdbc.ColumnNamesProviderOld
-import io.elastic.jdbc.SailorVersionsAdapter
+import io.elastic.jdbc.providers.ColumnNamesProviderOld
+import io.elastic.jdbc.Utils.SailorVersionsAdapter
 import spock.lang.Ignore
 import spock.lang.Specification
 

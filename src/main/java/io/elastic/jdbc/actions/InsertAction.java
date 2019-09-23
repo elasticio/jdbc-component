@@ -3,10 +3,10 @@ package io.elastic.jdbc.actions;
 import io.elastic.api.ExecutionParameters;
 import io.elastic.api.Message;
 import io.elastic.api.Module;
-import io.elastic.jdbc.Engines;
+import io.elastic.jdbc.Utils.Engines;
 import io.elastic.jdbc.QueryBuilders.Query;
-import io.elastic.jdbc.QueryFactory;
-import io.elastic.jdbc.Utils;
+import io.elastic.jdbc.Utils.QueryFactory;
+import io.elastic.jdbc.Utils.Utils;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.json.Json;
@@ -35,14 +35,15 @@ public class InsertAction implements Module {
       Query query = queryFactory.getQuery(dbEngine);
       query.from(tableName);
       query.executeInsert(connection, tableName, body);
-      JsonObject result = Json.createObjectBuilder()
-          .add("result", true)
-          .build();
-      LOGGER.info("Emit data= {}", result);
-      parameters.getEventEmitter().emitData(new Message.Builder().body(result).build());
-      LOGGER.info("Insert action is successfully executed");
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
+    JsonObject result = Json.createObjectBuilder()
+        .add("result", true)
+        .build();
+    LOGGER.info("Emit data= {}", result);
+    parameters.getEventEmitter().emitData(new Message.Builder().body(result).build());
+    LOGGER.info("Insert action is successfully executed");
+
   }
 }

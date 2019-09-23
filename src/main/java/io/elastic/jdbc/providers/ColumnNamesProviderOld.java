@@ -1,9 +1,11 @@
-package io.elastic.jdbc;
+package io.elastic.jdbc.providers;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.elastic.api.DynamicMetadataProvider;
 import io.elastic.api.SelectModelProvider;
+import io.elastic.jdbc.Utils.SailorVersionsAdapter;
+import io.elastic.jdbc.Utils.UtilsOld;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;

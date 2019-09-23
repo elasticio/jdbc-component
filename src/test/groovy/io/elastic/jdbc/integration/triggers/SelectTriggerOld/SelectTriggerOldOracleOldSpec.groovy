@@ -5,7 +5,7 @@ import io.elastic.api.EventEmitter
 import io.elastic.api.EventEmitter.Callback
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
-import io.elastic.jdbc.SailorVersionsAdapter
+import io.elastic.jdbc.Utils.SailorVersionsAdapter
 import io.elastic.jdbc.triggers.SelectTriggerOld
 import spock.lang.Ignore
 import spock.lang.Shared

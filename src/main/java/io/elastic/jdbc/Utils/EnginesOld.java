@@ -1,4 +1,4 @@
-package io.elastic.jdbc;
+package io.elastic.jdbc.Utils;
 
 @Deprecated
 public enum EnginesOld {

@@ -1,4 +1,4 @@
-package io.elastic.jdbc;
+package io.elastic.jdbc.Utils;
 
 public enum Engines {
   MYSQL("com.mysql.cj.jdbc.Driver", 3306) {

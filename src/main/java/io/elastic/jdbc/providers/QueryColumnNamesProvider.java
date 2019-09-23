@@ -1,7 +1,8 @@
-package io.elastic.jdbc;
+package io.elastic.jdbc.providers;
 
 import io.elastic.api.DynamicMetadataProvider;
 import io.elastic.api.SelectModelProvider;
+import io.elastic.jdbc.Utils.Utils;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

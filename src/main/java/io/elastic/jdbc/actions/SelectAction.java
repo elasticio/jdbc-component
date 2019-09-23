@@ -4,8 +4,8 @@ import io.elastic.api.ExecutionParameters;
 import io.elastic.api.Message;
 import io.elastic.api.Module;
 import io.elastic.jdbc.QueryBuilders.Query;
-import io.elastic.jdbc.QueryFactory;
-import io.elastic.jdbc.Utils;
+import io.elastic.jdbc.Utils.QueryFactory;
+import io.elastic.jdbc.Utils.Utils;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -28,7 +28,6 @@ public class SelectAction implements Module {
     final JsonObject configuration = parameters.getConfiguration();
     JsonObject snapshot = parameters.getSnapshot();
     checkConfig(configuration);
-    Connection connection = Utils.getConnection(configuration);
     String dbEngine = configuration.getString("dbEngine");
     String sqlQuery = configuration.getString("sqlQuery");
     Integer skipNumber = 0;
@@ -52,8 +51,10 @@ public class SelectAction implements Module {
       Query query = queryFactory.getQuery(dbEngine);
       sqlQuery = Query.preProcessSelect(sqlQuery);
       LOGGER.info("SQL Query: {}", sqlQuery);
-
-      ArrayList<JsonObject> resultList = query.executeSelectQuery(connection, sqlQuery, body);
+      ArrayList<JsonObject> resultList;
+      try(Connection connection = Utils.getConnection(configuration)){
+        resultList = query.executeSelectQuery(connection, sqlQuery, body);
+      }
       for (int i = 0; i < resultList.size(); i++) {
         LOGGER.info("Columns count: {} from {}", i + 1, resultList.size());
         LOGGER.info("Emitting data {}", resultList.get(i).toString());
@@ -81,14 +82,6 @@ public class SelectAction implements Module {
       parameters.getEventEmitter().emitSnapshot(snapshot);
     } catch (SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      if (connection != null) {
-        try {
-          connection.close();
-        } catch (SQLException e) {
-          LOGGER.error(e.toString());
-        }
-      }
     }
   }
 

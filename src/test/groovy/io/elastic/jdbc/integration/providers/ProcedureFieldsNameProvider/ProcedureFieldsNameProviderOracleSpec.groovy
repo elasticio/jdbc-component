@@ -1,7 +1,7 @@
 package io.elastic.jdbc.integration.providers.ProcedureFieldsNameProvider
 
-import io.elastic.jdbc.ProcedureFieldsNameProvider
-import io.elastic.jdbc.SchemasProvider
+import io.elastic.jdbc.providers.ProcedureFieldsNameProvider
+import io.elastic.jdbc.providers.SchemasProvider
 import org.junit.Ignore
 import spock.lang.Shared
 import spock.lang.Specification

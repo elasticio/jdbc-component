@@ -1,8 +1,8 @@
 package io.elastic.jdbc.integration.providers.TableNameProviderOld
 
 import com.google.gson.JsonObject
-import io.elastic.jdbc.SailorVersionsAdapter
-import io.elastic.jdbc.TableNameProviderOld
+import io.elastic.jdbc.Utils.SailorVersionsAdapter
+import io.elastic.jdbc.providers.TableNameProviderOld
 import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
