@@ -29,12 +29,12 @@ import org.slf4j.LoggerFactory;
 
 public class Utils {
 
-  public static final String CFG_DATABASE_NAME = "databaseName";
-  public static final String CFG_PASSWORD = "password";
-  public static final String CFG_PORT = "port";
+  private static final String CFG_DATABASE_NAME = "databaseName";
+  private static final String CFG_PASSWORD = "password";
+  private static final String CFG_PORT = "port";
   public static final String CFG_DB_ENGINE = "dbEngine";
-  public static final String CFG_HOST = "host";
-  public static final String CFG_USER = "user";
+  private static final String CFG_HOST = "host";
+  private static final String CFG_USER = "user";
   public static final String VARS_REGEXP = "\\B@([\\w_$][\\d\\w_$]*(:(string|boolean|date|number|bigint|float|real))?)";
   public static final String TEMPLATE_REGEXP = "\\B@(?:(?![=\\)\\(])[\\S])+";
   private static final String PROPERTY_DB_ENGINE = "dbEngine";
@@ -354,9 +354,15 @@ public class Utils {
     }
   }
 
+  /**
+   * Converts table name according Engine Type
+   *
+   * @param configuration should contains tableName
+   * @param isOracle flag is Engine type equals `oracle`
+   */
   public static String getTableName(JsonObject configuration, boolean isOracle) {
     if (configuration.containsKey(PROPERTY_TABLE_NAME)
-        && Utils.getNonNullString(configuration, PROPERTY_TABLE_NAME).length() != 0) {
+        && getNonNullString(configuration, PROPERTY_TABLE_NAME).length() != 0) {
       String tableName = configuration.getString(PROPERTY_TABLE_NAME);
       if (tableName.contains(".")) {
         tableName = isOracle ? tableName.split("\\.")[1].toUpperCase() : tableName.split("\\.")[1];
@@ -367,8 +373,13 @@ public class Utils {
     }
   }
 
+  /**
+   * Checks is Engine Type is presents in configuration and return it
+   *
+   * @param configuration should contains dbEngine
+   */
   public static String getDbEngine(JsonObject configuration) {
-    if (Utils.getNonNullString(configuration, PROPERTY_DB_ENGINE).length() != 0) {
+    if (getNonNullString(configuration, PROPERTY_DB_ENGINE).length() != 0) {
       return configuration.getString(PROPERTY_DB_ENGINE);
     } else {
       throw new RuntimeException("DB Engine is required field");
@@ -380,7 +391,7 @@ public class Utils {
    *
    * @param sqlType JDBC column type
    */
-  static String convertType(Integer sqlType) {
+  public static String convertType(Integer sqlType) {
     if (sqlType == Types.NUMERIC || sqlType == Types.DECIMAL || sqlType == Types.TINYINT
         || sqlType == Types.SMALLINT || sqlType == Types.INTEGER || sqlType == Types.BIGINT
         || sqlType == Types.REAL || sqlType == Types.FLOAT || sqlType == Types.DOUBLE) {
@@ -392,7 +403,7 @@ public class Utils {
     return "string";
   }
 
-  public static ArrayList<String> getColumnNames(ResultSet resultSet) throws SQLException {
+  static ArrayList<String> getColumnNames(ResultSet resultSet) throws SQLException {
     ArrayList<String> columnNames = new ArrayList<>();
     while (resultSet.next()) {
       columnNames.add(resultSet.getString("COLUMN_NAME"));
@@ -400,6 +411,11 @@ public class Utils {
     return columnNames;
   }
 
+  /**
+   * Converts table name to TableNamePattern
+   *
+   * @param tableName should contains tableName
+   */
   public static String getTableNamePattern(String tableName) {
     if (tableName.contains(".")) {
       tableName = tableName.split("\\.")[1];
@@ -407,6 +423,11 @@ public class Utils {
     return tableName;
   }
 
+  /**
+   * Gets SchemaNamePattern from tableName
+   *
+   * @param tableName should contains tableName
+   */
   public static String getSchemaNamePattern(String tableName) {
     String schemaName = null;
     if (tableName.contains(".")) {
@@ -415,7 +436,13 @@ public class Utils {
     return schemaName;
   }
 
-  public static Boolean isAutoincrement(ResultSet resultSet, final boolean isOracle)
+  /**
+   * Defines is field autoincrement
+   *
+   * @param resultSet contains column properties
+   * @param isOracle flag is Engine type equals `oracle`
+   */
+  static Boolean isAutoincrement(ResultSet resultSet, final boolean isOracle)
       throws SQLException {
     boolean isAutoincrement = false;
     if (!isOracle) {
@@ -424,11 +451,22 @@ public class Utils {
     return isAutoincrement;
   }
 
-  public static Boolean isNotNull(ResultSet resultSet) throws SQLException {
+  /**
+   * Defines is field not null
+   *
+   * @param resultSet contains column properties
+   */
+  static Boolean isNotNull(ResultSet resultSet) throws SQLException {
     return resultSet.getString("IS_NULLABLE").equals("NO");
   }
 
-  public static Boolean isCalculated(ResultSet resultSet, final String dbEngine)
+  /**
+   * Defines is field calculated
+   *
+   * @param resultSet contains column properties
+   * @param dbEngine Engine type
+   */
+  static Boolean isCalculated(ResultSet resultSet, final String dbEngine)
       throws SQLException {
     switch (dbEngine) {
       case "mysql":
@@ -443,11 +481,23 @@ public class Utils {
     }
   }
 
-  public static Boolean isPrimaryKey(ArrayList<String> primaryKeys, final String fieldName) {
+  /**
+   * Defines is field primary key
+   *
+   * @param primaryKeys Array of primary keys names
+   * @param fieldName column field name
+   */
+  static Boolean isPrimaryKey(ArrayList<String> primaryKeys, final String fieldName) {
     return primaryKeys.contains(fieldName);
   }
 
-  public static Boolean isRequired(final boolean isPrimaryKey, final boolean isNotNull,
+  /**
+   * Defines is field primary key
+   *
+   * @param isPrimaryKey flag is column Primary Key
+   * @param isNotNull flag is column Not Null
+   */
+  static Boolean isRequired(final boolean isPrimaryKey, final boolean isNotNull,
       final boolean isAutoincrement, final boolean isCalculated) {
     return isPrimaryKey || (!isAutoincrement && !isCalculated && isNotNull);
   }
