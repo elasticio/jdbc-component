@@ -1,8 +1,8 @@
 package io.elastic.jdbc.providers;
 
 import io.elastic.api.DynamicMetadataProvider;
-import io.elastic.jdbc.Utils.Engines;
-import io.elastic.jdbc.Utils.Utils;
+import io.elastic.jdbc.utils.Engines;
+import io.elastic.jdbc.utils.Utils;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;

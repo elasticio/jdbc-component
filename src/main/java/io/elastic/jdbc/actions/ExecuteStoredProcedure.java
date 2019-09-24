@@ -3,9 +3,9 @@ package io.elastic.jdbc.actions;
 import io.elastic.api.ExecutionParameters;
 import io.elastic.api.Message;
 import io.elastic.api.Module;
-import io.elastic.jdbc.QueryBuilders.Query;
-import io.elastic.jdbc.Utils.QueryFactory;
-import io.elastic.jdbc.Utils.Utils;
+import io.elastic.jdbc.query_builders.Query;
+import io.elastic.jdbc.utils.QueryFactory;
+import io.elastic.jdbc.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

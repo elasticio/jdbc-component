@@ -2,7 +2,7 @@ package io.elastic.jdbc;
 
 import io.elastic.api.CredentialsVerifier;
 import io.elastic.api.InvalidCredentialsException;
-import io.elastic.jdbc.Utils.Utils;
+import io.elastic.jdbc.utils.Utils;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.json.JsonObject;

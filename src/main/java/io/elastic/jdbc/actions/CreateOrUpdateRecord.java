@@ -5,9 +5,9 @@ import com.google.gson.JsonObject;
 import io.elastic.api.ExecutionParameters;
 import io.elastic.api.Message;
 import io.elastic.api.Module;
-import io.elastic.jdbc.Utils.EnginesOld;
-import io.elastic.jdbc.Utils.SailorVersionsAdapter;
-import io.elastic.jdbc.Utils.UtilsOld;
+import io.elastic.jdbc.utils.EnginesOld;
+import io.elastic.jdbc.utils.SailorVersionsAdapter;
+import io.elastic.jdbc.utils.UtilsOld;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

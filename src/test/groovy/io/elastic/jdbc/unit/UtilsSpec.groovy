@@ -1,7 +1,7 @@
 package io.elastic.jdbc.unit
 
-import io.elastic.jdbc.Utils.Engines
-import io.elastic.jdbc.Utils.Utils
+import io.elastic.jdbc.utils.Engines
+import io.elastic.jdbc.utils.Utils
 import spock.lang.Specification
 
 import javax.json.Json
