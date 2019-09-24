@@ -66,13 +66,13 @@
           "prompt": "Select a Table",
           "label": "Tables List",
           "required": true,
-          "model": "io.elastic.jdbc.TableNameProvider"
+          "model": "io.elastic.jdbc.providers.TableNameProvider"
         },
         "pollingField": {
           "viewClass": "SelectView",
           "prompt": "Select a Timestamp (or similar) Column",
           "label": "Timestamp (or similar) Column",
-          "model": "io.elastic.jdbc.ColumnNamesProvider",
+          "model": "io.elastic.jdbc.providers.ColumnNamesProvider",
           "required": true,
           "require": [
             "tableName"
@@ -85,7 +85,7 @@
           "placeholder": "1970-01-01 00:00:00.000"
         }
       },
-      "dynamicMetadata": "io.elastic.jdbc.ColumnNamesProvider"
+      "dynamicMetadata": "io.elastic.jdbc.providers.ColumnNamesProvider"
     },
     "selectTrigger": {
       "main": "io.elastic.jdbc.triggers.SelectTrigger",
@@ -107,7 +107,7 @@
           "placeholder": "1970-01-01 00:00:00.000"
         }
       },
-      "dynamicMetadata": "io.elastic.jdbc.ColumnNamesProvider"
+      "dynamicMetadata": "io.elastic.jdbc.providers.ColumnNamesProvider"
     },
     "select": {
       "main": "io.elastic.jdbc.triggers.SelectTriggerOld",
@@ -121,20 +121,20 @@
           "prompt": "Select a Table",
           "label": "Tables List",
           "required": true,
-          "model": "io.elastic.jdbc.TableNameProviderOld"
+          "model": "io.elastic.jdbc.providers.TableNameProviderOld"
         },
         "orderField": {
           "viewClass": "SelectView",
           "prompt": "Select a field to order rows",
           "label": "Order Column",
-          "model": "io.elastic.jdbc.ColumnNamesProviderOld",
+          "model": "io.elastic.jdbc.providers.ColumnNamesProviderOld",
           "required": true,
           "require": [
             "tableName"
           ]
         }
       },
-      "dynamicMetadata": "io.elastic.jdbc.ColumnNamesProviderOld"
+      "dynamicMetadata": "io.elastic.jdbc.providers.ColumnNamesProviderOld"
     }
   },
   "actions": {
@@ -148,17 +148,17 @@
           "prompt": "Select a Table",
           "label": "Table",
           "required": true,
-          "model": "io.elastic.jdbc.TableNameProvider"
+          "model": "io.elastic.jdbc.providers.TableNameProvider"
         },
         "nullableResult": {
           "label": "Don`t throw Error on an Empty Result",
           "viewClass": "CheckBoxView"
         }
       },
-      "dynamicMetadata": "io.elastic.jdbc.PrimaryColumnNamesProvider"
+      "dynamicMetadata": "io.elastic.jdbc.providers.PrimaryColumnNamesProvider"
     },
     "upsertRowByPrimaryKey": {
-      "main": "io.elastic.jdbc.actions.UpsertRowByPrimaryKey",
+      "main": "io.elastic.jdbc.actions.providers.UpsertRowByPrimaryKey",
       "title": "Upsert Row By Primary Key",
       "description": "Executes upsert by primary key",
       "fields": {
@@ -167,10 +167,10 @@
           "prompt": "Select a Table",
           "label": "Table",
           "required": true,
-          "model": "io.elastic.jdbc.TableNameProvider"
+          "model": "io.elastic.jdbc.providers.TableNameProvider"
         }
       },
-      "dynamicMetadata": "io.elastic.jdbc.ColumnNamesWithPrimaryKeyProvider"
+      "dynamicMetadata": "io.elastic.jdbc.providers.ColumnNamesWithPrimaryKeyProvider"
     },
     "insert": {
       "main": "io.elastic.jdbc.actions.InsertAction",
@@ -182,10 +182,10 @@
           "prompt": "Select a Table",
           "label": "Table",
           "required": true,
-          "model": "io.elastic.jdbc.TableNameProvider"
+          "model": "io.elastic.jdbc.providers.TableNameProvider"
         }
       },
-      "dynamicMetadata": "io.elastic.jdbc.ColumnNamesForInsertProvider"
+      "dynamicMetadata": "io.elastic.jdbc.providers.ColumnNamesForInsertProvider"
     },
     "deleteRowByPrimaryKey": {
       "main": "io.elastic.jdbc.actions.DeleteRowByPrimaryKey",
@@ -197,14 +197,14 @@
           "prompt": "Select a Table",
           "label": "Tables",
           "required": true,
-          "model": "io.elastic.jdbc.TableNameProvider"
+          "model": "io.elastic.jdbc.providers.TableNameProvider"
         },
         "nullableResult": {
           "label": "Don`t throw Error on an Empty Result",
           "viewClass": "CheckBoxView"
         }
       },
-      "dynamicMetadata": "io.elastic.jdbc.PrimaryColumnNamesProvider"
+      "dynamicMetadata": "io.elastic.jdbc.providers.PrimaryColumnNamesProvider"
     },
     "selectAction": {
       "main": "io.elastic.jdbc.actions.SelectAction",
@@ -223,7 +223,7 @@
           "viewClass": "CheckBoxView"
         }
       },
-      "dynamicMetadata": "io.elastic.jdbc.QueryColumnNamesProvider"
+      "dynamicMetadata": "io.elastic.jdbc.providers.QueryColumnNamesProvider"
     },
     "createOrUpdateRecord": {
       "main": "io.elastic.jdbc.actions.CreateOrUpdateRecord",
@@ -236,20 +236,20 @@
           "prompt": "Select a Table",
           "label": "Tables",
           "required": true,
-          "model": "io.elastic.jdbc.TableNameProviderOld"
+          "model": "io.elastic.jdbc.providers.TableNameProviderOld"
         },
         "idColumn": {
           "viewClass": "SelectView",
           "prompt": "Select an ID column",
           "label": "ID Column",
-          "model": "io.elastic.jdbc.ColumnNamesProviderOld",
+          "model": "io.elastic.jdbc.providers.ColumnNamesProviderOld",
           "required": true,
           "require": [
             "tableName"
           ]
         }
       },
-      "dynamicMetadata": "io.elastic.jdbc.ColumnNamesProviderOld"
+      "dynamicMetadata": "io.elastic.jdbc.providers.ColumnNamesProviderOld"
     },
     "executeStoredProcedure": {
       "main": "io.elastic.jdbc.actions.ExecuteStoredProcedure",
@@ -261,20 +261,20 @@
           "prompt": "Select a Schema",
           "label": "DB Schema",
           "required": true,
-          "model": "io.elastic.jdbc.SchemasProvider"
+          "model": "io.elastic.jdbc.providers.SchemasProvider"
         },
         "procedureName": {
           "viewClass": "SelectView",
           "prompt": "Select a stored procedure name",
           "label": "Stored procedure",
-          "model": "io.elastic.jdbc.ProcedureFieldsNameProvider",
+          "model": "io.elastic.jdbc.providers.ProcedureFieldsNameProvider",
           "required": true,
           "require": [
             "schemaName"
           ]
         }
       },
-      "dynamicMetadata": "io.elastic.jdbc.ProcedureFieldsNameProvider"
+      "dynamicMetadata": "io.elastic.jdbc.providers.ProcedureFieldsNameProvider"
     }
   }
 }
