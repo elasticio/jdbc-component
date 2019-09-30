@@ -11,7 +11,7 @@ import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 
-//@Ignore
+@Ignore
 class ProcedureFieldsNameProviderMySQLSpec extends Specification {
     @Shared
     def user = System.getenv("CONN_USER_MYSQL")
