@@ -31,7 +31,7 @@ public class SchemasProvider implements SelectModelProvider {
 
     if (configuration.getString("dbEngine").equals("mysql")) {
       LOGGER.info("Adding placeholder to MySQL schemas list...");
-      formatMySQLSchemasResponse(result);
+      formatMySQLSchemasResponse(result, configuration.getString("databaseName"));
     }
 
     LOGGER.info("Response building complete. Returning result...");
@@ -55,8 +55,8 @@ public class SchemasProvider implements SelectModelProvider {
     return result;
   }
 
-  private JsonObjectBuilder formatMySQLSchemasResponse(JsonObjectBuilder structure) {
-    structure.add(null, "<No schema>");
+  private JsonObjectBuilder formatMySQLSchemasResponse(JsonObjectBuilder structure, String dbName) {
+    structure.add(dbName, dbName);
     return structure;
   }
 
