@@ -1,5 +1,9 @@
 # JDBC Component
 
+## 2.3.1 (September 30, 2019)
+ 
+* Add placeholder to MySQL schemas list
+
 ## 2.3.0 (September 25, 2019)
  
 * Add new action `Insert` 

@@ -22,6 +22,11 @@ public class SchemasProvider implements SelectModelProvider {
     JsonObjectBuilder result = Json.createObjectBuilder();
     List<String> proceduresNames = getSchemasList(configuration);
     proceduresNames.forEach(procedure -> result.add(procedure, procedure));
+
+    if (configuration.getString("dbEngine").equals("mysql")) {
+      formatMySQLSchemasResponse(result);
+    }
+
     return result.build();
   }
 
@@ -41,4 +46,10 @@ public class SchemasProvider implements SelectModelProvider {
 
     return result;
   }
+
+  private JsonObjectBuilder formatMySQLSchemasResponse(JsonObjectBuilder structure) {
+    structure.add("", "<No schema>");
+    return structure;
+  }
+
 }

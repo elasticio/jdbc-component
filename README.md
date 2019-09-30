@@ -293,7 +293,6 @@ Please use [**Upsert row by primary key**](#upsert-row-by-primary-key-action) in
 3. The current implementation of the action ``Upsert By Primary Key`` doesn't mark non-nullable fields as required fields at a dynamic metadata. In case of updating such fields with an empty value you will get SQL Exception ``Cannot insert the value NULL into...``. You should manually fill in all non-nullable fields with previous data, if you want to update part of columns in a row, even if data in that fields doesn't change. 
 4. The current implementation of the action ``Execute stored procedure`` doesn't support ResultSet MSSQL output.
 5. The current implementation of the action ``Execute stored procedure`` doesn't support any array types parameters.
-6. The current implementation of the action ``Execute stored procedure`` doesn't support MySQL schemas dropdown list. 
 (MySQL does not have schemas by definition)
 
 ## License
