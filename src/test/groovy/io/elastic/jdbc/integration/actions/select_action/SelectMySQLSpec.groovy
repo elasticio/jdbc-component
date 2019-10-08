@@ -14,7 +14,6 @@ import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 
-@Ignore
 class SelectMySQLSpec extends Specification {
 
   @Shared

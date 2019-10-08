@@ -4,32 +4,25 @@ import io.elastic.api.EventEmitter
 import io.elastic.api.EventEmitter.Callback
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
+import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.triggers.GetRowsPollingTrigger
 import spock.lang.*
 
+import javax.json.Json
+import javax.json.JsonObject
 import javax.json.JsonObjectBuilder
 import java.sql.Connection
 import java.sql.DriverManager
 
-@Ignore
 class GetRowsPollingTriggerMySQLSpec extends Specification {
 
-  @Shared
-  def connectionString = System.getenv("CONN_URI_MYSQL")
-  @Shared
-  def user = System.getenv("CONN_USER_MYSQL")
-  @Shared
-  def password = System.getenv("CONN_PASSWORD_MYSQL")
-  @Shared
-  def databaseName = System.getenv("CONN_DBNAME_MYSQL")
-  @Shared
-  def host = System.getenv("CONN_HOST_MYSQL")
 
   @Shared
   Connection connection;
 
   def setup() {
-    connection = DriverManager.getConnection(connectionString, user, password)
+    JsonObject config = TestUtils.getMysqlConfigurationBuilder().build()
+    connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
 
     String sql = "DROP TABLE IF EXISTS stars"
     connection.createStatement().execute(sql)
@@ -52,42 +45,36 @@ class GetRowsPollingTriggerMySQLSpec extends Specification {
     Callback snapshotCallback = Mock(Callback)
     Callback dataCallback = Mock(Callback)
     Callback onreboundCallback = Mock(Callback)
+    Callback onHttpCallback = Mock(Callback)
 
     EventEmitter emitter = new EventEmitter.Builder()
         .onData(dataCallback)
         .onSnapshot(snapshotCallback)
         .onError(errorCallback)
+        .onHttpReplyCallback(onHttpCallback)
         .onRebound(onreboundCallback).build();
 
-    GetRowsPollingTrigger getRowsPollingTrigger = new GetRowsPollingTrigger(emitter);
+    GetRowsPollingTrigger getRowsPollingTrigger = new GetRowsPollingTrigger();
 
     given:
     Message msg = new Message.Builder().build();
 
-    JsonObjectBuilder config = Json.createObjectBuilder()
+    JsonObjectBuilder config = TestUtils.getMysqlConfigurationBuilder()
     config.add("pollingField", "createdat")
         .add("pollingValue", "2018-06-14 00:00:00")
-        .add("user", user)
-        .add("password", password)
-        .add("dbEngine", "mysql")
-        .add("host", host)
-        .add("databaseName", databaseName)
         .add("tableName", "stars")
 
     JsonObjectBuilder snapshot = Json.createObjectBuilder()
     snapshot.add("skipNumber", 0)
 
     when:
-    ExecutionParameters params = new ExecutionParameters(msg, config.build(), snapshot.build())
+    ExecutionParameters params = new ExecutionParameters(msg, emitter, config.build(), snapshot.build())
     getRowsPollingTrigger.execute(params)
 
     then:
     0 * errorCallback.receive(_)
     1 * dataCallback.receive({
-      it.toString() == '{"body":{"id":"1","isDead":"0","name":"Sun","radius":"50","destination":"170.0","createdat":"2018-06-14 13:00:00.0"},"attachments":{}}'
-    })
-    1 * snapshotCallback.receive({
-      it.toString() == '{"skipNumber":1,"tableName":"stars","pollingField":"createdat","pollingValue":"2018-06-14 10:00:00.000"}'
+      it.body.toString() == '{"id":1,"isDead":false,"name":"Sun","radius":50,"destination":170.0,"createdat":"2018-06-14 13:00:00.0"}'
     })
   }
 }

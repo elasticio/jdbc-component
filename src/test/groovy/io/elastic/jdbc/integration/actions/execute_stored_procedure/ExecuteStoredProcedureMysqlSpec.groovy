@@ -3,6 +3,7 @@ package io.elastic.jdbc.integration.actions.execute_stored_procedure
 import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
+import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.actions.ExecuteStoredProcedure
 import spock.lang.Ignore
 import spock.lang.Shared
@@ -13,20 +14,7 @@ import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 
-@Ignore
 class ExecuteStoredProcedureMysqlSpec extends Specification {
-    @Shared
-    def user = System.getenv("CONN_USER_MYSQL")
-    @Shared
-    def password = System.getenv("CONN_USER_MYSQL")
-    @Shared
-    def databaseName = System.getenv("CONN_USER_MYSQL")
-    @Shared
-    def host = System.getenv("CONN_USER_MYSQL")
-    @Shared
-    def port = System.getenv("CONN_USER_MYSQL")
-    @Shared
-    def connectionString = "jdbc:mysql://" + host + ":" + port + "/" + databaseName
 
     @Shared
     Connection connection
@@ -47,7 +35,8 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
     ExecuteStoredProcedure action
 
     def setupSpec() {
-        connection = DriverManager.getConnection(connectionString, user, password)
+        JsonObject config = getStarsConfig()
+        connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
     }
 
     def setup() {
@@ -72,15 +61,9 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
     }
 
     def getStarsConfig() {
-        JsonObject config = Json.createObjectBuilder()
+        JsonObject config = TestUtils.getMysqlConfigurationBuilder()
                 .add("schemaName", "ELASTICIO")
                 .add("procedureName", "GET_CUSTOMER_BY_ID_AND_NAME")
-                .add("user", user)
-                .add("password", password)
-                .add("dbEngine", "mysql")
-                .add("host", host)
-                .add("port", port)
-                .add("databaseName", databaseName)
                 .build();
         return config;
     }

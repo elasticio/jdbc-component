@@ -21,7 +21,7 @@ class ColumnNamesWithPrimaryKeyProviderMySQLSpec extends Specification {
     config = TestUtils.getMysqlConfigurationBuilder()
         .add("tableName", "stars")
         .build()
-    connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"));
+    connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
     String sql = " DROP TABLE IF EXISTS stars;"
     connection.createStatement().execute(sql)
     sql = "CREATE TABLE stars (id int AUTO_INCREMENT, isDead boolean, name varchar(255) NOT NULL, radius int, destination float, createdat timestamp, PRIMARY KEY (id))"
