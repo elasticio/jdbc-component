@@ -58,6 +58,8 @@ class TableNameProviderMySQLSpec extends Specification {
 
         then:
         print model
-        model.toString().contains('"orders":"orders","products":"products","users":"users"')
+        model.getString("orders").equals("orders")
+        model.getString("products").equals("products")
+        model.getString("users").equals("users")
     }
 }
