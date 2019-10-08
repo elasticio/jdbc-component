@@ -19,7 +19,7 @@ class TableNameProviderMySQLSpec extends Specification {
     JsonObject config
 
     def setupSpec() {
-        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        Class.forName("com.mysql.jdbc.Driver");
         JsonObject config = TestUtils.getMysqlConfigurationBuilder().build()
         connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
 
