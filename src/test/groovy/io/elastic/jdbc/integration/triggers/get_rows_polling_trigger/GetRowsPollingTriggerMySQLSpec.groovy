@@ -73,8 +73,11 @@ class GetRowsPollingTriggerMySQLSpec extends Specification {
 
     then:
     0 * errorCallback.receive(_)
-    1 * dataCallback.receive({
-      it.body.toString() == '{"id":1,"isDead":false,"name":"Sun","radius":50,"destination":170.0,"createdat":"2018-06-14 13:00:00.0"}'
+    dataCallback.receive({
+      it.body.getInt("id").equals(1)
+      it.body.getBoolean("isDead").equals(false)
+      it.body.getString("name").equals("Sun")
+      it.body.getString("createdat").equals("2018-06-14 13:00:00.0")
     })
   }
 }
