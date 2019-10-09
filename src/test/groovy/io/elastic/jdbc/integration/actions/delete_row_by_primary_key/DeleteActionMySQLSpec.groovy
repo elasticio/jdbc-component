@@ -3,6 +3,7 @@ package io.elastic.jdbc.integration.actions.delete_row_by_primary_key
 import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
+import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.actions.DeleteRowByPrimaryKey
 import org.junit.Ignore
 import spock.lang.Shared
@@ -14,23 +15,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 
-@Ignore
 class DeleteActionMySQLSpec extends Specification {
-
-  @Shared
-  def user = System.getenv("CONN_USER_MYSQL")
-  @Shared
-  def password = System.getenv("CONN_PASSWORD_MYSQL")
-  @Shared
-  def databaseName = System.getenv("CONN_DBNAME_MYSQL")
-  @Shared
-  def host = System.getenv("CONN_HOST_MYSQL")
-  @Shared
-  def port = System.getenv("CONN_PORT_MYSQL")
-  @Shared
-  def dbEngine = "mysql"
-  @Shared
-  def connectionString ="jdbc:" + dbEngine + "://" + host + ":" + port + "/" + databaseName + "?useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC"
   @Shared
   Connection connection
 
@@ -50,7 +35,8 @@ class DeleteActionMySQLSpec extends Specification {
   DeleteRowByPrimaryKey action
 
   def setupSpec() {
-    connection = DriverManager.getConnection(connectionString, user, password)
+    JsonObject config = getStarsConfig()
+    connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
   }
 
   def setup() {
@@ -75,14 +61,8 @@ class DeleteActionMySQLSpec extends Specification {
   }
 
   def getStarsConfig() {
-    JsonObject config = Json.createObjectBuilder()
+    JsonObject config = TestUtils.getMysqlConfigurationBuilder()
         .add("tableName", "stars")
-        .add("user", user)
-        .add("password", password)
-        .add("dbEngine", "mysql")
-        .add("host", host)
-        .add("port", port)
-        .add("databaseName", databaseName)
         .add("nullableResult", "true")
         .build();
     return config;

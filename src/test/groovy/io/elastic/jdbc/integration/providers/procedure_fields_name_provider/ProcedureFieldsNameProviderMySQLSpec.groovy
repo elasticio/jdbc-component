@@ -1,30 +1,17 @@
 package io.elastic.jdbc.integration.providers.procedure_fields_name_provider
 
+import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.providers.ProcedureFieldsNameProvider
 import io.elastic.jdbc.providers.SchemasProvider
-import org.junit.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
-import javax.json.Json
 import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 
-@Ignore
 class ProcedureFieldsNameProviderMySQLSpec extends Specification {
-    @Shared
-    def user = System.getenv("CONN_USER_MYSQL")
-    @Shared
-    def password = System.getenv("CONN_PASSWORD_MYSQL")
-    @Shared
-    def databaseName = System.getenv("CONN_DBNAME_MYSQL")
-    @Shared
-    def host = System.getenv("CONN_HOST_MYSQL")
-    @Shared
-    def port = System.getenv("CONN_PORT_MYSQL")
-    @Shared
-    def connectionString = "jdbc:mysql://" + host + ":" + port + "/" + databaseName
+
 
     @Shared
     Connection connection
@@ -35,7 +22,8 @@ class ProcedureFieldsNameProviderMySQLSpec extends Specification {
     ProcedureFieldsNameProvider procedureProvider
 
     def setupSpec() {
-        connection = DriverManager.getConnection(connectionString, user, password)
+        JsonObject config = getStarsConfig()
+        connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
     }
 
     def setup() {
@@ -60,17 +48,11 @@ class ProcedureFieldsNameProviderMySQLSpec extends Specification {
     }
 
     def getStarsConfig() {
-        JsonObject config = Json.createObjectBuilder()
+        JsonObject config = TestUtils.getMysqlConfigurationBuilder()
                 .add("schemaName", "ELASTICIO")
                 .add("procedureName", "GET_CUSTOMER_BY_ID_AND_NAME")
-                .add("user", user)
-                .add("password", password)
-                .add("dbEngine", "mysql")
-                .add("host", host)
-                .add("port", port)
-                .add("databaseName", databaseName)
-                .build();
-        return config;
+                .build()
+        return config
     }
 
     def prepareStarsTable() {
@@ -129,6 +111,7 @@ class ProcedureFieldsNameProviderMySQLSpec extends Specification {
 
         when:
         def result = runSchemasList(getStarsConfig())
+        def databaseName = getStarsConfig().getString("databaseName")
         then:
         result.getString(databaseName) == databaseName
         and:
