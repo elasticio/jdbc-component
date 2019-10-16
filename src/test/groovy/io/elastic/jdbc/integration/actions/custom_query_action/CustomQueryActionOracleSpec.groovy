@@ -15,23 +15,22 @@ import java.sql.DriverManager
 import java.sql.ResultSet
 
 @Ignore
-class CustomQueryActionPostrgeSpec extends Specification {
+class CustomQueryActionOracleSpec extends Specification {
 
   @Shared
-  def user = System.getenv("CONN_USER_POSTGRESQL")
+  def user = System.getenv("CONN_USER_ORACLE")
   @Shared
-  def password = System.getenv("CONN_PASSWORD_POSTGRESQL")
+  def password = System.getenv("CONN_PASSWORD_ORACLE")
   @Shared
-  def databaseName = System.getenv("CONN_DBNAME_POSTGRESQL")
+  def databaseName = System.getenv("CONN_DBNAME_ORACLE")
   @Shared
-  def host = System.getenv("CONN_HOST_POSTGRESQL")
+  def host = System.getenv("CONN_HOST_ORACLE")
   @Shared
-  def port = System.getenv("CONN_PORT_POSTGRESQL")
-
+  def port = System.getenv("CONN_PORT_ORACLE")
   @Shared
-  def dbEngine = "postgresql"
+  def dbEngine = "oracle"
   @Shared
-  def connectionString ="jdbc:postgresql://"+ host + ":" + port + "/" + databaseName
+  def connectionString ="jdbc:oracle:thin:@//" + host + ":" + port + "/XE"
   @Shared
   Connection connection
 
@@ -77,26 +76,32 @@ class CustomQueryActionPostrgeSpec extends Specification {
 
   def getConfig() {
     JsonObject config = Json.createObjectBuilder()
-        .add("user", user)
-        .add("password", password)
-        .add("dbEngine", "postgresql")
-        .add("host", host)
-        .add("port", port)
-        .add("databaseName", databaseName)
-        .add("nullableResult", "true")
-        .build();
+            .add("user", user)
+            .add("password", password)
+            .add("dbEngine", dbEngine)
+            .add("host", host)
+            .add("port", port)
+            .add("databaseName", databaseName)
+            .add("nullableResult", "true")
+            .build();
     return config;
   }
 
   def prepareStarsTable() {
-    String sql = "DROP TABLE IF EXISTS stars;"
+    String sql = "BEGIN" +
+            "   EXECUTE IMMEDIATE 'DROP TABLE stars';" +
+            "EXCEPTION" +
+            "   WHEN OTHERS THEN" +
+            "      IF SQLCODE != -942 THEN" +
+            "         RAISE;" +
+            "      END IF;" +
+            "END;"
     connection.createStatement().execute(sql);
-    connection.createStatement().execute("CREATE TABLE stars (id int, name varchar(255) NOT NULL, " +
-        "date timestamp, radius int, destination int, visible boolean, visibledate date, PRIMARY KEY(id))");
-    connection.createStatement().execute("INSERT INTO stars values (1,'Taurus', '2015-02-19 10:10:10.0'," +
-        " 123, 5, 'true', '2015-02-19')")
-    connection.createStatement().execute("INSERT INTO stars values (2,'Eridanus', '2017-02-19 10:10:10.0'," +
-        " 852, 5, 'false', '2015-07-19')")
+    connection.createStatement().execute("CREATE TABLE stars (id number, name varchar(255) NOT NULL, " +
+            "radius number, destination float,visible number(1), " +
+            "CONSTRAINT pk_stars PRIMARY KEY (id))");
+    connection.createStatement().execute("INSERT INTO stars (ID,NAME,RADIUS,DESTINATION, VISIBLE) VALUES (1,'Taurus',321,44.4,1)")
+    connection.createStatement().execute("INSERT INTO stars (ID,NAME,RADIUS,DESTINATION, VISIBLE) VALUES (2,'Boston',581,94.4,0)")
   }
 
   def getRecords(tableName) {
@@ -111,10 +116,14 @@ class CustomQueryActionPostrgeSpec extends Specification {
   }
 
   def cleanupSpec() {
-    String sql = "DROP TABLE IF EXISTS persons;"
-
-    connection.createStatement().execute(sql)
-    sql = "DROP TABLE IF EXISTS stars;"
+    String sql = "BEGIN" +
+            "   EXECUTE IMMEDIATE 'DROP TABLE stars';" +
+            "EXCEPTION" +
+            "   WHEN OTHERS THEN" +
+            "      IF SQLCODE != -942 THEN" +
+            "         RAISE;" +
+            "      END IF;" +
+            "END;"
     connection.createStatement().execute(sql)
     connection.close()
   }
@@ -143,8 +152,7 @@ class CustomQueryActionPostrgeSpec extends Specification {
     JsonObject snapshot = Json.createObjectBuilder().build()
 
     JsonObject body = Json.createObjectBuilder()
-            .add("query", "INSERT INTO stars values (3,'Rastaban', '2015-02-19 10:10:10.0'," +
-                    " 123, 5, 'true', '2018-02-19')")
+            .add("query", "INSERT INTO stars (ID,NAME,RADIUS,DESTINATION, VISIBLE) VALUES (3,'Rastaban', 123, 5, 1)")
             .build();
 
     when:
@@ -165,7 +173,7 @@ class CustomQueryActionPostrgeSpec extends Specification {
     JsonObject snapshot = Json.createObjectBuilder().build()
 
     JsonObject body = Json.createObjectBuilder()
-            .add("query", "DELETE FROM stars WHERE id = 1;")
+            .add("query", "DELETE FROM stars WHERE id = 1")
             .build();
 
     when:

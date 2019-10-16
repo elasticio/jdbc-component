@@ -3,8 +3,8 @@ package io.elastic.jdbc.integration.actions.custom_query_action
 import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
+import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.actions.CustomQueryAction
-import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -14,24 +14,24 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 
-@Ignore
-class CustomQueryActionPostrgeSpec extends Specification {
+//@Ignore
+class CustomQueryActionMySQLSpec extends Specification {
 
   @Shared
-  def user = System.getenv("CONN_USER_POSTGRESQL")
+  def user = System.getenv("CONN_USER_MYSQL")
   @Shared
-  def password = System.getenv("CONN_PASSWORD_POSTGRESQL")
+  def password = System.getenv("CONN_PASSWORD_MYSQL")
   @Shared
-  def databaseName = System.getenv("CONN_DBNAME_POSTGRESQL")
+  def databaseName = System.getenv("CONN_DBNAME_MYSQL")
   @Shared
-  def host = System.getenv("CONN_HOST_POSTGRESQL")
+  def host = System.getenv("CONN_HOST_MYSQL")
   @Shared
-  def port = System.getenv("CONN_PORT_POSTGRESQL")
+  def port = System.getenv("CONN_PORT_MYSQL")
 
   @Shared
-  def dbEngine = "postgresql"
+  def dbEngine = "mysql"
   @Shared
-  def connectionString ="jdbc:postgresql://"+ host + ":" + port + "/" + databaseName
+  def connectionString ="jdbc:mysql://"+ host + ":" + port + "/" + databaseName
   @Shared
   Connection connection
 
@@ -51,7 +51,8 @@ class CustomQueryActionPostrgeSpec extends Specification {
   CustomQueryAction action
 
   def setupSpec() {
-    connection = DriverManager.getConnection(connectionString, user, password)
+    JsonObject config = getConfig()
+    connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
   }
 
   def setup() {
@@ -65,7 +66,7 @@ class CustomQueryActionPostrgeSpec extends Specification {
     reboundCallback = Mock(EventEmitter.Callback)
     httpReplyCallback = Mock(EventEmitter.Callback)
     emitter = new EventEmitter.Builder().onData(dataCallback).onSnapshot(snapshotCallback).onError(errorCallback)
-        .onRebound(reboundCallback).onHttpReplyCallback(httpReplyCallback).build()
+            .onRebound(reboundCallback).onHttpReplyCallback(httpReplyCallback).build()
     action = new CustomQueryAction()
   }
 
@@ -76,27 +77,22 @@ class CustomQueryActionPostrgeSpec extends Specification {
   }
 
   def getConfig() {
-    JsonObject config = Json.createObjectBuilder()
-        .add("user", user)
-        .add("password", password)
-        .add("dbEngine", "postgresql")
-        .add("host", host)
-        .add("port", port)
-        .add("databaseName", databaseName)
-        .add("nullableResult", "true")
-        .build();
+    JsonObject config = TestUtils.getMysqlConfigurationBuilder()
+            .add("tableName", "stars")
+            .add("nullableResult", "true")
+            .build();
     return config;
   }
 
   def prepareStarsTable() {
     String sql = "DROP TABLE IF EXISTS stars;"
     connection.createStatement().execute(sql);
-    connection.createStatement().execute("CREATE TABLE stars (id int, name varchar(255) NOT NULL, " +
-        "date timestamp, radius int, destination int, visible boolean, visibledate date, PRIMARY KEY(id))");
+    connection.createStatement().execute("CREATE TABLE stars (id int PRIMARY KEY, name varchar(255) NOT NULL, " +
+            "date datetime, radius int, destination int, visible bit, visibledate date)");
     connection.createStatement().execute("INSERT INTO stars values (1,'Taurus', '2015-02-19 10:10:10.0'," +
-        " 123, 5, 'true', '2015-02-19')")
+            " 123, 5, 0, '2015-02-19')")
     connection.createStatement().execute("INSERT INTO stars values (2,'Eridanus', '2017-02-19 10:10:10.0'," +
-        " 852, 5, 'false', '2015-07-19')")
+            " 852, 5, 0, '2015-07-19')")
   }
 
   def getRecords(tableName) {

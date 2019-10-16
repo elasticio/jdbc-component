@@ -32,19 +32,20 @@ public class CustomQueryAction implements Module {
     JsonArray result = null;
     try (Connection connection = Utils.getConnection(configuration)) {
       connection.setAutoCommit(false);
-
-      ResultSet resultSet = null;
       try (Statement statement = connection.createStatement()) {
-        statement.execute(queryString);
-        resultSet = statement.getResultSet();
+        boolean status = statement.execute(queryString);
+        if (status) {
+          ResultSet resultSet = statement.getResultSet();
+          result = customResultSetToJsonArray(resultSet);
+        } else {
+          result = customResultSetToJsonArray(null);
+        }
+        connection.commit();
       } catch(Exception e) {
         connection.rollback();
         connection.setAutoCommit(true);
         throw e;
       }
-
-      result = customResultSetToJsonArray(resultSet);
-      connection.commit();
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
