@@ -26,9 +26,7 @@ public class CustomQuery implements Module {
     final JsonObject configuration = parameters.getConfiguration();
     final JsonObject body = parameters.getMessage().getBody();
     final String dbEngine = Utils.getDbEngine(configuration);
-    final String queryString = configuration.containsKey("defaultQuery")
-        ? configuration.getString("defaultQuery")
-        : body.getString("query");
+    final String queryString = body.getString("query");
     LOGGER.info("Found dbEngine: '{}' and query: '{}'", dbEngine, queryString);
 
     JsonArray result = null;

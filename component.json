@@ -142,22 +142,14 @@
       "main": "io.elastic.jdbc.actions.CustomQuery",
       "title": "Execute custom query",
       "description": "Executes provided sql query string as is",
-      "fields": {
-        "defaultQuery": {
-          "viewClass": "TextFieldView",
-          "prompt": "Select a Table",
-          "label": "Default query",
-          "required": false
-        }
-      },
       "metadata": {
         "in": {
           "type": "object",
-          "required": false,
+          "required": true,
           "properties": {
             "query": {
               "type": "string",
-              "required": false
+              "required": true
             }
           }
         },

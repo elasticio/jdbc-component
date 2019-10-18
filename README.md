@@ -121,6 +121,17 @@ The format of ``Start Polling From (optional)`` field should be like ``yyyy-mm-d
 This action exists in JDBC component only for backward compatibility. New [**Select trigger**](#select-trigger) is recommended to use.
 
 ## Actions
+### Execute custom query action
+Action to execute custom SQL query from provided request string.
+
+**Note:** SQL request will be executed according to chosen database JDBC specification.
+
+Execution result returns as array of objects.
+
+#### Input fields description
+
+As input metadata, you will get one field named `query` to provide request string
+
 ### Select action
 ![image](https://user-images.githubusercontent.com/40201204/43592439-39ec5738-967e-11e8-8632-3655b08982d3.png)
 The action will execute an [SQL](https://en.wikipedia.org/wiki/SQL "SQL") query that can return multiple results, it has limitations on the query and suited only for SELECT type of queries.
