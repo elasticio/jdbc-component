@@ -3,6 +3,7 @@ package io.elastic.jdbc.integration.actions.custom_query_action
 import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
+import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.actions.CustomQuery
 import spock.lang.Ignore
 import spock.lang.Shared
@@ -14,23 +15,13 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 
-@Ignore
+
 class CustomQueryMSSQLSpec extends Specification {
 
   @Shared
-  def user = System.getenv("CONN_USER_MSSQL")
-  @Shared
-  def password = System.getenv("CONN_PASSWORD_MSSQL")
-  @Shared
-  def databaseName = System.getenv("CONN_DBNAME_MSSQL")
-  @Shared
-  def host = System.getenv("CONN_HOST_MSSQL")
-  @Shared
-  def port = System.getenv("CONN_PORT_MSSQL")
-  @Shared
-  def connectionString = "jdbc:sqlserver://" + host + ":" + port + ";database=" + databaseName
-  @Shared
   Connection connection
+  @Shared
+  JsonObject configuration
 
   @Shared
   EventEmitter.Callback errorCallback
@@ -48,7 +39,10 @@ class CustomQueryMSSQLSpec extends Specification {
   CustomQuery action
 
   def setupSpec() {
-    connection = DriverManager.getConnection(connectionString, user, password)
+    configuration = TestUtils.getMssqlConfigurationBuilder()
+        .add("tableName", TestUtils.TEST_TABLE_NAME)
+        .build()
+    connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
   }
 
   def setup() {
@@ -73,14 +67,8 @@ class CustomQueryMSSQLSpec extends Specification {
   }
 
   def getConfig() {
-    JsonObject config = Json.createObjectBuilder()
+    JsonObject config = TestUtils.getMssqlConfigurationBuilder()
             .add("tableName", "stars")
-            .add("user", user)
-            .add("password", password)
-            .add("dbEngine", "mssql")
-            .add("host", host)
-            .add("port", port)
-            .add("databaseName", databaseName)
             .add("nullableResult", "true")
             .build();
     return config;
