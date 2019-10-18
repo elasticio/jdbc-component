@@ -14,7 +14,9 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -39,8 +41,17 @@ public class Utils {
   public static final String TEMPLATE_REGEXP = "\\B@(?:(?![=\\)\\(])[\\S])+";
   private static final String PROPERTY_DB_ENGINE = "dbEngine";
   private static final String PROPERTY_TABLE_NAME = "tableName";
+  private static final String PROPERTY_REBOUND = "reboundEnabled";
   private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
   public static Map<String, String> columnTypes = null;
+  public static final Map<String, List<String>> reboundDbState;
+  static {
+    reboundDbState = new HashMap<>();
+    reboundDbState.put(Engines.POSTGRESQL.name(), Collections.singletonList("40P01"));
+    reboundDbState.put(Engines.MSSQL.name(), Collections.singletonList("40001"));
+    reboundDbState.put(Engines.MYSQL.name(), Arrays.asList("40001", "XA102"));
+    reboundDbState.put(Engines.ORACLE.name(), Collections.singletonList("61000"));
+  }
 
   public static Connection getConnection(final JsonObject config) throws SQLException {
     final String engine = getRequiredNonEmptyString(config, CFG_DB_ENGINE, "Engine is required")
@@ -533,5 +544,9 @@ public class Utils {
   public static Boolean isRequired(final boolean isPrimaryKey, final boolean isNotNull,
       final boolean isAutoincrement, final boolean isCalculated) {
     return isPrimaryKey || (!isAutoincrement && !isCalculated && isNotNull);
+  }
+
+  public static boolean reboundIsEnabled(JsonObject config) {
+    return "Yes".equals(config.getString(PROPERTY_REBOUND, "No"));
   }
 }

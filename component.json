@@ -168,6 +168,16 @@
           "label": "Table",
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProvider"
+        },
+        "reboundEnabled" : {
+          "viewClass": "SelectView",
+          "prompt": "Default is No",
+          "label": "Enable Rebound",
+          "required": false,
+          "model" : {
+            "Yes" : "Yes",
+            "No" : "No"
+          }
         }
       },
       "dynamicMetadata": "io.elastic.jdbc.providers.ColumnNamesWithPrimaryKeyProvider"
@@ -183,6 +193,16 @@
           "label": "Table",
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProvider"
+        },
+        "reboundEnabled" : {
+          "viewClass": "SelectView",
+          "prompt": "Default is No",
+          "label": "Enable Rebound",
+          "required": false,
+          "model" : {
+            "Yes" : "Yes",
+            "No" : "No"
+          }
         }
       },
       "dynamicMetadata": "io.elastic.jdbc.providers.ColumnNamesForInsertProvider"
@@ -202,6 +222,16 @@
         "nullableResult": {
           "label": "Don`t throw Error on an Empty Result",
           "viewClass": "CheckBoxView"
+        },
+        "reboundEnabled" : {
+          "viewClass": "SelectView",
+          "prompt": "Default is No",
+          "label": "Enable Rebound",
+          "required": false,
+          "model" : {
+            "Yes" : "Yes",
+            "No" : "No"
+          }
         }
       },
       "dynamicMetadata": "io.elastic.jdbc.providers.PrimaryColumnNamesProvider"

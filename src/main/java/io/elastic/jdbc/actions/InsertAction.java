@@ -9,6 +9,11 @@ import io.elastic.jdbc.utils.QueryFactory;
 import io.elastic.jdbc.utils.Utils;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonObject;
 import org.slf4j.Logger;
@@ -36,6 +41,14 @@ public class InsertAction implements Module {
       query.from(tableName);
       query.executeInsert(connection, tableName, body);
     } catch (SQLException e) {
+      if (Utils.reboundIsEnabled(configuration)) {
+        List<String> states = Utils.reboundDbState.get(dbEngine);
+        if (states.contains(e.getSQLState())) {
+          LOGGER.warn("Starting rebound. Reason:", e);
+          parameters.getEventEmitter().emitRebound(e);
+          return;
+        }
+      }
       throw new RuntimeException(e);
     }
     JsonObject result = Json.createObjectBuilder()
@@ -44,6 +57,5 @@ public class InsertAction implements Module {
     LOGGER.info("Emit data= {}", result);
     parameters.getEventEmitter().emitData(new Message.Builder().body(result).build());
     LOGGER.info("Insert action is successfully executed");
-
   }
 }
