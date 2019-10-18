@@ -3,6 +3,7 @@ package io.elastic.jdbc.integration.actions.custom_query_action
 import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
+import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.actions.CustomQuery
 import spock.lang.Ignore
 import spock.lang.Shared
@@ -14,27 +15,11 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 
-@Ignore
 class CustomQueryPostrgeSpec extends Specification {
-
-  @Shared
-  def user = System.getenv("CONN_USER_POSTGRESQL")
-  @Shared
-  def password = System.getenv("CONN_PASSWORD_POSTGRESQL")
-  @Shared
-  def databaseName = System.getenv("CONN_DBNAME_POSTGRESQL")
-  @Shared
-  def host = System.getenv("CONN_HOST_POSTGRESQL")
-  @Shared
-  def port = System.getenv("CONN_PORT_POSTGRESQL")
-
-  @Shared
-  def dbEngine = "postgresql"
-  @Shared
-  def connectionString ="jdbc:postgresql://"+ host + ":" + port + "/" + databaseName
   @Shared
   Connection connection
-
+  @Shared
+  JsonObject configuration
   @Shared
   EventEmitter.Callback errorCallback
   @Shared
@@ -51,7 +36,8 @@ class CustomQueryPostrgeSpec extends Specification {
   CustomQuery action
 
   def setupSpec() {
-    connection = DriverManager.getConnection(connectionString, user, password)
+    configuration = getConfig()
+    connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
   }
 
   def setup() {
@@ -76,13 +62,7 @@ class CustomQueryPostrgeSpec extends Specification {
   }
 
   def getConfig() {
-    JsonObject config = Json.createObjectBuilder()
-        .add("user", user)
-        .add("password", password)
-        .add("dbEngine", "postgresql")
-        .add("host", host)
-        .add("port", port)
-        .add("databaseName", databaseName)
+    JsonObject config = TestUtils.getPostgresqlConfigurationBuilder()
         .add("nullableResult", "true")
         .build();
     return config;

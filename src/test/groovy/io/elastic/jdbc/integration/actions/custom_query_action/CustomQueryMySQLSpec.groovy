@@ -15,24 +15,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 
-@Ignore
 class CustomQueryMySQLSpec extends Specification {
-
-  @Shared
-  def user = System.getenv("CONN_USER_MYSQL")
-  @Shared
-  def password = System.getenv("CONN_PASSWORD_MYSQL")
-  @Shared
-  def databaseName = System.getenv("CONN_DBNAME_MYSQL")
-  @Shared
-  def host = System.getenv("CONN_HOST_MYSQL")
-  @Shared
-  def port = System.getenv("CONN_PORT_MYSQL")
-
-  @Shared
-  def dbEngine = "mysql"
-  @Shared
-  def connectionString ="jdbc:mysql://"+ host + ":" + port + "/" + databaseName
   @Shared
   Connection connection
 

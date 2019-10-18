@@ -3,6 +3,7 @@ package io.elastic.jdbc.integration.actions.custom_query_action
 import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
+import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.actions.CustomQuery
 import spock.lang.Ignore
 import spock.lang.Shared
@@ -14,25 +15,11 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 
-@Ignore
 class CustomQueryOracleSpec extends Specification {
-
-  @Shared
-  def user = System.getenv("CONN_USER_ORACLE")
-  @Shared
-  def password = System.getenv("CONN_PASSWORD_ORACLE")
-  @Shared
-  def databaseName = System.getenv("CONN_DBNAME_ORACLE")
-  @Shared
-  def host = System.getenv("CONN_HOST_ORACLE")
-  @Shared
-  def port = System.getenv("CONN_PORT_ORACLE")
-  @Shared
-  def dbEngine = "oracle"
-  @Shared
-  def connectionString ="jdbc:oracle:thin:@//" + host + ":" + port + "/XE"
   @Shared
   Connection connection
+  @Shared
+  JsonObject configuration
 
   @Shared
   EventEmitter.Callback errorCallback
@@ -50,7 +37,8 @@ class CustomQueryOracleSpec extends Specification {
   CustomQuery action
 
   def setupSpec() {
-    connection = DriverManager.getConnection(connectionString, user, password)
+    configuration = getConfig()
+    connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
   }
 
   def setup() {
@@ -75,13 +63,7 @@ class CustomQueryOracleSpec extends Specification {
   }
 
   def getConfig() {
-    JsonObject config = Json.createObjectBuilder()
-            .add("user", user)
-            .add("password", password)
-            .add("dbEngine", dbEngine)
-            .add("host", host)
-            .add("port", port)
-            .add("databaseName", databaseName)
+    JsonObject config = TestUtils.getOracleConfigurationBuilder()
             .add("nullableResult", "true")
             .build();
     return config;
