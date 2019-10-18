@@ -178,4 +178,47 @@ class CustomQueryActionPostrgeSpec extends Specification {
     expect:
     records == 1
   }
+
+  def "successful transaction"() {
+    prepareStarsTable();
+
+    JsonObject snapshot = Json.createObjectBuilder().build()
+
+    JsonObject body = Json.createObjectBuilder()
+            .add("query", "DELETE FROM stars WHERE id = 1;\n" +
+              "UPDATE stars SET radius = 5 WHERE id = 2;\n")
+            .build();
+
+    when:
+    runAction(getConfig(), body, snapshot)
+    then:
+    0 * errorCallback.receive(_)
+    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
+
+    int records = getRecords("stars").size()
+    expect:
+    records == 1
+  }
+
+  def "failed transaction"() {
+    prepareStarsTable();
+
+    JsonObject snapshot = Json.createObjectBuilder().build()
+
+    JsonObject body = Json.createObjectBuilder()
+            .add("query", "DELETE FROM stars WHERE id = 1;\n" +
+            "UPDATE wrong_stars SET radius = 5 WHERE id = 2;\n")
+            .build();
+
+    when:
+    runAction(getConfig(), body, snapshot)
+    then:
+    RuntimeException e = thrown()
+    e.message == 'org.postgresql.util.PSQLException: ERROR: relation "wrong_stars" does not exist\n' +
+            '  Position: 9'
+
+    int records = getRecords("stars").size()
+    expect:
+    records == 2
+  }
 }

@@ -178,4 +178,51 @@ class CustomQueryActionMSSQLSpec extends Specification {
     expect:
     records == 1
   }
+
+  def "successful transaction"() {
+    prepareStarsTable();
+
+    JsonObject snapshot = Json.createObjectBuilder().build()
+
+    JsonObject body = Json.createObjectBuilder()
+            .add("query", "BEGIN TRANSACTION;\n" +
+            "DELETE FROM stars WHERE id = 1;\n" +
+            "UPDATE stars SET radius = 5 WHERE id = 2;\n" +
+            "COMMIT;")
+            .build();
+
+    when:
+    runAction(getConfig(), body, snapshot)
+    then:
+    0 * errorCallback.receive(_)
+    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
+
+    int records = getRecords("stars").size()
+    expect:
+    records == 1
+  }
+
+  def "failed transaction"() {
+    prepareStarsTable();
+
+    JsonObject snapshot = Json.createObjectBuilder().build()
+
+    JsonObject body = Json.createObjectBuilder()
+            .add("query", "BEGIN TRANSACTION;\n" +
+            "DELETE FROM stars WHERE id = 1;\n" +
+            "UPDATE wrong_stars SET radius = 5 WHERE id = 2;\n" +
+            "COMMIT;")
+            .build();
+
+    when:
+    runAction(getConfig(), body, snapshot)
+    then:
+    0 * errorCallback.receive(_)
+    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
+    true
+
+    int records = getRecords("stars").size()
+    expect:
+    records == 2
+  }
 }

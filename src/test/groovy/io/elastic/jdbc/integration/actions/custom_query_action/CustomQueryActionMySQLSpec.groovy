@@ -5,6 +5,7 @@ import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
 import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.actions.CustomQueryAction
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -14,7 +15,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 
-//@Ignore
+@Ignore
 class CustomQueryActionMySQLSpec extends Specification {
 
   @Shared
@@ -139,8 +140,7 @@ class CustomQueryActionMySQLSpec extends Specification {
     JsonObject snapshot = Json.createObjectBuilder().build()
 
     JsonObject body = Json.createObjectBuilder()
-            .add("query", "INSERT INTO stars values (3,'Rastaban', '2015-02-19 10:10:10.0'," +
-                    " 123, 5, 'true', '2018-02-19')")
+            .add("query", "INSERT INTO stars values (3,'Rastaban', '2015-02-19 10:10:10.0', 123, 5, 1, '2018-02-19')")
             .build();
 
     when:

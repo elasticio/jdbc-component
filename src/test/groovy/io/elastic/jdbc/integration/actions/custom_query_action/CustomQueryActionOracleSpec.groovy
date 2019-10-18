@@ -186,4 +186,53 @@ class CustomQueryActionOracleSpec extends Specification {
     expect:
     records == 1
   }
+
+  def "successful transaction"() {
+      prepareStarsTable();
+
+      JsonObject snapshot = Json.createObjectBuilder().build()
+
+      JsonObject body = Json.createObjectBuilder()
+              .add("query", "BEGIN\n" +
+              " DELETE FROM stars WHERE id = 1;\n" +
+              " UPDATE stars SET radius = 5 WHERE id = 2;\n" +
+              "end;")
+              .build();
+
+      when:
+      runAction(getConfig(), body, snapshot)
+      then:
+      0 * errorCallback.receive(_)
+      1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
+
+      int records = getRecords("stars").size()
+      expect:
+      records == 1
+  }
+
+  def "failed transaction"() {
+      prepareStarsTable();
+
+      JsonObject snapshot = Json.createObjectBuilder().build()
+
+      JsonObject body = Json.createObjectBuilder()
+              .add("query", "BEGIN\n" +
+              " DELETE FROM stars WHERE id = 1;\n" +
+              " UPDATE wrong_stars SET radius = 5 WHERE id = 2;\n" +
+              "END;")
+              .build();
+
+      when:
+      runAction(getConfig(), body, snapshot)
+      then:
+      RuntimeException e = thrown()
+      e.message == 'java.sql.SQLException: ORA-06550: line 3, column 9:\n' +
+              'PL/SQL: ORA-00942: table or view does not exist\n' +
+              'ORA-06550: line 3, column 2:\n' +
+              'PL/SQL: SQL Statement ignored\n'
+
+      int records = getRecords("stars").size()
+      expect:
+      records == 2
+  }
 }
