@@ -3,7 +3,7 @@ package io.elastic.jdbc.integration.actions.custom_query_action
 import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
-import io.elastic.jdbc.actions.CustomQueryAction
+import io.elastic.jdbc.actions.CustomQuery
 import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
@@ -15,7 +15,7 @@ import java.sql.DriverManager
 import java.sql.ResultSet
 
 @Ignore
-class CustomQueryActionPostrgeSpec extends Specification {
+class CustomQueryPostrgeSpec extends Specification {
 
   @Shared
   def user = System.getenv("CONN_USER_POSTGRESQL")
@@ -48,7 +48,7 @@ class CustomQueryActionPostrgeSpec extends Specification {
   @Shared
   EventEmitter emitter
   @Shared
-  CustomQueryAction action
+  CustomQuery action
 
   def setupSpec() {
     connection = DriverManager.getConnection(connectionString, user, password)
@@ -66,7 +66,7 @@ class CustomQueryActionPostrgeSpec extends Specification {
     httpReplyCallback = Mock(EventEmitter.Callback)
     emitter = new EventEmitter.Builder().onData(dataCallback).onSnapshot(snapshotCallback).onError(errorCallback)
         .onRebound(reboundCallback).onHttpReplyCallback(httpReplyCallback).build()
-    action = new CustomQueryAction()
+    action = new CustomQuery()
   }
 
   def runAction(JsonObject config, JsonObject body, JsonObject snapshot) {

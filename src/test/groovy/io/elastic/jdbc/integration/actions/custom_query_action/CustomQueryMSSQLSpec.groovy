@@ -3,8 +3,7 @@ package io.elastic.jdbc.integration.actions.custom_query_action
 import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
-import io.elastic.jdbc.TestUtils
-import io.elastic.jdbc.actions.CustomQueryAction
+import io.elastic.jdbc.actions.CustomQuery
 import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
@@ -16,23 +15,20 @@ import java.sql.DriverManager
 import java.sql.ResultSet
 
 @Ignore
-class CustomQueryActionMySQLSpec extends Specification {
+class CustomQueryMSSQLSpec extends Specification {
 
   @Shared
-  def user = System.getenv("CONN_USER_MYSQL")
+  def user = System.getenv("CONN_USER_MSSQL")
   @Shared
-  def password = System.getenv("CONN_PASSWORD_MYSQL")
+  def password = System.getenv("CONN_PASSWORD_MSSQL")
   @Shared
-  def databaseName = System.getenv("CONN_DBNAME_MYSQL")
+  def databaseName = System.getenv("CONN_DBNAME_MSSQL")
   @Shared
-  def host = System.getenv("CONN_HOST_MYSQL")
+  def host = System.getenv("CONN_HOST_MSSQL")
   @Shared
-  def port = System.getenv("CONN_PORT_MYSQL")
-
+  def port = System.getenv("CONN_PORT_MSSQL")
   @Shared
-  def dbEngine = "mysql"
-  @Shared
-  def connectionString ="jdbc:mysql://"+ host + ":" + port + "/" + databaseName
+  def connectionString = "jdbc:sqlserver://" + host + ":" + port + ";database=" + databaseName
   @Shared
   Connection connection
 
@@ -49,11 +45,10 @@ class CustomQueryActionMySQLSpec extends Specification {
   @Shared
   EventEmitter emitter
   @Shared
-  CustomQueryAction action
+  CustomQuery action
 
   def setupSpec() {
-    JsonObject config = getConfig()
-    connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
+    connection = DriverManager.getConnection(connectionString, user, password)
   }
 
   def setup() {
@@ -68,7 +63,7 @@ class CustomQueryActionMySQLSpec extends Specification {
     httpReplyCallback = Mock(EventEmitter.Callback)
     emitter = new EventEmitter.Builder().onData(dataCallback).onSnapshot(snapshotCallback).onError(errorCallback)
             .onRebound(reboundCallback).onHttpReplyCallback(httpReplyCallback).build()
-    action = new CustomQueryAction()
+    action = new CustomQuery()
   }
 
   def runAction(JsonObject config, JsonObject body, JsonObject snapshot) {
@@ -78,16 +73,22 @@ class CustomQueryActionMySQLSpec extends Specification {
   }
 
   def getConfig() {
-    JsonObject config = TestUtils.getMysqlConfigurationBuilder()
+    JsonObject config = Json.createObjectBuilder()
             .add("tableName", "stars")
+            .add("user", user)
+            .add("password", password)
+            .add("dbEngine", "mssql")
+            .add("host", host)
+            .add("port", port)
+            .add("databaseName", databaseName)
             .add("nullableResult", "true")
             .build();
     return config;
   }
 
   def prepareStarsTable() {
-    String sql = "DROP TABLE IF EXISTS stars;"
-    connection.createStatement().execute(sql);
+    connection.createStatement().execute("IF OBJECT_ID('stars', 'U') IS NOT NULL\n" +
+            "  DROP TABLE stars;");
     connection.createStatement().execute("CREATE TABLE stars (id int PRIMARY KEY, name varchar(255) NOT NULL, " +
             "date datetime, radius int, destination int, visible bit, visibledate date)");
     connection.createStatement().execute("INSERT INTO stars values (1,'Taurus', '2015-02-19 10:10:10.0'," +
@@ -108,10 +109,12 @@ class CustomQueryActionMySQLSpec extends Specification {
   }
 
   def cleanupSpec() {
-    String sql = "DROP TABLE IF EXISTS persons;"
+    String sql = "IF OBJECT_ID('persons', 'U') IS NOT NULL\n" +
+            "  DROP TABLE persons;"
 
     connection.createStatement().execute(sql)
-    sql = "DROP TABLE IF EXISTS stars;"
+    sql = "IF OBJECT_ID('stars', 'U') IS NOT NULL\n" +
+            "  DROP TABLE stars;"
     connection.createStatement().execute(sql)
     connection.close()
   }
@@ -140,7 +143,8 @@ class CustomQueryActionMySQLSpec extends Specification {
     JsonObject snapshot = Json.createObjectBuilder().build()
 
     JsonObject body = Json.createObjectBuilder()
-            .add("query", "INSERT INTO stars values (3,'Rastaban', '2015-02-19 10:10:10.0', 123, 5, 1, '2018-02-19')")
+            .add("query", "INSERT INTO stars values (3,'Rastaban', '2015-02-19 10:10:10.0'," +
+                    " 123, 5, 'true', '2018-02-19')")
             .build();
 
     when:
@@ -173,5 +177,52 @@ class CustomQueryActionMySQLSpec extends Specification {
     int records = getRecords("stars").size()
     expect:
     records == 1
+  }
+
+  def "successful transaction"() {
+    prepareStarsTable();
+
+    JsonObject snapshot = Json.createObjectBuilder().build()
+
+    JsonObject body = Json.createObjectBuilder()
+            .add("query", "BEGIN TRANSACTION;\n" +
+            "DELETE FROM stars WHERE id = 1;\n" +
+            "UPDATE stars SET radius = 5 WHERE id = 2;\n" +
+            "COMMIT;")
+            .build();
+
+    when:
+    runAction(getConfig(), body, snapshot)
+    then:
+    0 * errorCallback.receive(_)
+    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
+
+    int records = getRecords("stars").size()
+    expect:
+    records == 1
+  }
+
+  def "failed transaction"() {
+    prepareStarsTable();
+
+    JsonObject snapshot = Json.createObjectBuilder().build()
+
+    JsonObject body = Json.createObjectBuilder()
+            .add("query", "BEGIN TRANSACTION;\n" +
+            "DELETE FROM stars WHERE id = 1;\n" +
+            "UPDATE wrong_stars SET radius = 5 WHERE id = 2;\n" +
+            "COMMIT;")
+            .build();
+
+    when:
+    runAction(getConfig(), body, snapshot)
+    then:
+    0 * errorCallback.receive(_)
+    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
+    true
+
+    int records = getRecords("stars").size()
+    expect:
+    records == 2
   }
 }

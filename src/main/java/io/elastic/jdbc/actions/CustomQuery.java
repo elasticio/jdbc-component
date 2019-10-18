@@ -17,8 +17,8 @@ import javax.json.JsonObjectBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CustomQueryAction implements Module {
-  private static final Logger LOGGER = LoggerFactory.getLogger(CustomQueryAction.class);
+public class CustomQuery implements Module {
+  private static final Logger LOGGER = LoggerFactory.getLogger(CustomQuery.class);
 
   @Override
   public void execute(ExecutionParameters parameters) {

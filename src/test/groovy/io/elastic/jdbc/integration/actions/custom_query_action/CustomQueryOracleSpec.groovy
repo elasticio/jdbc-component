@@ -3,7 +3,7 @@ package io.elastic.jdbc.integration.actions.custom_query_action
 import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
-import io.elastic.jdbc.actions.CustomQueryAction
+import io.elastic.jdbc.actions.CustomQuery
 import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
@@ -15,20 +15,22 @@ import java.sql.DriverManager
 import java.sql.ResultSet
 
 @Ignore
-class CustomQueryActionMSSQLSpec extends Specification {
+class CustomQueryOracleSpec extends Specification {
 
   @Shared
-  def user = System.getenv("CONN_USER_MSSQL")
+  def user = System.getenv("CONN_USER_ORACLE")
   @Shared
-  def password = System.getenv("CONN_PASSWORD_MSSQL")
+  def password = System.getenv("CONN_PASSWORD_ORACLE")
   @Shared
-  def databaseName = System.getenv("CONN_DBNAME_MSSQL")
+  def databaseName = System.getenv("CONN_DBNAME_ORACLE")
   @Shared
-  def host = System.getenv("CONN_HOST_MSSQL")
+  def host = System.getenv("CONN_HOST_ORACLE")
   @Shared
-  def port = System.getenv("CONN_PORT_MSSQL")
+  def port = System.getenv("CONN_PORT_ORACLE")
   @Shared
-  def connectionString = "jdbc:sqlserver://" + host + ":" + port + ";database=" + databaseName
+  def dbEngine = "oracle"
+  @Shared
+  def connectionString ="jdbc:oracle:thin:@//" + host + ":" + port + "/XE"
   @Shared
   Connection connection
 
@@ -45,7 +47,7 @@ class CustomQueryActionMSSQLSpec extends Specification {
   @Shared
   EventEmitter emitter
   @Shared
-  CustomQueryAction action
+  CustomQuery action
 
   def setupSpec() {
     connection = DriverManager.getConnection(connectionString, user, password)
@@ -62,8 +64,8 @@ class CustomQueryActionMSSQLSpec extends Specification {
     reboundCallback = Mock(EventEmitter.Callback)
     httpReplyCallback = Mock(EventEmitter.Callback)
     emitter = new EventEmitter.Builder().onData(dataCallback).onSnapshot(snapshotCallback).onError(errorCallback)
-            .onRebound(reboundCallback).onHttpReplyCallback(httpReplyCallback).build()
-    action = new CustomQueryAction()
+        .onRebound(reboundCallback).onHttpReplyCallback(httpReplyCallback).build()
+    action = new CustomQuery()
   }
 
   def runAction(JsonObject config, JsonObject body, JsonObject snapshot) {
@@ -74,10 +76,9 @@ class CustomQueryActionMSSQLSpec extends Specification {
 
   def getConfig() {
     JsonObject config = Json.createObjectBuilder()
-            .add("tableName", "stars")
             .add("user", user)
             .add("password", password)
-            .add("dbEngine", "mssql")
+            .add("dbEngine", dbEngine)
             .add("host", host)
             .add("port", port)
             .add("databaseName", databaseName)
@@ -87,14 +88,20 @@ class CustomQueryActionMSSQLSpec extends Specification {
   }
 
   def prepareStarsTable() {
-    connection.createStatement().execute("IF OBJECT_ID('stars', 'U') IS NOT NULL\n" +
-            "  DROP TABLE stars;");
-    connection.createStatement().execute("CREATE TABLE stars (id int PRIMARY KEY, name varchar(255) NOT NULL, " +
-            "date datetime, radius int, destination int, visible bit, visibledate date)");
-    connection.createStatement().execute("INSERT INTO stars values (1,'Taurus', '2015-02-19 10:10:10.0'," +
-            " 123, 5, 0, '2015-02-19')")
-    connection.createStatement().execute("INSERT INTO stars values (2,'Eridanus', '2017-02-19 10:10:10.0'," +
-            " 852, 5, 0, '2015-07-19')")
+    String sql = "BEGIN" +
+            "   EXECUTE IMMEDIATE 'DROP TABLE stars';" +
+            "EXCEPTION" +
+            "   WHEN OTHERS THEN" +
+            "      IF SQLCODE != -942 THEN" +
+            "         RAISE;" +
+            "      END IF;" +
+            "END;"
+    connection.createStatement().execute(sql);
+    connection.createStatement().execute("CREATE TABLE stars (id number, name varchar(255) NOT NULL, " +
+            "radius number, destination float,visible number(1), " +
+            "CONSTRAINT pk_stars PRIMARY KEY (id))");
+    connection.createStatement().execute("INSERT INTO stars (ID,NAME,RADIUS,DESTINATION, VISIBLE) VALUES (1,'Taurus',321,44.4,1)")
+    connection.createStatement().execute("INSERT INTO stars (ID,NAME,RADIUS,DESTINATION, VISIBLE) VALUES (2,'Boston',581,94.4,0)")
   }
 
   def getRecords(tableName) {
@@ -109,12 +116,14 @@ class CustomQueryActionMSSQLSpec extends Specification {
   }
 
   def cleanupSpec() {
-    String sql = "IF OBJECT_ID('persons', 'U') IS NOT NULL\n" +
-            "  DROP TABLE persons;"
-
-    connection.createStatement().execute(sql)
-    sql = "IF OBJECT_ID('stars', 'U') IS NOT NULL\n" +
-            "  DROP TABLE stars;"
+    String sql = "BEGIN" +
+            "   EXECUTE IMMEDIATE 'DROP TABLE stars';" +
+            "EXCEPTION" +
+            "   WHEN OTHERS THEN" +
+            "      IF SQLCODE != -942 THEN" +
+            "         RAISE;" +
+            "      END IF;" +
+            "END;"
     connection.createStatement().execute(sql)
     connection.close()
   }
@@ -143,8 +152,7 @@ class CustomQueryActionMSSQLSpec extends Specification {
     JsonObject snapshot = Json.createObjectBuilder().build()
 
     JsonObject body = Json.createObjectBuilder()
-            .add("query", "INSERT INTO stars values (3,'Rastaban', '2015-02-19 10:10:10.0'," +
-                    " 123, 5, 'true', '2018-02-19')")
+            .add("query", "INSERT INTO stars (ID,NAME,RADIUS,DESTINATION, VISIBLE) VALUES (3,'Rastaban', 123, 5, 1)")
             .build();
 
     when:
@@ -165,7 +173,7 @@ class CustomQueryActionMSSQLSpec extends Specification {
     JsonObject snapshot = Json.createObjectBuilder().build()
 
     JsonObject body = Json.createObjectBuilder()
-            .add("query", "DELETE FROM stars WHERE id = 1;")
+            .add("query", "DELETE FROM stars WHERE id = 1")
             .build();
 
     when:
@@ -180,49 +188,51 @@ class CustomQueryActionMSSQLSpec extends Specification {
   }
 
   def "successful transaction"() {
-    prepareStarsTable();
+      prepareStarsTable();
 
-    JsonObject snapshot = Json.createObjectBuilder().build()
+      JsonObject snapshot = Json.createObjectBuilder().build()
 
-    JsonObject body = Json.createObjectBuilder()
-            .add("query", "BEGIN TRANSACTION;\n" +
-            "DELETE FROM stars WHERE id = 1;\n" +
-            "UPDATE stars SET radius = 5 WHERE id = 2;\n" +
-            "COMMIT;")
-            .build();
+      JsonObject body = Json.createObjectBuilder()
+              .add("query", "BEGIN\n" +
+              " DELETE FROM stars WHERE id = 1;\n" +
+              " UPDATE stars SET radius = 5 WHERE id = 2;\n" +
+              "end;")
+              .build();
 
-    when:
-    runAction(getConfig(), body, snapshot)
-    then:
-    0 * errorCallback.receive(_)
-    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
+      when:
+      runAction(getConfig(), body, snapshot)
+      then:
+      0 * errorCallback.receive(_)
+      1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
 
-    int records = getRecords("stars").size()
-    expect:
-    records == 1
+      int records = getRecords("stars").size()
+      expect:
+      records == 1
   }
 
   def "failed transaction"() {
-    prepareStarsTable();
+      prepareStarsTable();
 
-    JsonObject snapshot = Json.createObjectBuilder().build()
+      JsonObject snapshot = Json.createObjectBuilder().build()
 
-    JsonObject body = Json.createObjectBuilder()
-            .add("query", "BEGIN TRANSACTION;\n" +
-            "DELETE FROM stars WHERE id = 1;\n" +
-            "UPDATE wrong_stars SET radius = 5 WHERE id = 2;\n" +
-            "COMMIT;")
-            .build();
+      JsonObject body = Json.createObjectBuilder()
+              .add("query", "BEGIN\n" +
+              " DELETE FROM stars WHERE id = 1;\n" +
+              " UPDATE wrong_stars SET radius = 5 WHERE id = 2;\n" +
+              "END;")
+              .build();
 
-    when:
-    runAction(getConfig(), body, snapshot)
-    then:
-    0 * errorCallback.receive(_)
-    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
-    true
+      when:
+      runAction(getConfig(), body, snapshot)
+      then:
+      RuntimeException e = thrown()
+      e.message == 'java.sql.SQLException: ORA-06550: line 3, column 9:\n' +
+              'PL/SQL: ORA-00942: table or view does not exist\n' +
+              'ORA-06550: line 3, column 2:\n' +
+              'PL/SQL: SQL Statement ignored\n'
 
-    int records = getRecords("stars").size()
-    expect:
-    records == 2
+      int records = getRecords("stars").size()
+      expect:
+      records == 2
   }
 }
