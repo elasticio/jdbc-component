@@ -102,11 +102,11 @@ public class UpsertRowByPrimaryKey implements Module {
     } catch (SQLException e) {
       if (Utils.reboundIsEnabled(configuration)) {
         List<String> states = Utils.reboundDbState.get(dbEngine);
-//        if (states.contains(e.getSQLState())) {
+        if (states.contains(e.getSQLState())) {
           LOGGER.warn("Starting rebound max iter: {}, rebound ttl: {}. Reason: {}", System.getenv("ELASTICIO_REBOUND_LIMIT"), System.getenv("ELASTICIO_REBOUND_INITIAL_EXPIRATION"), e.getMessage());
           parameters.getEventEmitter().emitRebound(e);
           return;
-//        }
+        }
       }
       throw new RuntimeException(e);
     }
