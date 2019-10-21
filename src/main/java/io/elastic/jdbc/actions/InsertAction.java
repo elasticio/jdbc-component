@@ -27,7 +27,6 @@ public class InsertAction implements Module {
   public void execute(ExecutionParameters parameters) {
     LOGGER.info("Starting execute insert action");
     final JsonObject configuration = parameters.getConfiguration();
-    final JsonObject header = parameters.getMessage().getHeaders();
     final JsonObject body = parameters.getMessage().getBody();
     final String dbEngine = Utils.getDbEngine(configuration);
     final boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
@@ -45,7 +44,7 @@ public class InsertAction implements Module {
       if (Utils.reboundIsEnabled(configuration)) {
         List<String> states = Utils.reboundDbState.get(dbEngine);
 //        if (states.contains(e.getSQLState())) {
-          LOGGER.warn("Starting rebound Rebound count: {}. Reason:", header);
+          LOGGER.warn("Starting rebound max iter: {}, rebound ttl: {}. Reason:", System.getenv("ELASTICIO_REBOUND_LIMIT"), System.getenv("ELASTICIO_REBOUND_INITIAL_EXPIRATION"));
           parameters.getEventEmitter().emitRebound("Exception");
           return;
 //        }
