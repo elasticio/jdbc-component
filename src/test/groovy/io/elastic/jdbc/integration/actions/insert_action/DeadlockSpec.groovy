@@ -1,7 +1,6 @@
 package io.elastic.jdbc.integration.actions.insert_action
 
 import io.elastic.jdbc.TestUtils
-import org.junit.Ignore
 import org.junit.Test
 import spock.lang.Shared
 import spock.lang.Specification
@@ -13,8 +12,6 @@ import java.sql.SQLException
 import java.sql.Statement
 import java.util.concurrent.CountDownLatch
 
-
-@Ignore
 class DeadlockSpec extends Specification {
     @Shared
     String deadlockTable1 = "deadlock_test1"
