@@ -3,15 +3,12 @@ package io.elastic.jdbc.actions;
 import io.elastic.api.ExecutionParameters;
 import io.elastic.api.Message;
 import io.elastic.api.Module;
-import io.elastic.jdbc.utils.Engines;
 import io.elastic.jdbc.query_builders.Query;
+import io.elastic.jdbc.utils.Engines;
 import io.elastic.jdbc.utils.QueryFactory;
 import io.elastic.jdbc.utils.Utils;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.json.Json;
@@ -120,11 +117,12 @@ public class DeleteRowByPrimaryKey implements Module {
         } catch (SQLException e) {
           if (Utils.reboundIsEnabled(configuration)) {
             List<String> states = Utils.reboundDbState.get(dbEngine);
-//            if (states.contains(e.getSQLState())) {
-              LOGGER.warn("Starting rebound. Reason:", e);
+            if (states.contains(e.getSQLState())) {
+              LOGGER.warn("Starting rebound max iter: {}, rebound ttl: {}. Reason: {}", System.getenv("ELASTICIO_REBOUND_LIMIT"),
+                  System.getenv("ELASTICIO_REBOUND_INITIAL_EXPIRATION"), e.getMessage());
               parameters.getEventEmitter().emitRebound(e);
               return;
-//            }
+            }
           }
           LOGGER.error("Failed to make request", e.toString());
           throw new RuntimeException(e);
