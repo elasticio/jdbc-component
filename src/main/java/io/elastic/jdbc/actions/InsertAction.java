@@ -43,11 +43,11 @@ public class InsertAction implements Module {
     } catch (SQLException e) {
       if (Utils.reboundIsEnabled(configuration)) {
         List<String> states = Utils.reboundDbState.get(dbEngine);
-        if (states.contains(e.getSQLState())) {
+//        if (states.contains(e.getSQLState())) {
           LOGGER.warn("Starting rebound. Reason:", e);
           parameters.getEventEmitter().emitRebound(e);
           return;
-        }
+//        }
       }
       throw new RuntimeException(e);
     }
