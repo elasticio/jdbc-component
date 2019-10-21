@@ -157,9 +157,13 @@
           "type": "object",
           "required": false,
           "properties": {
-            "response": {
+            "result": {
               "required": false,
               "type": "array"
+            },
+            "updated": {
+              "required": false,
+              "type": "number"
             }
           }
         }
