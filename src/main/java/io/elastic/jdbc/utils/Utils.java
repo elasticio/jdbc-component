@@ -41,6 +41,8 @@ public class Utils {
   public static final String TEMPLATE_REGEXP = "\\B@(?:(?![=\\)\\(])[\\S])+";
   private static final String PROPERTY_DB_ENGINE = "dbEngine";
   private static final String PROPERTY_TABLE_NAME = "tableName";
+  private static final String ENABLED_REBOUND = "Yes";
+  private static final String DISABLED_REBOUND = "No";
   private static final String PROPERTY_REBOUND = "reboundEnabled";
   private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
   public static Map<String, String> columnTypes = null;
@@ -547,6 +549,6 @@ public class Utils {
   }
 
   public static boolean reboundIsEnabled(JsonObject config) {
-    return "Yes".equals(config.getString(PROPERTY_REBOUND, "No"));
+    return ENABLED_REBOUND.equals(config.getString(PROPERTY_REBOUND, DISABLED_REBOUND));
   }
 }
