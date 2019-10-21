@@ -158,7 +158,7 @@
       "dynamicMetadata": "io.elastic.jdbc.providers.PrimaryColumnNamesProvider"
     },
     "upsertRowByPrimaryKey": {
-      "main": "io.elastic.jdbc.actions.providers.UpsertRowByPrimaryKey",
+      "main": "io.elastic.jdbc.actions.UpsertRowByPrimaryKey",
       "title": "Upsert Row By Primary Key",
       "description": "Executes upsert by primary key",
       "fields": {
