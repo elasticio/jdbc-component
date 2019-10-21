@@ -137,7 +137,7 @@ class CustomQueryMSSQLSpec extends Specification {
     runAction(getConfig(), body, snapshot)
     then:
     0 * errorCallback.receive(_)
-    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
+    1 * dataCallback.receive({ it.getBody().getInt("updated") == 1 })
 
     int records = getRecords("stars").size()
     expect:
@@ -158,7 +158,7 @@ class CustomQueryMSSQLSpec extends Specification {
     runAction(getConfig(), body, snapshot)
     then:
     0 * errorCallback.receive(_)
-    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
+    1 * dataCallback.receive({ it.getBody().getInt("updated") == 1 })
 
     int records = getRecords("stars").size()
     expect:
@@ -181,7 +181,7 @@ class CustomQueryMSSQLSpec extends Specification {
     runAction(getConfig(), body, snapshot)
     then:
     0 * errorCallback.receive(_)
-    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
+    2 * dataCallback.receive({ it.getBody().getInt("updated") == 1 })
 
     int records = getRecords("stars").size()
     expect:
@@ -203,9 +203,8 @@ class CustomQueryMSSQLSpec extends Specification {
     when:
     runAction(getConfig(), body, snapshot)
     then:
-    0 * errorCallback.receive(_)
-    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
-    true
+    RuntimeException e = thrown()
+    e.message == 'com.microsoft.sqlserver.jdbc.SQLServerException: Invalid object name \'wrong_stars\'.'
 
     int records = getRecords("stars").size()
     expect:

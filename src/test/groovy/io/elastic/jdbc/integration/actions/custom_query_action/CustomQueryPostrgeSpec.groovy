@@ -5,7 +5,6 @@ import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
 import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.actions.CustomQuery
-import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -86,7 +85,7 @@ class CustomQueryPostrgeSpec extends Specification {
     while (rs.next()) {
       records.add(rs.toRowResult().toString());
     }
-    rs.close();
+    rs.close();2
     return records;
   }
 
@@ -131,7 +130,7 @@ class CustomQueryPostrgeSpec extends Specification {
     runAction(getConfig(), body, snapshot)
     then:
     0 * errorCallback.receive(_)
-    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
+    1 * dataCallback.receive({ it.getBody().getInt("updated") == 1 })
 
     int records = getRecords("stars").size()
     expect:
@@ -152,7 +151,7 @@ class CustomQueryPostrgeSpec extends Specification {
     runAction(getConfig(), body, snapshot)
     then:
     0 * errorCallback.receive(_)
-    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
+    1 * dataCallback.receive({ it.getBody().getInt("updated") == 1 })
 
     int records = getRecords("stars").size()
     expect:
@@ -173,7 +172,7 @@ class CustomQueryPostrgeSpec extends Specification {
     runAction(getConfig(), body, snapshot)
     then:
     0 * errorCallback.receive(_)
-    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 0 })
+    2 * dataCallback.receive({ it.getBody().getInt("updated") == 1 })
 
     int records = getRecords("stars").size()
     expect:

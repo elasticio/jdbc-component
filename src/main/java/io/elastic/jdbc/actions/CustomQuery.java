@@ -9,6 +9,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -18,7 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CustomQuery implements Module {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(CustomQuery.class);
+
+  private static final String JSON_RESULT_ARRAY_NAME = "result";
+  private static final String JSON_RESULT_COUNT_NAME = "updated";
 
   @Override
   public void execute(ExecutionParameters parameters) {
@@ -29,19 +35,28 @@ public class CustomQuery implements Module {
     final String queryString = body.getString("query");
     LOGGER.info("Found dbEngine: '{}' and query: '{}'", dbEngine, queryString);
 
-    JsonArray result = null;
+    List<Message> messages = new ArrayList<>();
     try (Connection connection = Utils.getConnection(configuration)) {
       connection.setAutoCommit(false);
       try (Statement statement = connection.createStatement()) {
         boolean status = statement.execute(queryString);
         if (status) {
           ResultSet resultSet = statement.getResultSet();
-          result = customResultSetToJsonArray(resultSet);
+          messages.add(this.processResultSetToMessage(resultSet));
         } else {
-          result = customResultSetToJsonArray(null);
+          messages.add(this.processUpdateCountToMessage(statement.getUpdateCount()));
         }
+
+        while (statement.getMoreResults() || statement.getUpdateCount() != -1) {
+          if (statement.getUpdateCount() != -1) {
+            messages.add(this.processUpdateCountToMessage(statement.getUpdateCount()));
+          } else {
+            messages.add(this.processResultSetToMessage(statement.getResultSet()));
+          }
+        }
+
         connection.commit();
-      } catch(Exception e) {
+      } catch (Exception e) {
         connection.rollback();
         connection.setAutoCommit(true);
         throw e;
@@ -50,16 +65,32 @@ public class CustomQuery implements Module {
       throw new RuntimeException(e);
     }
 
-    LOGGER.trace("Emit data= {}", result);
-    parameters.getEventEmitter().emitData(new Message.Builder()
-        .body(Json.createObjectBuilder()
-            .add("result", result)
-            .build()
-        ).build());
+    messages.forEach(message -> {
+      LOGGER.trace("Emit data= {}", message.getBody());
+      parameters.getEventEmitter().emitData(message);
+    });
+
     LOGGER.info("Custom query action is successfully executed");
   }
 
-  public static JsonArray customResultSetToJsonArray(ResultSet resultSet) throws SQLException{
+  private Message processResultSetToMessage(ResultSet resultSet) throws SQLException {
+    JsonArray result = customResultSetToJsonArray(resultSet);
+    return new Message.Builder()
+        .body(Json.createObjectBuilder()
+            .add(JSON_RESULT_ARRAY_NAME, result)
+            .build()
+        ).build();
+  }
+
+  private Message processUpdateCountToMessage(int updateCount) {
+    return new Message.Builder()
+        .body(Json.createObjectBuilder()
+            .add(JSON_RESULT_COUNT_NAME, updateCount)
+            .build()
+        ).build();
+  }
+
+  public static JsonArray customResultSetToJsonArray(ResultSet resultSet) throws SQLException {
     JsonArrayBuilder jsonBuilder = Json.createArrayBuilder();
 
     if (resultSet == null) {
@@ -68,7 +99,7 @@ public class CustomQuery implements Module {
 
     ResultSetMetaData metaData = resultSet.getMetaData();
 
-    while(resultSet.next()) {
+    while (resultSet.next()) {
       JsonObjectBuilder entry = Json.createObjectBuilder();
       for (int i = 1; i <= metaData.getColumnCount(); i++) {
         Utils.getColumnDataByType(resultSet, metaData, i, entry);
