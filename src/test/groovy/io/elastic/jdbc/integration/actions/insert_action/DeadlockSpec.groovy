@@ -14,6 +14,7 @@ import java.sql.Statement
 import java.util.concurrent.CountDownLatch
 
 
+@Ignore
 class DeadlockSpec extends Specification {
     @Shared
     String deadlockTable1 = "deadlock_test1"

@@ -175,7 +175,7 @@ As an input metadata you will get a Primary Key field to provide the data inside
 The action will execute ``INSERT`` command into the table from ``Table`` dropdown list the values specified in the body.
 
 #### List of Expected Config fields
-
+   * `Enable Rebound` if `Yes` in case of deadlocks rebound message using Sailor rebound mechanism, number of rebound can be specified via environment variable: `ELASTICIO_REBOUND_LIMIT` recommended value 3
 #### Input fields description
 ##### Table
 
@@ -199,6 +199,7 @@ As output metadata, you will get execution insert result like:
 ![image](https://user-images.githubusercontent.com/40201204/43592505-5b6bbfe8-967e-11e8-845e-2ce8ac707357.png)
 The action will execute delete query from a ``Table`` dropdown field, as criteria can be used only [PRIMARY KEY](https://en.wikipedia.org/wiki/Primary_key "PRIMARY KEY"). The action returns count of affected rows.
 Checkbox ``Don't throw Error on an Empty Result`` allows to emit an empty response, otherwise you will get an error on empty response.
+`Enable Rebound` if `Yes` in case of deadlocks rebound message using Sailor rebound mechanism, number of rebound can be specified via environment variable: `ELASTICIO_REBOUND_LIMIT` recommended value 3
 #### Input fields description
 ![image](https://user-images.githubusercontent.com/40201204/43644579-f593d1c8-9737-11e8-9b97-ee9e575a19f7.png)
 As an input metadata you will get a Primary Key field to provide the data inside as a clause value.
@@ -260,19 +261,23 @@ The action will execute ``SELECT`` command from a ``Tables`` dropdown field, as 
 5. Specify input data (field with red asterisk is Primary key), and click "Continue"
 ![image](https://user-images.githubusercontent.com/16806832/44981854-83fcfa00-af7c-11e8-9ef2-8c06e77fed1e.png)
 
-6. Retrieving sample
+6. Enable rebound mechanism if needed
+![image](https://user-images.githubusercontent.com/18464641/67211608-b76e4280-f423-11e9-85f6-f7ec58cc24f1.png)
+
+7. Retrieving sample
 ![image](https://user-images.githubusercontent.com/16806832/44983059-86f9e980-af80-11e8-8178-77e463488c7a.png)
 
-7. Retrieve sample result
+8. Retrieve sample result
 ![image](https://user-images.githubusercontent.com/16806832/44982952-2ec2e780-af80-11e8-98b1-58c3adbc15b9.png)
 
-8. Click "Continue"
+9. Click "Continue"
 ![image](https://user-images.githubusercontent.com/16806832/44983101-b0b31080-af80-11e8-82d8-0e70e4b4ff97.png)
 
-9. Finish component configuration
+10. Finish component configuration
 ![image](https://user-images.githubusercontent.com/16806832/44983365-90378600-af81-11e8-9be4-4dbb39af0fdc.png)
 
 #### Input fields description
+* `Enable Rebound` if `Yes` in case of deadlocks rebound message using Sailor rebound mechanism, number of rebound can be specified via environment variable: `ELASTICIO_REBOUND_LIMIT` recommended value 3
 As an input metadata you will get all fields of selected table. [PRIMARY KEY](https://en.wikipedia.org/wiki/Primary_key "PRIMARY KEY") is required field (will mark as asterisk) and other input fields are optional.
 ![image](https://user-images.githubusercontent.com/16806832/44397461-1a76f780-a549-11e8-8247-9a6f9aa3f3b4.png)
 
