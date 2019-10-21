@@ -45,8 +45,8 @@ public class InsertAction implements Module {
       if (Utils.reboundIsEnabled(configuration)) {
         List<String> states = Utils.reboundDbState.get(dbEngine);
 //        if (states.contains(e.getSQLState())) {
-          LOGGER.warn("Starting rebound Rebound count: {}. Reason:", header, e);
-          parameters.getEventEmitter().emitRebound(e);
+          LOGGER.warn("Starting rebound Rebound count: {}. Reason:", header);
+          parameters.getEventEmitter().emitRebound("Exception");
           return;
 //        }
       }
