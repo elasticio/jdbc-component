@@ -117,6 +117,22 @@ The format of ``Start Polling From (optional)`` field should be like ``yyyy-mm-d
 
 *Please Note: Component Snapshot will not be overwritten in Real-Time flows due to platform behaviour, so we strongly recommend to use Get Rows Polling trigger in Keen Flows only*
 
+#### Input fields description
+![image](https://user-images.githubusercontent.com/16806832/67293348-f5836900-f4ec-11e9-8e6a-e91b9417ff9d.png)
+
+##### Tables List
+
+Dropdown list with available table names, required field
+
+##### Timestamp (or similar) Column
+
+Dropdown list with available Column names, that have a type like `java.sql.Date` or `java.sql.Timestamp`, required field
+
+##### Start Polling From (optional)
+
+Optional field, indicates the beginning time to start polling from (defaults to the current time)
+
+
 ### SELECT trigger (Deprecated)
 This action exists in JDBC component only for backward compatibility. New [**Select trigger**](#select-trigger) is recommended to use.
 

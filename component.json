@@ -72,7 +72,7 @@
           "viewClass": "SelectView",
           "prompt": "Select a Timestamp (or similar) Column",
           "label": "Timestamp (or similar) Column",
-          "model": "io.elastic.jdbc.providers.ColumnNamesProvider",
+          "model": "io.elastic.jdbc.providers.TimeStampColumnNamesProvider",
           "required": true,
           "require": [
             "tableName"
