@@ -27,7 +27,7 @@ public class TimeStampColumnNamesProvider implements SelectModelProvider {
             schemaName = tableName.split("\\.")[0];
             tableName = tableName.split("\\.")[1];
         }
-        LOGGER.debug("Table name: {}, SchemaName: {}", tableName, schemaName);
+        LOGGER.info("Table name: {}, SchemaName: {}", tableName, schemaName);
         JsonObjectBuilder columnNames = Json.createObjectBuilder();
         try (Connection connection = Utils.getConnection(configuration)) {
             DatabaseMetaData dbMetaData = connection.getMetaData();
@@ -36,7 +36,7 @@ public class TimeStampColumnNamesProvider implements SelectModelProvider {
                     int sqlType = rs.getInt("DATA_TYPE");
                     String name = rs.getString("COLUMN_NAME");
                     LOGGER.debug("Found field with name: {} and sqlType: {}", name, sqlType);
-                    if (sqlType == Types.DATE || sqlType == Types.TIMESTAMP || sqlType == Types.TIME) {
+                    if (sqlType == Types.DATE || sqlType == Types.TIMESTAMP) {
                         LOGGER.info("Found similar to timestamp field: {}", name);
                         columnNames.add(name, name);
                     }
