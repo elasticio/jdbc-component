@@ -126,11 +126,30 @@ Action to execute custom SQL query from provided request string.
 
 **Note:** SQL request will be executed according to chosen database JDBC specification.
 
-Execution result returns as array of objects.
+Execution result returns as array of objects. If request contains multiple sql statements - them will execute inside one transaction.
+If one of statements fails, transaction will be rollbacked.
 
 #### Input fields description
 
 As input metadata, you will get one field named `query` to provide request string
+
+#### Query Samples:
+
+Select:
+```sql
+SELECT name, size FROM stars
+```
+
+Update: 
+```sql
+INSERT INTO stars values (1,'Taurus', '2015-02-19 10:10:10.0', 123, 5, 'true', '2015-02-19')
+```
+
+Posgresql batch multiple statements request:
+```sql
+DELETE FROM stars WHERE id = 1;
+UPDATE stars SET radius = 5 WHERE id = 2;
+```
 
 ### Select action
 ![image](https://user-images.githubusercontent.com/40201204/43592439-39ec5738-967e-11e8-8632-3655b08982d3.png)
