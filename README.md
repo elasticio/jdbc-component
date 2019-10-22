@@ -130,7 +130,7 @@ Dropdown list with available Column names, that have a type like `java.sql.Date`
 
 ##### Start Polling From (optional)
 
-optional field, indicates the beginning time to start polling from (defaults to the current time)
+Optional field, indicates the beginning time to start polling from (defaults to the current time)
 
 
 ### SELECT trigger (Deprecated)
