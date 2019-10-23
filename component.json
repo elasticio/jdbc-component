@@ -1,6 +1,7 @@
 {
   "title": "Database",
   "description": "Database JDBC connector",
+  "buildType": "docker",
   "credentials": {
     "verifier": "io.elastic.jdbc.JdbcCredentialsVerifier",
     "fields": {
@@ -72,7 +73,7 @@
           "viewClass": "SelectView",
           "prompt": "Select a Timestamp (or similar) Column",
           "label": "Timestamp (or similar) Column",
-          "model": "io.elastic.jdbc.providers.ColumnNamesProvider",
+          "model": "io.elastic.jdbc.providers.TimeStampColumnNamesProvider",
           "required": true,
           "require": [
             "tableName"
@@ -189,7 +190,7 @@
       "dynamicMetadata": "io.elastic.jdbc.providers.PrimaryColumnNamesProvider"
     },
     "upsertRowByPrimaryKey": {
-      "main": "io.elastic.jdbc.actions.providers.UpsertRowByPrimaryKey",
+      "main": "io.elastic.jdbc.actions.UpsertRowByPrimaryKey",
       "title": "Upsert Row By Primary Key",
       "description": "Executes upsert by primary key",
       "fields": {
@@ -199,6 +200,16 @@
           "label": "Table",
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProvider"
+        },
+        "reboundEnabled" : {
+          "viewClass": "SelectView",
+          "prompt": "Default is No",
+          "label": "Enable Rebound",
+          "required": false,
+          "model" : {
+            "Yes" : "Yes",
+            "No" : "No"
+          }
         }
       },
       "dynamicMetadata": "io.elastic.jdbc.providers.ColumnNamesWithPrimaryKeyProvider"
@@ -214,6 +225,16 @@
           "label": "Table",
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProvider"
+        },
+        "reboundEnabled" : {
+          "viewClass": "SelectView",
+          "prompt": "Default is No",
+          "label": "Enable Rebound",
+          "required": false,
+          "model" : {
+            "Yes" : "Yes",
+            "No" : "No"
+          }
         }
       },
       "dynamicMetadata": "io.elastic.jdbc.providers.ColumnNamesForInsertProvider"
@@ -233,6 +254,16 @@
         "nullableResult": {
           "label": "Don`t throw Error on an Empty Result",
           "viewClass": "CheckBoxView"
+        },
+        "reboundEnabled" : {
+          "viewClass": "SelectView",
+          "prompt": "Default is No",
+          "label": "Enable Rebound",
+          "required": false,
+          "model" : {
+            "Yes" : "Yes",
+            "No" : "No"
+          }
         }
       },
       "dynamicMetadata": "io.elastic.jdbc.providers.PrimaryColumnNamesProvider"
