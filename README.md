@@ -4,7 +4,7 @@
 This is an open source component for working with object-relational database management systems on [elastic.io platform](http://www.elastic.io "elastic.io platform").
 
 ### Completeness Matrix
-![JDBC Component Completeness Matrix](https://user-images.githubusercontent.com/16806832/65326373-f6f20680-dbb9-11e9-9ad2-0900f68fd6e3.png)
+![JDBC Component Completeness Matrix](https://user-images.githubusercontent.com/22715422/67289390-38dad900-f4e7-11e9-9a45-1c7775c9c7d5.png)
 
 [JDBC Component Completeness Matrix](https://docs.google.com/spreadsheets/d/1sZr9ydJbMK8v-TguctmFDiqgjRKcrpbdj4CeFuZEkQU/edit?usp=sharing)
 
@@ -137,6 +137,36 @@ Optional field, indicates the beginning time to start polling from (defaults to 
 This action exists in JDBC component only for backward compatibility. New [**Select trigger**](#select-trigger) is recommended to use.
 
 ## Actions
+### Execute custom query action
+Action to execute custom SQL query from provided request string.
+
+**Note:** SQL request will be executed according to chosen database JDBC specification.
+
+Execution result returns as array of objects. If request contains multiple sql statements - them will execute inside one transaction.
+If one of statements fails, transaction will be rollbacked.
+
+#### Input fields description
+
+As input metadata, you will get one field named `query` to provide request string
+
+#### Query Samples:
+
+Select:
+```sql
+SELECT name, size FROM stars
+```
+
+Update: 
+```sql
+INSERT INTO stars values (1,'Taurus', '2015-02-19 10:10:10.0', 123, 5, 'true', '2015-02-19')
+```
+
+Posgresql batch multiple statements request:
+```sql
+DELETE FROM stars WHERE id = 1;
+UPDATE stars SET radius = 5 WHERE id = 2;
+```
+
 ### Select action
 ![image](https://user-images.githubusercontent.com/40201204/43592439-39ec5738-967e-11e8-8632-3655b08982d3.png)
 The action will execute an [SQL](https://en.wikipedia.org/wiki/SQL "SQL") query that can return multiple results, it has limitations on the query and suited only for SELECT type of queries.

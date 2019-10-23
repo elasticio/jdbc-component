@@ -139,6 +139,37 @@
     }
   },
   "actions": {
+    "customQuery": {
+      "main": "io.elastic.jdbc.actions.CustomQuery",
+      "title": "Execute custom query",
+      "description": "Executes provided sql query string as is",
+      "metadata": {
+        "in": {
+          "type": "object",
+          "required": true,
+          "properties": {
+            "query": {
+              "type": "string",
+              "required": true
+            }
+          }
+        },
+        "out":{
+          "type": "object",
+          "required": false,
+          "properties": {
+            "result": {
+              "required": false,
+              "type": "array"
+            },
+            "updated": {
+              "required": false,
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
     "lookupRowByPrimaryKey": {
       "main": "io.elastic.jdbc.actions.LookupRowByPrimaryKey",
       "title": "Lookup Row By Primary Key",
