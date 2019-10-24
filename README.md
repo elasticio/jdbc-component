@@ -345,6 +345,11 @@ Please use [**Upsert row by primary key**](#upsert-row-by-primary-key-action) in
 4. The current implementation of the action ``Execute stored procedure`` doesn't support ResultSet MSSQL output.
 5. The current implementation of the action ``Execute stored procedure`` doesn't support any array types parameters.
 (MySQL does not have schemas by definition)
+6. Rebound mechanism only works for this SQL State: 
+ - ``MySQL``: 40001, XA102
+ - ``Oracle``: 61000
+ - ``MSSQL``: 40001
+ - ``PostgreSQL``:  40P01
 
 ## License
 Apache-2.0 © [elastic.io GmbH](https://www.elastic.io "elastic.io GmbH")
