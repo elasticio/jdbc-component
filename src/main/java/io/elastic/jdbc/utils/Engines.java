@@ -1,6 +1,18 @@
 package io.elastic.jdbc.utils;
 
 public enum Engines {
+  FIREBIRD("org.firebirdsql.jdbc.FBDriver", 3050) {
+    @Override
+    protected String getSubprotocol(String host, Integer port, String db) {
+      return "firebirdsql";
+    }
+
+    @Override
+    protected String getSubname(String host, Integer port, String db) {
+      return String.format("//%s:%s/%s", host, port, db);
+    }
+  },
+
   MYSQL("com.mysql.cj.jdbc.Driver", 3306) {
     @Override
     protected String getSubprotocol(String host, Integer port, String db) {
