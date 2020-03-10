@@ -73,6 +73,22 @@ public class TestUtils {
         .add("connectionString", connectionString);
   }
 
+  public static JsonObjectBuilder getFirebirdConfigurationBuilder() {
+    final String host = dotenv.get("CONN_HOST_FIREBIRD");
+    final String port = dotenv.get("CONN_PORT_FIREBIRD");
+    final String databaseName = dotenv.get("CONN_DBNAME_FIREBIRD");
+    final String connectionString =
+        "jdbc:firebirdsql://" + host + ":" + port + "/" + databaseName;
+    return Json.createObjectBuilder()
+        .add("dbEngine", "firebirdsql")
+        .add("host", host)
+        .add("port", port)
+        .add("databaseName", databaseName)
+        .add("user", dotenv.get("CONN_USER_FIREBIRD"))
+        .add("password", dotenv.get("CONN_PASSWORD_FIREBIRD"))
+        .add("connectionString", connectionString);
+  }
+
   public static JsonObjectBuilder getMysqlConfigurationBuilder() {
     final String host = dotenv.get("CONN_HOST_MYSQL");
     final String port = dotenv.get("CONN_PORT_MYSQL");

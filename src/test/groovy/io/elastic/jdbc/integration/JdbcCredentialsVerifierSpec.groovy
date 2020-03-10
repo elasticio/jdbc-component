@@ -22,6 +22,16 @@ class JdbcCredentialsVerifierSpec extends Specification {
     notThrown(Throwable.class)
   }
 
+  def "should verify successfully Firebird"() {
+    setup:
+    JsonObject mysqlConfig = TestUtils.getFirebirdConfigurationBuilder().build()
+    when:
+    new JdbcCredentialsVerifier().verify(mysqlConfig)
+
+    then:
+    notThrown(Throwable.class)
+  }
+
   def "should verify successfully MySql"() {
     setup:
     JsonObject mysqlConfig = TestUtils.getMysqlConfigurationBuilder()
