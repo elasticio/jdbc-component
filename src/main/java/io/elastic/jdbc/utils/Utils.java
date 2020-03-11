@@ -136,11 +136,16 @@ public class Utils {
       JsonObject body) throws SQLException {
     try {
       if (isNumeric(colName)) {
-        if ((body.get(colName) != null) && (body.get(colName) != JsonValue.NULL)) {
-          statement.setBigDecimal(paramNumber, body.getJsonNumber(colName).bigDecimalValue());
-        } else {
-          statement.setBigDecimal(paramNumber, null);
-        }
+          if ((body.get(colName) != null) && (body.get(colName) != JsonValue.NULL)) {
+            // workaround for Firebase -> isNumeric=true, but value = "true" or "false"
+            if (body.get(colName).toString().equals("true") || body.get(colName).toString().equals("false")) {
+              statement.setBoolean(paramNumber, body.getBoolean(colName));
+            } else {
+              statement.setBigDecimal(paramNumber, body.getJsonNumber(colName).bigDecimalValue());
+            }
+          } else {
+            statement.setBigDecimal(paramNumber, null);
+          }
       } else if (isTimestamp(colName)) {
         if ((body.get(colName) != null) && (body.get(colName) != JsonValue.NULL)) {
           statement.setTimestamp(paramNumber, Timestamp.valueOf(body.getString(colName)));
@@ -224,19 +229,18 @@ public class Utils {
     return type != null && type.equals("boolean");
   }
 
-  public static Map<String, String> getColumnTypes(Connection connection, Boolean isOracle,
-      String tableName) {
+  public static Map<String, String> getColumnTypes(Connection connection, String tableName) {
     DatabaseMetaData md;
     ResultSet rs = null;
     Map<String, String> columnTypes = new HashMap<>();
-    String schemaName = null;
+    String schemaName = "";
     try {
       md = connection.getMetaData();
       if (tableName.contains(".")) {
         schemaName = tableName.split("\\.")[0];
         tableName = tableName.split("\\.")[1];
       }
-      rs = md.getColumns(null, schemaName, tableName, "%");
+      rs = md.getColumns("", schemaName, tableName, "%");
       while (rs.next()) {
         String name = rs.getString("COLUMN_NAME").toLowerCase();
         String type = detectColumnType(rs.getInt("DATA_TYPE"), rs.getString("TYPE_NAME"));
@@ -367,14 +371,16 @@ public class Utils {
    * Converts table name according Engine Type
    *
    * @param configuration should contains tableName
-   * @param isOracle flag is Engine type equals `oracle`
+   * @param isOracleOrFirebird flag is Engine type equals `oracle`
    */
-  public static String getTableName(JsonObject configuration, boolean isOracle) {
+  public static String getTableName(JsonObject configuration, boolean isOracleOrFirebird) {
     if (configuration.containsKey(PROPERTY_TABLE_NAME)
         && getNonNullString(configuration, PROPERTY_TABLE_NAME).length() != 0) {
       String tableName = configuration.getString(PROPERTY_TABLE_NAME);
       if (tableName.contains(".")) {
-        tableName = isOracle ? tableName.split("\\.")[1].toUpperCase() : tableName.split("\\.")[1];
+        tableName = isOracleOrFirebird ? tableName.split("\\.")[1].toUpperCase() : tableName.split("\\.")[1];
+      } else {
+        tableName = isOracleOrFirebird ? tableName.toUpperCase() : tableName;
       }
       return tableName;
     } else {

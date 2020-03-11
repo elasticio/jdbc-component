@@ -5,7 +5,6 @@ import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
 import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.actions.SelectAction
-import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -14,10 +13,10 @@ import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 
-class SelectMySQLSpec extends Specification {
+class SelectFirebirdSpec extends Specification {
 
   @Shared
-  def credentials = TestUtils.getMysqlConfigurationBuilder().build()
+  def credentials = TestUtils.getFirebirdConfigurationBuilder().build()
   @Shared
   def host = credentials.getString("host")
   @Shared
@@ -29,7 +28,7 @@ class SelectMySQLSpec extends Specification {
   @Shared
   def password = credentials.getString("password")
   @Shared
-  def connectionString = "jdbc:mysql://" + host + ":" + port + "/" + databaseName
+  def connectionString = "jdbc:firebirdsql://" + host + ":" + port + "/" + databaseName
 
   @Shared
   Connection connection
@@ -79,7 +78,7 @@ class SelectMySQLSpec extends Specification {
   }
 
   def getStarsConfig() {
-    JsonObject config = TestUtils.getMysqlConfigurationBuilder()
+    JsonObject config = TestUtils.getFirebirdConfigurationBuilder()
         .add("sqlQuery", "SELECT * from stars where @id:number =id AND name=@name")
         .build()
     return config;

@@ -1,8 +1,7 @@
 package io.elastic.jdbc.integration.providers.column_names_with_primary_key_provider
 
-
-import io.elastic.jdbc.providers.ColumnNamesWithPrimaryKeyProvider
 import io.elastic.jdbc.TestUtils
+import io.elastic.jdbc.providers.ColumnNamesWithPrimaryKeyProvider
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -10,7 +9,7 @@ import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 
-class ColumnNamesWithPrimaryKeyProviderMySQLSpec extends Specification {
+class ColumnNamesWithPrimaryKeyProviderFirebirdSpec extends Specification {
 
   @Shared
   Connection connection
@@ -18,18 +17,18 @@ class ColumnNamesWithPrimaryKeyProviderMySQLSpec extends Specification {
   JsonObject config
 
   def setup() {
-    config = TestUtils.getMysqlConfigurationBuilder()
+    config = TestUtils.getFirebirdConfigurationBuilder()
         .add("tableName", "stars")
         .build()
     connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
-    String sql = " DROP TABLE IF EXISTS stars;"
+    String sql = " DROP TABLE stars;"
     connection.createStatement().execute(sql)
     sql = "CREATE TABLE stars (id int AUTO_INCREMENT, isDead boolean, name varchar(255) NOT NULL, radius int, destination float, createdat timestamp, PRIMARY KEY (id))"
     connection.createStatement().execute(sql);
   }
 
   def cleanupSpec() {
-    String sql = " DROP TABLE IF EXISTS stars;"
+    String sql = " DROP TABLE stars;"
     connection.createStatement().execute(sql)
     connection.close()
   }

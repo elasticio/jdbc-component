@@ -6,7 +6,8 @@ import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
 import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.triggers.GetRowsPollingTrigger
-import spock.lang.*
+import spock.lang.Shared
+import spock.lang.Specification
 
 import javax.json.Json
 import javax.json.JsonObject
@@ -14,17 +15,17 @@ import javax.json.JsonObjectBuilder
 import java.sql.Connection
 import java.sql.DriverManager
 
-class GetRowsPollingTriggerMySQLSpec extends Specification {
+class GetRowsPollingTriggerFirebirdSpec extends Specification {
 
 
   @Shared
   Connection connection;
 
   def setup() {
-    JsonObject config = TestUtils.getMysqlConfigurationBuilder().build()
+    JsonObject config = TestUtils.getFirebirdConfigurationBuilder().build()
     connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
 
-    String sql = "DROP TABLE IF EXISTS stars"
+    String sql = "DROP TABLE stars"
     connection.createStatement().execute(sql)
 
     sql = "CREATE TABLE stars (id int, isDead boolean, name varchar(255) NOT NULL, radius int, destination float, createdat timestamp)"
@@ -59,7 +60,7 @@ class GetRowsPollingTriggerMySQLSpec extends Specification {
     given:
     Message msg = new Message.Builder().build();
 
-    JsonObjectBuilder config = TestUtils.getMysqlConfigurationBuilder()
+    JsonObjectBuilder config = TestUtils.getFirebirdConfigurationBuilder()
     config.add("pollingField", "createdat")
         .add("pollingValue", "2018-06-14 00:00:00")
         .add("tableName", "stars")

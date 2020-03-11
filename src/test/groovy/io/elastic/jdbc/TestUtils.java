@@ -12,6 +12,8 @@ public class TestUtils {
   public static final String TEST_TABLE_NAME = "stars";
   private static final String SQL_DELETE_TABLE =
       " DROP TABLE IF EXISTS " + TEST_TABLE_NAME;
+  private static final String FIREBIRD_DELETE_TABLE =
+      " DROP TABLE " + TEST_TABLE_NAME + ";";
   private static final String ORACLE_DELETE_TABLE = "BEGIN"
       + "   EXECUTE IMMEDIATE 'DROP TABLE "
       + TEST_TABLE_NAME + "';"
@@ -55,6 +57,14 @@ public class TestUtils {
       + "visible bit, "
       + "createdat DATETIME, "
       + "diameter INT GENERATED ALWAYS AS (radius * 2));";
+  private static final String FIREBIRD_CREATE_TABLE = "CREATE TABLE "
+      + TEST_TABLE_NAME
+      + " (id INT PRIMARY KEY, "
+      + "name VARCHAR(255) NOT NULL, "
+      + "radius INT NOT NULL, "
+      + "destination FLOAT, "
+      + "visible SMALLINT, "
+      + "createdat TIMESTAMP);";
   private static Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
   public static JsonObjectBuilder getMssqlConfigurationBuilder() {
@@ -162,6 +172,9 @@ public class TestUtils {
       case "postgresql":
         connection.createStatement().execute(POSTGRESQL_CREATE_TABLE);
         break;
+      case "firebirdsql":
+        connection.createStatement().execute(FIREBIRD_CREATE_TABLE);
+        break;
       default:
         throw new RuntimeException("Unsupported dbEngine" + dbEngine);
     }
@@ -171,6 +184,8 @@ public class TestUtils {
       throws SQLException {
     if (dbEngine.toLowerCase().equals("oracle")){
       connection.createStatement().execute(ORACLE_DELETE_TABLE);
+    } else if (dbEngine.toLowerCase().equals("firebirdsql")){
+      connection.createStatement().execute(FIREBIRD_DELETE_TABLE);
     } else {
       connection.createStatement().execute(SQL_DELETE_TABLE);
     }

@@ -17,7 +17,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
-public class MySQL extends Query {
+public class Firebird extends Query {
 
   public ArrayList executePolling(Connection connection) throws SQLException {
     validateQuery();

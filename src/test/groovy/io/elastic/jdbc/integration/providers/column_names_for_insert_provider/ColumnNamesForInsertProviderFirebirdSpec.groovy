@@ -1,7 +1,7 @@
 package io.elastic.jdbc.integration.providers.column_names_for_insert_provider
 
-import io.elastic.jdbc.providers.ColumnNamesForInsertProvider
 import io.elastic.jdbc.TestUtils
+import io.elastic.jdbc.providers.ColumnNamesForInsertProvider
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -11,7 +11,7 @@ import javax.json.JsonReader
 import java.sql.Connection
 import java.sql.DriverManager
 
-class ColumnNamesForInsertProviderMySQLSpec extends Specification {
+class ColumnNamesForInsertProviderFirebirdSpec extends Specification {
 
   @Shared
   Connection connection
@@ -19,18 +19,18 @@ class ColumnNamesForInsertProviderMySQLSpec extends Specification {
   JsonObject config
 
   def setup() {
-    config = TestUtils.getMysqlConfigurationBuilder()
+    config = TestUtils.getFirebirdConfigurationBuilder()
         .add("tableName", "stars")
         .build()
     connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"));
-    String sql = " DROP TABLE IF EXISTS stars;"
+    String sql = " DROP TABLE stars;"
     connection.createStatement().execute(sql)
     sql = "CREATE TABLE stars (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, radius INT NOT NULL, destination FLOAT, createdat DATETIME, diameter INT GENERATED ALWAYS AS (radius * 2));"
     connection.createStatement().execute(sql);
   }
 
   def cleanupSpec() {
-    String sql = " DROP TABLE IF EXISTS stars;"
+    String sql = " DROP TABLE stars;"
     connection.createStatement().execute(sql)
     connection.close()
   }

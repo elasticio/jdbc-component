@@ -14,7 +14,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 
-class InsertActionMySQLSpec extends Specification {
+class InsertActionFirebirdSpec extends Specification {
   @Shared
   Connection connection
   @Shared
@@ -24,11 +24,11 @@ class InsertActionMySQLSpec extends Specification {
   @Shared
   InsertAction action = new InsertAction()
   @Shared
-  String dbEngine = "mysql"
+  String dbEngine = "firebirdsql"
 
 
   def setupSpec() {
-    configuration = TestUtils.getMysqlConfigurationBuilder()
+    configuration = TestUtils.getFirebirdConfigurationBuilder()
         .add("tableName", TestUtils.TEST_TABLE_NAME)
         .build()
     connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
@@ -54,6 +54,7 @@ class InsertActionMySQLSpec extends Specification {
 
   def "one insert"() {
     JsonObject body = Json.createObjectBuilder()
+        .add("id", 1)
         .add("name", "Taurus")
         .add("radius", 12)
         .add("visible", true)
@@ -68,6 +69,6 @@ class InsertActionMySQLSpec extends Specification {
 
     expect:
     records.size() == 1
-    records.get(0) == '{id=1, name=Taurus, radius=12, destination=null, visible=true, createdat=2015-02-19 10:10:10.0, diameter=24}'
+    records.get(0) == '{ID=1, NAME=Taurus, RADIUS=12, DESTINATION=null, VISIBLE=1, CREATEDAT=2015-02-19 10:10:10.0}'
   }
 }

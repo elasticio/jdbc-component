@@ -35,10 +35,10 @@ public class LookupRowByPrimaryKey implements Module {
     JsonObject snapshot = parameters.getSnapshot();
     StringBuilder primaryKey = new StringBuilder();
     StringBuilder primaryValue = new StringBuilder();
-    Integer primaryKeysCount = 0;
+    int primaryKeysCount = 0;
     String tableName = "";
     String dbEngine = "";
-    Boolean nullableResult = false;
+    boolean nullableResult = false;
 
     if (configuration.containsKey(PROPERTY_TABLE_NAME)
         && Utils.getNonNullString(configuration, PROPERTY_TABLE_NAME).length() != 0) {
@@ -64,8 +64,6 @@ public class LookupRowByPrimaryKey implements Module {
       nullableResult = true;
     }
 
-    boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
-
     for (Map.Entry<String, JsonValue> entry : body.entrySet()) {
       LOGGER.info("{} = {}", entry.getKey(), entry.getValue());
       primaryKey.append(entry.getKey());
@@ -77,7 +75,7 @@ public class LookupRowByPrimaryKey implements Module {
 
       try (Connection connection = Utils.getConnection(configuration)) {
         LOGGER.info("Executing lookup row by primary key action");
-        Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
+        Utils.columnTypes = Utils.getColumnTypes(connection, tableName);
         LOGGER.info("Detected column types: " + Utils.columnTypes);
         try {
           QueryFactory queryFactory = new QueryFactory();

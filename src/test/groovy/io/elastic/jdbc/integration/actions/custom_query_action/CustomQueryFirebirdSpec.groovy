@@ -14,7 +14,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 
-class CustomQueryMySQLSpec extends Specification {
+class CustomQueryFirebirdSpec extends Specification {
   @Shared
   Connection connection
 
@@ -60,7 +60,7 @@ class CustomQueryMySQLSpec extends Specification {
   }
 
   def getConfig() {
-    JsonObject config = TestUtils.getMysqlConfigurationBuilder()
+    JsonObject config = TestUtils.getFirebirdConfigurationBuilder()
             .add("tableName", "stars")
             .add("nullableResult", "true")
             .build();
@@ -68,10 +68,8 @@ class CustomQueryMySQLSpec extends Specification {
   }
 
   def prepareStarsTable() {
-    String sql = "DROP TABLE IF EXISTS stars;"
-    connection.createStatement().execute(sql);
     connection.createStatement().execute("CREATE TABLE stars (id int PRIMARY KEY, name varchar(255) NOT NULL, " +
-            "date datetime, radius int, destination int, visible bit, visibledate date)");
+            "datet timestamp, radius int, destination int, visible smallint, visibledate date)");
     connection.createStatement().execute("INSERT INTO stars values (1,'Taurus', '2015-02-19 10:10:10.0'," +
             " 123, 5, 0, '2015-02-19')")
     connection.createStatement().execute("INSERT INTO stars values (2,'Eridanus', '2017-02-19 10:10:10.0'," +
@@ -89,23 +87,19 @@ class CustomQueryMySQLSpec extends Specification {
     return records;
   }
 
-  def cleanupSpec() {
-    String sql = "DROP TABLE IF EXISTS persons;"
-
-    connection.createStatement().execute(sql)
-    sql = "DROP TABLE IF EXISTS stars;"
-    connection.createStatement().execute(sql)
+  def cleanup() {
+    connection.createStatement().execute("DROP TABLE stars;")
     connection.close()
   }
 
   def "make select"() {
-
+    String tableName = "stars";
     prepareStarsTable();
 
     JsonObject snapshot = Json.createObjectBuilder().build()
 
     JsonObject body = Json.createObjectBuilder()
-        .add("query", "SELECT * FROM stars")
+        .add("query", "SELECT * FROM " + tableName)
         .build();
 
     when:
@@ -116,7 +110,7 @@ class CustomQueryMySQLSpec extends Specification {
   }
 
   def "make insert"() {
-
+    String tableName = "stars";
     prepareStarsTable();
 
     JsonObject snapshot = Json.createObjectBuilder().build()
@@ -137,7 +131,7 @@ class CustomQueryMySQLSpec extends Specification {
   }
 
   def "make delete"() {
-
+    String tableName = "stars";
     prepareStarsTable();
 
     JsonObject snapshot = Json.createObjectBuilder().build()

@@ -5,7 +5,6 @@ import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
 import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.actions.DeleteRowByPrimaryKey
-import org.junit.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -15,7 +14,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 
-class DeleteActionMySQLSpec extends Specification {
+class DeleteActionFirebirdSpec extends Specification {
   @Shared
   Connection connection
 
@@ -61,7 +60,7 @@ class DeleteActionMySQLSpec extends Specification {
   }
 
   def getStarsConfig() {
-    JsonObject config = TestUtils.getMysqlConfigurationBuilder()
+    JsonObject config = TestUtils.getFirebirdConfigurationBuilder()
         .add("tableName", "stars")
         .add("nullableResult", "true")
         .build();
@@ -69,7 +68,7 @@ class DeleteActionMySQLSpec extends Specification {
   }
 
   def prepareStarsTable() {
-    String sql = "DROP TABLE IF EXISTS stars;"
+    String sql = "DROP TABLE stars;"
     connection.createStatement().execute(sql);
     connection.createStatement().execute("CREATE TABLE stars (id int PRIMARY KEY, name varchar(255) NOT NULL, " +
         "date datetime, radius int, destination int, visible bit, visibledate date)");
@@ -91,10 +90,10 @@ class DeleteActionMySQLSpec extends Specification {
   }
 
   def cleanupSpec() {
-    String sql = "DROP TABLE IF EXISTS persons;"
+    String sql = "DROP TABLE persons;"
 
     connection.createStatement().execute(sql)
-    sql = "DROP TABLE IF EXISTS stars;"
+    sql = "DROP TABLE stars;"
     connection.createStatement().execute(sql)
     connection.close()
   }

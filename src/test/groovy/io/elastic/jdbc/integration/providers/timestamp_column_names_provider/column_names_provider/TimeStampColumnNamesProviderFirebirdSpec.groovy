@@ -9,25 +9,25 @@ import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 
-class TimeStampColumnNamesProviderMySQLSpec extends Specification {
+class TimeStampColumnNamesProviderFirebirdSpec extends Specification {
     @Shared
     Connection connection
     @Shared
     JsonObject config
 
     def setup() {
-        config = TestUtils.getMysqlConfigurationBuilder()
+        config = TestUtils.getFirebirdConfigurationBuilder()
                 .add("tableName", "stars")
                 .build()
         connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"));
-        String sql = "DROP TABLE IF EXISTS stars;"
+        String sql = "DROP TABLE stars;"
         connection.createStatement().execute(sql)
         sql = "CREATE TABLE stars (ID int, name varchar(255) NOT NULL, radius int, destination float, createdat DATETIME)"
         connection.createStatement().execute(sql);
     }
 
     def cleanupSpec() {
-        String sql = " DROP TABLE IF EXISTS stars;"
+        String sql = " DROP TABLE stars;"
         connection.createStatement().execute(sql)
         connection.close()
     }

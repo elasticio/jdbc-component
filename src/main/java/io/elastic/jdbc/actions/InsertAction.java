@@ -30,10 +30,11 @@ public class InsertAction implements Module {
     final JsonObject body = parameters.getMessage().getBody();
     final String dbEngine = Utils.getDbEngine(configuration);
     final boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
-    final String tableName = Utils.getTableName(configuration, isOracle);
+    final boolean isFirebird = dbEngine.equals(Engines.FIREBIRDSQL.name().toLowerCase());
+    final String tableName = Utils.getTableName(configuration, (isOracle || isFirebird));
     LOGGER.info("Found dbEngine: '{}' and tableName: '{}'", dbEngine, tableName);
     try (Connection connection = Utils.getConnection(configuration)) {
-      Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
+      Utils.columnTypes = Utils.getColumnTypes(connection, tableName);
       LOGGER.info("Detected column types: " + Utils.columnTypes);
       LOGGER.info("Inserting in table '{}' values '{}'", tableName, body);
       QueryFactory queryFactory = new QueryFactory();

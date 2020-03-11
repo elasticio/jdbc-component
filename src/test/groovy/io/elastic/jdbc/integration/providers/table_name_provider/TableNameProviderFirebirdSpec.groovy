@@ -10,7 +10,7 @@ import javax.json.JsonObjectBuilder
 import java.sql.Connection
 import java.sql.DriverManager
 
-class TableNameProviderMySQLSpec extends Specification {
+class TableNameProviderFirebirdSpec extends Specification {
 
     @Shared
     Connection connection
@@ -20,26 +20,26 @@ class TableNameProviderMySQLSpec extends Specification {
 
     def setupSpec() {
         Class.forName("com.mysql.jdbc.Driver");
-        JsonObject config = TestUtils.getMysqlConfigurationBuilder().build()
+        JsonObject config = TestUtils.getFirebirdConfigurationBuilder().build()
         connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
 
 
-        connection.createStatement().execute(" DROP TABLE IF EXISTS users");
-        connection.createStatement().execute(" DROP TABLE IF EXISTS products");
-        connection.createStatement().execute(" DROP TABLE IF EXISTS orders");
+        connection.createStatement().execute(" DROP TABLE users");
+        connection.createStatement().execute(" DROP TABLE products");
+        connection.createStatement().execute(" DROP TABLE orders");
     }
 
     def cleanupSpec() {
-        connection.createStatement().execute(" DROP TABLE IF EXISTS users");
-        connection.createStatement().execute(" DROP TABLE IF EXISTS products");
-        connection.createStatement().execute(" DROP TABLE IF EXISTS orders");
+        connection.createStatement().execute(" DROP TABLE users");
+        connection.createStatement().execute(" DROP TABLE products");
+        connection.createStatement().execute(" DROP TABLE orders");
 
         connection.close();
     }
 
     def "create tables, successful"() {
 
-        JsonObjectBuilder config = TestUtils.getMysqlConfigurationBuilder()
+        JsonObjectBuilder config = TestUtils.getFirebirdConfigurationBuilder()
                 .add("tableName", "stars")
 
         String sql1 = "CREATE TABLE users (id int, name varchar(255) NOT NULL, radius int, destination int)"

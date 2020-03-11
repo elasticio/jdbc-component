@@ -31,7 +31,7 @@ public class UpsertRowByPrimaryKey implements Module {
     JsonObject resultRow;
     String tableName;
     String dbEngine;
-    String catalog = null;
+    String catalog = "";
     String schemaName = "";
     String primaryKey = "";
     int primaryKeysCount = 0;
@@ -55,13 +55,17 @@ public class UpsertRowByPrimaryKey implements Module {
     }
 
     LOGGER.info("Executing lookup primary key");
-    boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
-    Boolean isMysql = configuration.getString("dbEngine").equals("mysql");
+    final boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
+    final boolean isMysql = dbEngine.equals(Engines.MYSQL.name().toLowerCase());
+    final boolean isFirebird = dbEngine.equals(Engines.FIREBIRDSQL.name().toLowerCase());
 
     try (Connection connection = Utils.getConnection(configuration)) {
       DatabaseMetaData dbMetaData = connection.getMetaData();
       if (isMysql) {
         catalog = configuration.getString("databaseName");
+      }
+      if (isFirebird) {
+        tableName = tableName.toUpperCase();
       }
       if (tableName.contains(".")) {
         schemaName =
@@ -78,7 +82,7 @@ public class UpsertRowByPrimaryKey implements Module {
         }
         if (primaryKeysCount == 1) {
           LOGGER.info("Executing upsert row by primary key action");
-          Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
+          Utils.columnTypes = Utils.getColumnTypes(connection, tableName);
           LOGGER.info("Detected column types: " + Utils.columnTypes);
           QueryFactory queryFactory = new QueryFactory();
           Query query = queryFactory.getQuery(dbEngine);

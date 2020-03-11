@@ -5,16 +5,17 @@ import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
 import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.triggers.SelectTrigger
-import spock.lang.*
+import spock.lang.Shared
+import spock.lang.Specification
 
 import javax.json.Json
 import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 
-class SelectTriggerMySQLSpec extends Specification {
+class SelectTriggerFirebirdSpec extends Specification {
     @Shared
-    def credentials = TestUtils.getMysqlConfigurationBuilder().build()
+    def credentials = TestUtils.getFirebirdConfigurationBuilder().build()
     @Shared
     def user = credentials.getString("user")
     @Shared
@@ -65,21 +66,21 @@ class SelectTriggerMySQLSpec extends Specification {
     }
 
     def getStarsConfig() {
-        JsonObject config = TestUtils.getMysqlConfigurationBuilder()
+        JsonObject config = TestUtils.getFirebirdConfigurationBuilder()
                 .add("sqlQuery", "SELECT * from stars where id = 1")
                 .build();
         return config;
     }
 
     def prepareStarsTable() {
-        String sql = "DROP TABLE IF EXISTS stars;"
+        String sql = "DROP TABLE stars;"
         connection.createStatement().execute(sql);
         connection.createStatement().execute("CREATE TABLE stars (id int, name varchar(255) NOT NULL, date datetime, radius int, destination int)");
         connection.createStatement().execute("INSERT INTO stars (id, name) VALUES (1,'Hello')");
     }
 
     def cleanupSpec() {
-        String sql = "DROP TABLE IF EXISTS stars;"
+        String sql = "DROP TABLE stars;"
         connection.createStatement().execute(sql)
         connection.close()
     }
