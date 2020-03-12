@@ -25,8 +25,9 @@ public class Firebird extends Query {
     /* workaround to set FIRST operation on the 1st position in the statement */
     StringBuilder sql = new StringBuilder("WITH d AS (SELECT * FROM ");
     sql.append(tableName);
-    sql.append(" WHERE ID = ?");
-    sql.append(") ");
+    sql.append(" WHERE ");
+    sql.append(pollingField);
+    sql.append(" > ?) ");
     sql.append("SELECT FIRST ? * FROM d");
     if (orderField != null) {
       sql.append(" ORDER BY ").append(orderField).append(" ASC");
@@ -37,6 +38,8 @@ public class Firebird extends Query {
 
   public JsonObject executeLookup(Connection connection, JsonObject body) throws SQLException {
     validateQuery();
+
+    /* workaround to set FIRST operation on the 1st position in the statement */
     StringBuilder sql = new StringBuilder("SELECT * FROM ");
     sql.append(tableName);
     sql.append(" WHERE ");
@@ -44,6 +47,7 @@ public class Firebird extends Query {
     sql.append(" = ?");
     sql.append(" ORDER BY ").append(lookupField);
     sql.append(" ASC ROWS ? TO ?");
+
     return getLookupRow(connection, body, sql.toString(), 1, skipNumber += countNumber);
   }
 
