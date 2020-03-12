@@ -284,8 +284,8 @@ public abstract class Query {
 
   public ArrayList getRowsExecutePolling(Connection connection, String sql) throws SQLException {
     try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-      stmt.setTimestamp(2, pollingValue);
-      stmt.setInt(1, countNumber);
+      stmt.setTimestamp(1, pollingValue);
+      stmt.setInt(2, countNumber);
       LOGGER.info("SQL statement: {} with params: {}, {}", sql, pollingValue, countNumber);
       try (ResultSet rs = stmt.executeQuery()) {
         ArrayList listResult = new ArrayList();

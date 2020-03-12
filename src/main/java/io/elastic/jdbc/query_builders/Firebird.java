@@ -23,16 +23,14 @@ public class Firebird extends Query {
     validateQuery();
 
     /* workaround to set FIRST operation on the 1st position in the statement */
-    StringBuilder sql = new StringBuilder("SELECT FIRST ? * FROM");
-    sql.append("(SELECT * FROM ");
+    StringBuilder sql = new StringBuilder("WITH d AS (SELECT * FROM ");
     sql.append(tableName);
-    sql.append(" WHERE ");
-    sql.append(pollingField);
-    sql.append(" > ?");
+    sql.append(" WHERE ID = ?");
+    sql.append(") ");
+    sql.append("SELECT FIRST ? * FROM d");
     if (orderField != null) {
       sql.append(" ORDER BY ").append(orderField).append(" ASC");
     }
-    sql.append(")");
 
     return getRowsExecutePolling(connection, sql.toString());
   }
