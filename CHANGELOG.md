@@ -1,4 +1,9 @@
 # JDBC Component
+
+## 2.4.0 (March 12, 2020) 
+
+* Add Firebird RDBMS support
+
 ## 2.3.2 (October 21, 2019)
 
 * Add rebound mechanism in case of deadlocks for actions: Insert, UpsertByPK, DeleteByPK

@@ -53,7 +53,7 @@ public class Utils {
     reboundDbState.put(Engines.MSSQL.name(), Collections.singletonList("40001"));
     reboundDbState.put(Engines.MYSQL.name(), Arrays.asList("40001", "XA102"));
     reboundDbState.put(Engines.ORACLE.name(), Collections.singletonList("61000"));
-    reboundDbState.put(Engines.FIREBIRDSQL.name(), Collections.singletonList("10054")); // 10038 ?
+    reboundDbState.put(Engines.FIREBIRDSQL.name(), Arrays.asList("10054", "10038"));
   }
 
   public static Connection getConnection(final JsonObject config) throws SQLException {
