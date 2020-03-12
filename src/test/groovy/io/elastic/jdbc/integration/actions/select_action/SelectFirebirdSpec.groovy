@@ -17,22 +17,11 @@ class SelectFirebirdSpec extends Specification {
 
   @Shared
   def credentials = TestUtils.getFirebirdConfigurationBuilder().build()
-  @Shared
-  def host = credentials.getString("host")
-  @Shared
-  def port = credentials.getString("port")
-  @Shared
-  def databaseName = credentials.getString("databaseName")
-  @Shared
-  def user = credentials.getString("user")
-  @Shared
-  def password = credentials.getString("password")
-  @Shared
-  def connectionString = "jdbc:firebirdsql://" + host + ":" + port + "/" + databaseName
 
   @Shared
   Connection connection
-
+  @Shared
+  JsonObject configuration
   @Shared
   EventEmitter.Callback errorCallback
   @Shared
@@ -49,7 +38,10 @@ class SelectFirebirdSpec extends Specification {
   SelectAction action
 
   def setupSpec() {
-    connection = DriverManager.getConnection(connectionString, user, password)
+    configuration = TestUtils.getFirebirdConfigurationBuilder()
+            .add("tableName", TestUtils.TEST_TABLE_NAME)
+            .build()
+    connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
   }
 
   def setup() {
@@ -85,15 +77,13 @@ class SelectFirebirdSpec extends Specification {
   }
 
   def prepareStarsTable() {
-    String sql = "DROP TABLE IF EXISTS stars"
-    connection.createStatement().execute(sql);
-    connection.createStatement().execute("CREATE TABLE stars (id int, name varchar(255) NOT NULL, date datetime, radius int, destination int)");
+    connection.createStatement().execute("CREATE TABLE stars (id int, name varchar(255) NOT NULL, datet timestamp, radius int, destination int)");
     connection.createStatement().execute("INSERT INTO stars (id, name) VALUES (1,'Hello')");
     connection.createStatement().execute("INSERT INTO stars (id, name) VALUES (2,'World')");
   }
 
   def cleanupSpec() {
-    String sql = "DROP TABLE IF EXISTS stars"
+    String sql = "DROP TABLE stars"
     connection.createStatement().execute(sql)
     connection.close()
   }

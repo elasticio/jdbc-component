@@ -68,10 +68,8 @@ class DeleteActionFirebirdSpec extends Specification {
   }
 
   def prepareStarsTable() {
-    String sql = "DROP TABLE stars;"
-    connection.createStatement().execute(sql);
     connection.createStatement().execute("CREATE TABLE stars (id int PRIMARY KEY, name varchar(255) NOT NULL, " +
-        "date datetime, radius int, destination int, visible bit, visibledate date)");
+        "datet timestamp, radius int, destination int, visible smallint, visibledate date)");
     connection.createStatement().execute("INSERT INTO stars values (1,'Taurus', '2015-02-19 10:10:10.0'," +
         " 123, 5, 0, '2015-02-19')")
     connection.createStatement().execute("INSERT INTO stars values (2,'Eridanus', '2017-02-19 10:10:10.0'," +
@@ -90,11 +88,7 @@ class DeleteActionFirebirdSpec extends Specification {
   }
 
   def cleanupSpec() {
-    String sql = "DROP TABLE persons;"
-
-    connection.createStatement().execute(sql)
-    sql = "DROP TABLE stars;"
-    connection.createStatement().execute(sql)
+    connection.createStatement().execute("DROP TABLE stars;")
     connection.close()
   }
 

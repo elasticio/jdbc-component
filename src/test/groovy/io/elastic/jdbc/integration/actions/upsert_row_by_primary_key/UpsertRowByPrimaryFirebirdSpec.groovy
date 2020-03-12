@@ -68,11 +68,8 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
   }
 
   def prepareStarsTable() {
-
-    String sql = "DROP TABLE stars;"
-    connection.createStatement().execute(sql);
     connection.createStatement().execute("CREATE TABLE stars (id int PRIMARY KEY, name varchar(255) NOT NULL, " +
-            "date datetime, radius int, destination int, visible bit, visibledate date)");
+            "datet timestamp, radius int, destination int, visible smallint, visibledate date)");
   }
 
   def getRecords(tableName) {
@@ -87,9 +84,6 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
   }
 
   def cleanupSpec() {
-    String sql = "DROP TABLE persons;"
-
-    connection.createStatement().execute(sql)
     sql = "DROP TABLE stars;"
     connection.createStatement().execute(sql)
     connection.close()
@@ -104,9 +98,9 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
     JsonObject body = Json.createObjectBuilder()
     .add("id", 1)
     .add("name", "Taurus")
-    .add("date", "2015-02-19 10:10:10.0")
+    .add("datet", "2015-02-19 10:10:10.0")
     .add("radius", 123)
-    .add("visible", true)
+    .add("visible", 1)
     .build();
 
     runAction(getStarsConfig(), body, snapshot)
@@ -115,8 +109,8 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
 
     expect:
     records.size() == 1
-    records.get(0) == '{id=1, name=Taurus, date=2015-02-19 10:10:10.0, radius=123, destination=null, visible=true, ' +
-            'visibledate=null}'
+    records.get(0) == '{ID=1, NAME=Taurus, DATET=2015-02-19 10:10:10.0, RADIUS=123, DESTINATION=null, VISIBLE=1, ' +
+            'VISIBLEDATE=null}'
   }
 
   def "one insert, incorrect value: string in integer field"() {
@@ -167,8 +161,8 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
 
     expect:
     records.size() == 2
-    records.get(0) == '{id=1, name=Taurus, date=null, radius=123, destination=null, visible=null, visibledate=null}'
-    records.get(1) == '{id=2, name=Eridanus, date=null, radius=456, destination=null, visible=null, visibledate=null}'
+    records.get(0) == '{ID=1, NAME=Taurus, DATET=null, RADIUS=123, DESTINATION=null, VISIBLE=null, VISIBLEDATE=null}'
+    records.get(1) == '{ID=2, NAME=Eridanus, DATET=null, RADIUS=456, DESTINATION=null, VISIBLE=null, VISIBLEDATE=null}'
   }
 
   def "one insert, one update by ID"() {
@@ -194,7 +188,7 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
 
     expect:
     records.size() == 1
-    records.get(0) == '{id=1, name=Eridanus, date=null, radius=123, destination=null, visible=null, visibledate=null}'
+    records.get(0) == '{ID=1, NAME=Eridanus, DATET=null, RADIUS=123, DESTINATION=null, VISIBLE=null, VISIBLEDATE=null}'
   }
 
 
@@ -229,7 +223,7 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
 
     expect:
     records.size() == 1
-    records.get(0) == '{id=1, name=O\'Henry, email=ohenry@elastic.io}'
+    records.get(0) == '{ID=1, NAME=O\'Henry, EMAIL=ohenry@elastic.io}'
   }
 
   def "two inserts, one update by email"() {
@@ -263,7 +257,7 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
 
     expect:
     records.size() == 2
-    records.get(0) == '{id=1, name=User1, email=user1@elastic.io}'
-    records.get(1) == '{id=3, name=User3, email=user2@elastic.io}'
+    records.get(0) == '{ID=1, NAME=User1, EMAIL=user1@elastic.io}'
+    records.get(1) == '{ID=3, NAME=User3, EMAIL=user2@elastic.io}'
   }
 }

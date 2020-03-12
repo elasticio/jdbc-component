@@ -25,13 +25,10 @@ class GetRowsPollingTriggerFirebirdSpec extends Specification {
     JsonObject config = TestUtils.getFirebirdConfigurationBuilder().build()
     connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
 
-    String sql = "DROP TABLE stars"
+    String sql = "CREATE TABLE stars (id int, isDead smallint, name varchar(255) NOT NULL, radius int, destination float, createdat timestamp)"
     connection.createStatement().execute(sql)
 
-    sql = "CREATE TABLE stars (id int, isDead boolean, name varchar(255) NOT NULL, radius int, destination float, createdat timestamp)"
-    connection.createStatement().execute(sql)
-
-    sql = "INSERT INTO stars (id, isDead, name, radius, destination, createdat) VALUES (1, false, 'Sun', 50, 170, '2018-06-14 10:00:00')"
+    sql = "INSERT INTO stars (id, isDead, name, radius, destination, createdat) VALUES (1, 0, 'Sun', 50, 170, '2018-06-14 10:00:00')"
     connection.createStatement().execute(sql)
   }
 
@@ -76,7 +73,7 @@ class GetRowsPollingTriggerFirebirdSpec extends Specification {
     0 * errorCallback.receive(_)
     dataCallback.receive({
       it.body.getInt("id").equals(1)
-      it.body.getBoolean("isDead").equals(false)
+      it.body.getBoolean("isDead").equals(0)
       it.body.getString("name").equals("Sun")
       it.body.getString("createdat").equals("2018-06-14 13:00:00.0")
     })

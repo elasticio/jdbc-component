@@ -21,7 +21,10 @@ public class Firebird extends Query {
 
   public ArrayList executePolling(Connection connection) throws SQLException {
     validateQuery();
-    StringBuilder sql = new StringBuilder("SELECT * FROM ");
+
+    /* workaround to set FIRST operation on the 1st position in the statement */
+    StringBuilder sql = new StringBuilder("SELECT FIRST ? * FROM");
+    sql.append("(SELECT * FROM ");
     sql.append(tableName);
     sql.append(" WHERE ");
     sql.append(pollingField);
@@ -29,7 +32,7 @@ public class Firebird extends Query {
     if (orderField != null) {
       sql.append(" ORDER BY ").append(orderField).append(" ASC");
     }
-    sql.append(" LIMIT ?");
+    sql.append(")");
 
     return getRowsExecutePolling(connection, sql.toString());
   }
@@ -42,8 +45,8 @@ public class Firebird extends Query {
     sql.append(lookupField);
     sql.append(" = ?");
     sql.append(" ORDER BY ").append(lookupField);
-    sql.append(" ASC LIMIT ? OFFSET ?");
-    return getLookupRow(connection, body, sql.toString(), countNumber, skipNumber);
+    sql.append(" ASC ROWS ? TO ?");
+    return getLookupRow(connection, body, sql.toString(), 1, skipNumber += countNumber);
   }
 
   public int executeDelete(Connection connection, JsonObject body) throws SQLException {

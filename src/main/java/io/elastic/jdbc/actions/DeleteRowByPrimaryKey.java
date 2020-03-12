@@ -35,27 +35,11 @@ public class DeleteRowByPrimaryKey implements Module {
     StringBuilder primaryKey = new StringBuilder();
     StringBuilder primaryValue = new StringBuilder();
     Integer primaryKeysCount = 0;
-    String tableName = "";
-    String dbEngine = "";
     Boolean nullableResult = false;
-
-    if (configuration.containsKey(PROPERTY_TABLE_NAME)
-        && Utils.getNonNullString(configuration, PROPERTY_TABLE_NAME).length() != 0) {
-      tableName = configuration.getString(PROPERTY_TABLE_NAME);
-    } else if (snapshot.containsKey(PROPERTY_TABLE_NAME)
-        && Utils.getNonNullString(snapshot, PROPERTY_TABLE_NAME).length() != 0) {
-      tableName = snapshot.getString(PROPERTY_TABLE_NAME);
-    } else {
-      throw new RuntimeException("Table name is required field");
-    }
-
-    if (Utils.getNonNullString(configuration, PROPERTY_DB_ENGINE).length() != 0) {
-      dbEngine = configuration.getString(PROPERTY_DB_ENGINE);
-    } else if (Utils.getNonNullString(snapshot, PROPERTY_DB_ENGINE).length() != 0) {
-      dbEngine = snapshot.getString(PROPERTY_DB_ENGINE);
-    } else {
-      throw new RuntimeException("DB Engine is required field");
-    }
+    final String dbEngine = Utils.getDbEngine(configuration);
+    final boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
+    final boolean isFirebird = dbEngine.equals(Engines.FIREBIRDSQL.name().toLowerCase());
+    final String tableName = Utils.getTableName(configuration, (isOracle || isFirebird));
 
     if (Utils.getNonNullString(configuration, PROPERTY_NULLABLE_RESULT).equals("true")) {
       nullableResult = true;

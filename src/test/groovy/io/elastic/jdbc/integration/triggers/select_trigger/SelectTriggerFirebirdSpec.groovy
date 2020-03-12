@@ -17,13 +17,9 @@ class SelectTriggerFirebirdSpec extends Specification {
     @Shared
     def credentials = TestUtils.getFirebirdConfigurationBuilder().build()
     @Shared
-    def user = credentials.getString("user")
-    @Shared
-    def password = credentials.getString("password")
-    @Shared
-    def connectionString = credentials.getString("connectionString")
-    @Shared
     Connection connection
+    @Shared
+    JsonObject configuration
 
     @Shared
     EventEmitter.Callback errorCallback
@@ -41,7 +37,10 @@ class SelectTriggerFirebirdSpec extends Specification {
     SelectTrigger trigger
 
     def setupSpec() {
-        connection = DriverManager.getConnection(connectionString, user, password)
+        configuration = TestUtils.getFirebirdConfigurationBuilder()
+                .add("tableName", TestUtils.TEST_TABLE_NAME)
+                .build()
+        connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
     }
 
     def setup() {
@@ -73,9 +72,7 @@ class SelectTriggerFirebirdSpec extends Specification {
     }
 
     def prepareStarsTable() {
-        String sql = "DROP TABLE stars;"
-        connection.createStatement().execute(sql);
-        connection.createStatement().execute("CREATE TABLE stars (id int, name varchar(255) NOT NULL, date datetime, radius int, destination int)");
+        connection.createStatement().execute("CREATE TABLE stars (id int, name varchar(255) NOT NULL, datet timestamp, radius int, destination int)");
         connection.createStatement().execute("INSERT INTO stars (id, name) VALUES (1,'Hello')");
     }
 
