@@ -51,7 +51,9 @@ public class MySQL extends Query {
         " FROM " + tableName +
         " WHERE " + lookupField + " = ?";
     try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-      stmt.setString(1, lookupValue);
+      for (Map.Entry<String, JsonValue> entry : body.entrySet()) {
+        Utils.setStatementParam(stmt, 1, entry.getKey(), body);
+      }
       return stmt.executeUpdate();
     }
   }

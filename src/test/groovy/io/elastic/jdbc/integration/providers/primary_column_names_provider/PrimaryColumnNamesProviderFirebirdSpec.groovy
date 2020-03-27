@@ -12,29 +12,36 @@ import java.sql.DriverManager
 
 class PrimaryColumnNamesProviderFirebirdSpec extends Specification {
 
-
   @Shared
   Connection connection
+  @Shared
+  JsonObject config = TestUtils.getFirebirdConfigurationBuilder().build()
+  @Shared
+  String sqlDropTable = "EXECUTE BLOCK AS BEGIN\n" +
+          "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
+          "execute statement 'DROP TABLE STARS;';\n" +
+          "END"
+  @Shared
+  String sqlCreateTable = "EXECUTE BLOCK AS BEGIN\n" +
+          "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
+          "execute statement 'CREATE TABLE STARS (ID int NOT NULL, name varchar(255) NOT NULL, RADIUS int, DESTINATION float, CREATEDAT TIMESTAMP, PRIMARY KEY (ID));';\n" +
+          "END"
 
   def setup() {
-    JsonObject config = TestUtils.getFirebirdConfigurationBuilder().build()
     connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"));
-    String sql = "DROP TABLE stars"
-    connection.createStatement().execute(sql)
-    sql = "CREATE TABLE stars (ID int, name varchar(255) NOT NULL, radius int, destination float, createdat DATETIME, PRIMARY KEY (ID))"
-    connection.createStatement().execute(sql);
+    connection.createStatement().execute(sqlDropTable)
+    connection.createStatement().execute(sqlCreateTable)
   }
 
   def cleanupSpec() {
-    String sql = "DROP TABLE stars"
-    connection.createStatement().execute(sql)
+    connection.createStatement().execute(sqlDropTable)
     connection.close()
   }
 
   def "get metadata model, given table name"() {
 
     JsonObjectBuilder config = TestUtils.getFirebirdConfigurationBuilder()
-        .add("tableName", "stars")
+        .add("tableName", "STARS")
     PrimaryColumnNamesProvider provider = new PrimaryColumnNamesProvider()
     JsonObject meta = provider.getMetaModel(config.build());
     print meta

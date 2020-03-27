@@ -16,31 +16,35 @@ class ColumnNamesForInsertProviderFirebirdSpec extends Specification {
   @Shared
   Connection connection
   @Shared
-  JsonObject config
+  JsonObject config = TestUtils.getFirebirdConfigurationBuilder()
+          .add("tableName", "STARS")
+          .build()
+  @Shared
+  String sqlDropTable = "EXECUTE BLOCK AS BEGIN\n" +
+          "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
+          "execute statement 'DROP TABLE STARS;';\n" +
+          "END"
+  @Shared
+  String sqlCreateTable = "EXECUTE BLOCK AS BEGIN\n" +
+          "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
+          "execute statement 'CREATE TABLE STARS (id INT PRIMARY KEY, name VARCHAR(255) NOT NULL, radius INT NOT NULL, destination FLOAT, createdat TIMESTAMP, diameter INT GENERATED ALWAYS AS (radius * 2));';\n" +
+          "END"
 
   def setup() {
-    config = TestUtils.getFirebirdConfigurationBuilder()
-        .add("tableName", "stars")
-        .build()
     connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"));
-    String sql = " DROP TABLE stars;"
-    connection.createStatement().execute(sql)
-    sql = "CREATE TABLE stars (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, radius INT NOT NULL, destination FLOAT, createdat DATETIME, diameter INT GENERATED ALWAYS AS (radius * 2));"
-    connection.createStatement().execute(sql);
+    connection.createStatement().execute(sqlDropTable)
+    connection.createStatement().execute(sqlCreateTable)
   }
 
   def cleanupSpec() {
-    String sql = " DROP TABLE stars;"
-    connection.createStatement().execute(sql)
+    connection.createStatement().execute(sqlDropTable)
     connection.close()
   }
 
   def "get metadata model, given table name"() {
-
-
     ColumnNamesForInsertProvider provider = new ColumnNamesForInsertProvider()
     JsonObject meta = provider.getMetaModel(config)
-    InputStream fis = new FileInputStream("src/test/resources/GeneratedMetadata/columnName.json");
+    InputStream fis = new FileInputStream("src/test/resources/GeneratedMetadata/columnNameFirebird.json");
     JsonReader reader = Json.createReader(fis);
     JsonObject expectedMetadata = reader.readObject();
     reader.close();

@@ -20,20 +20,33 @@ class GetRowsPollingTriggerFirebirdSpec extends Specification {
 
   @Shared
   Connection connection;
+  @Shared
+  JsonObject config = TestUtils.getFirebirdConfigurationBuilder().build()
+  @Shared
+  String sqlDropTable = "EXECUTE BLOCK AS BEGIN\n" +
+          "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
+          "execute statement 'DROP TABLE STARS;';\n" +
+          "END"
+  @Shared
+  String sqlCreateTable = "EXECUTE BLOCK AS BEGIN\n" +
+          "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
+          "execute statement 'CREATE TABLE STARS (ID int, ISDEAD smallint, NAME varchar(255) NOT NULL, RADIUS int, DESTINATION float, CREATEDAT timestamp);';\n" +
+          "END"
+  @Shared
+  String sqlInsertTable = "EXECUTE BLOCK AS BEGIN\n" +
+          "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
+          "execute statement 'INSERT INTO STARS (ID, ISDEAD, NAME, RADIUS, DESTINATION, CREATEDAT) VALUES (1, 0, \''Sun\'', 50, 170, \''2018-06-14 10:00:00\'');';\n" +
+          "END"
 
   def setup() {
-    JsonObject config = TestUtils.getFirebirdConfigurationBuilder().build()
     connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
-
-    String sql = "CREATE TABLE stars (id int, isDead smallint, name varchar(255) NOT NULL, radius int, destination float, createdat timestamp)"
-    connection.createStatement().execute(sql)
-
-    sql = "INSERT INTO stars (id, isDead, name, radius, destination, createdat) VALUES (1, 0, 'Sun', 50, 170, '2018-06-14 10:00:00')"
-    connection.createStatement().execute(sql)
+    connection.createStatement().execute(sqlDropTable)
+    connection.createStatement().execute(sqlCreateTable)
+    connection.createStatement().execute(sqlInsertTable)
   }
 
   def cleanupSpec() {
-    connection.createStatement().execute("DROP TABLE stars")
+    connection.createStatement().execute(sqlDropTable)
     connection.close()
   }
 
@@ -58,9 +71,9 @@ class GetRowsPollingTriggerFirebirdSpec extends Specification {
     Message msg = new Message.Builder().build();
 
     JsonObjectBuilder config = TestUtils.getFirebirdConfigurationBuilder()
-    config.add("pollingField", "createdat")
+    config.add("pollingField", "CREATEDAT")
         .add("pollingValue", "2018-06-14 00:00:00")
-        .add("tableName", "stars")
+        .add("tableName", "STARS")
 
     JsonObjectBuilder snapshot = Json.createObjectBuilder()
     snapshot.add("skipNumber", 0)
@@ -72,10 +85,10 @@ class GetRowsPollingTriggerFirebirdSpec extends Specification {
     then:
     0 * errorCallback.receive(_)
     dataCallback.receive({
-      it.body.getInt("id").equals(1)
-      it.body.getBoolean("isDead").equals(0)
-      it.body.getString("name").equals("Sun")
-      it.body.getString("createdat").equals("2018-06-14 13:00:00.0")
+      it.body.getInt("ID").equals(1)
+      it.body.getBoolean("ISDEAD").equals(0)
+      it.body.getString("NAME").equals("Sun")
+      it.body.getString("CREATEDAT").equals("2018-06-14 13:00:00.0")
     })
   }
 }

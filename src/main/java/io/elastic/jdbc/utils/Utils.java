@@ -2,6 +2,7 @@ package io.elastic.jdbc.utils;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Date;
@@ -171,7 +172,7 @@ public class Utils {
           statement.setNull(paramNumber, Types.VARCHAR);
         }
       }
-    } catch (java.lang.NumberFormatException e) {
+    } catch (java.lang.NumberFormatException | java.lang.ClassCastException e) {
       String message = String
           .format("Provided data: %s can't be cast to the column %s datatype", body.get(colName),
               colName);
@@ -234,6 +235,7 @@ public class Utils {
     ResultSet rs = null;
     Map<String, String> columnTypes = new HashMap<>();
     String schemaName = "";
+
     try {
       md = connection.getMetaData();
       if (tableName.contains(".")) {
@@ -241,6 +243,10 @@ public class Utils {
         tableName = tableName.split("\\.")[1];
       }
       rs = md.getColumns("", schemaName, tableName, "%");
+      if (!rs.next()){
+        // ResultSet is empty, maybe we need to use null as Catalog?
+        rs = md.getColumns(null, schemaName, tableName, "%");
+      }
       while (rs.next()) {
         String name = rs.getString("COLUMN_NAME").toLowerCase();
         String type = detectColumnType(rs.getInt("DATA_TYPE"), rs.getString("TYPE_NAME"));

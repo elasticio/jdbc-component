@@ -87,8 +87,12 @@ public class TestUtils {
     final String host = dotenv.get("CONN_HOST_FIREBIRD");
     final String port = dotenv.get("CONN_PORT_FIREBIRD");
     final String databaseName = dotenv.get("CONN_DBNAME_FIREBIRD");
+    String configProperties = "";
+    if ((!dotenv.get("CONN_CONFIG_PROP_FIREBIRD").equals(""))) {
+      configProperties = dotenv.get("CONN_CONFIG_PROP_FIREBIRD");
+    }
     final String connectionString =
-        "jdbc:firebirdsql://" + host + ":" + port + "/" + databaseName;
+        "jdbc:firebirdsql://" + host + ":" + port + "/" + databaseName + "?" + configProperties;
     return Json.createObjectBuilder()
         .add("dbEngine", "firebirdsql")
         .add("host", host)
@@ -96,6 +100,7 @@ public class TestUtils {
         .add("databaseName", databaseName)
         .add("user", dotenv.get("CONN_USER_FIREBIRD"))
         .add("password", dotenv.get("CONN_PASSWORD_FIREBIRD"))
+        .add("configurationProperties", configProperties)
         .add("connectionString", connectionString);
   }
 
@@ -103,8 +108,12 @@ public class TestUtils {
     final String host = dotenv.get("CONN_HOST_MYSQL");
     final String port = dotenv.get("CONN_PORT_MYSQL");
     final String databaseName = dotenv.get("CONN_DBNAME_MYSQL");
+    String configProperties = "";
+    if ((!dotenv.get("CONN_CONFIG_PROP_FIREBIRD").equals(""))) {
+      configProperties = dotenv.get("CONN_CONFIG_PROP_MYSQL");
+    }
     final String connectionString =
-        "jdbc:mysql://" + host + ":" + port + "/" + databaseName;
+        "jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?" + configProperties;
     return Json.createObjectBuilder()
         .add("dbEngine", "mysql")
         .add("host", host)
@@ -112,6 +121,7 @@ public class TestUtils {
         .add("databaseName", databaseName)
         .add("user", dotenv.get("CONN_USER_MYSQL"))
         .add("password", dotenv.get("CONN_PASSWORD_MYSQL"))
+        .add("configurationProperties", configProperties)
         .add("connectionString", connectionString);
   }
 

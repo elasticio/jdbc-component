@@ -32,6 +32,16 @@ class DeleteActionFirebirdSpec extends Specification {
   EventEmitter emitter
   @Shared
   DeleteRowByPrimaryKey action
+  @Shared
+  String sqlDropTable = "EXECUTE BLOCK AS BEGIN\n" +
+          "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
+          "execute statement 'DROP TABLE STARS;';\n" +
+          "END"
+  @Shared
+  String sqlCreateTable = "EXECUTE BLOCK AS BEGIN\n" +
+          "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
+          "execute statement 'CREATE TABLE STARS (ID int PRIMARY KEY, NAME varchar(255) NOT NULL, DATET timestamp, RADIUS int, DESTINATION int, VISIBLE smallint, VISIBLEDATE date);';\n" +
+          "END"
 
   def setupSpec() {
     JsonObject config = getStarsConfig()
@@ -61,15 +71,15 @@ class DeleteActionFirebirdSpec extends Specification {
 
   def getStarsConfig() {
     JsonObject config = TestUtils.getFirebirdConfigurationBuilder()
-        .add("tableName", "stars")
+        .add("tableName", "STARS")
         .add("nullableResult", "true")
         .build();
     return config;
   }
 
   def prepareStarsTable() {
-    connection.createStatement().execute("CREATE TABLE stars (id int PRIMARY KEY, name varchar(255) NOT NULL, " +
-        "datet timestamp, radius int, destination int, visible smallint, visibledate date)");
+    connection.createStatement().execute(sqlDropTable)
+    connection.createStatement().execute(sqlCreateTable)
     connection.createStatement().execute("INSERT INTO stars values (1,'Taurus', '2015-02-19 10:10:10.0'," +
         " 123, 5, 0, '2015-02-19')")
     connection.createStatement().execute("INSERT INTO stars values (2,'Eridanus', '2017-02-19 10:10:10.0'," +
@@ -88,27 +98,24 @@ class DeleteActionFirebirdSpec extends Specification {
   }
 
   def cleanupSpec() {
-    connection.createStatement().execute("DROP TABLE stars;")
+    connection.createStatement().execute(sqlDropTable)
     connection.close()
   }
 
   def "one delete"() {
-
     prepareStarsTable();
-
     JsonObject snapshot = Json.createObjectBuilder().build()
-
     JsonObject body = Json.createObjectBuilder()
-        .add("id", 1)
+        .add("ID", 1)
         .build();
 
     runAction(getStarsConfig(), body, snapshot)
-    int first = getRecords("stars").size()
+    int first = getRecords("STARS").size()
     JsonObject body2 = Json.createObjectBuilder()
-        .add("id", 2)
+        .add("ID", 2)
         .build()
     runAction(getStarsConfig(), body2, snapshot)
-    int second = getRecords("stars").size()
+    int second = getRecords("STARS").size()
 
     expect:
     first == 1

@@ -18,24 +18,25 @@ class InsertActionFirebirdSpec extends Specification {
   @Shared
   Connection connection
   @Shared
-  JsonObject configuration
-  @Shared
   EventEmitter emitter = TestUtils.getFakeEventEmitter(Mock(EventEmitter.Callback))
   @Shared
   InsertAction action = new InsertAction()
   @Shared
   String dbEngine = "firebirdsql"
-
+  @Shared
+  JsonObject configuration = TestUtils.getFirebirdConfigurationBuilder()
+          .add("tableName", TestUtils.TEST_TABLE_NAME)
+          .build()
 
   def setupSpec() {
-    configuration = TestUtils.getFirebirdConfigurationBuilder()
-        .add("tableName", TestUtils.TEST_TABLE_NAME)
-        .build()
     connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
     TestUtils.createTestTable(connection, dbEngine)
   }
 
   def cleanupSpec() {
+    connection.close()
+
+    connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
     TestUtils.deleteTestTable(connection, dbEngine)
     connection.close()
   }

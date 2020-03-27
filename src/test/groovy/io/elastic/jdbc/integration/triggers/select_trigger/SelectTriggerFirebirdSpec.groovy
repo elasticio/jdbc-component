@@ -19,7 +19,9 @@ class SelectTriggerFirebirdSpec extends Specification {
     @Shared
     Connection connection
     @Shared
-    JsonObject configuration
+    JsonObject configuration = TestUtils.getFirebirdConfigurationBuilder()
+            .add("tableName", TestUtils.TEST_TABLE_NAME)
+            .build()
 
     @Shared
     EventEmitter.Callback errorCallback
@@ -35,16 +37,32 @@ class SelectTriggerFirebirdSpec extends Specification {
     EventEmitter emitter
     @Shared
     SelectTrigger trigger
-
-    def setupSpec() {
-        configuration = TestUtils.getFirebirdConfigurationBuilder()
-                .add("tableName", TestUtils.TEST_TABLE_NAME)
-                .build()
-        connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
-    }
+    @Shared
+    String sqlDropTable = "EXECUTE BLOCK AS BEGIN\n" +
+            "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
+            "execute statement 'DROP TABLE STARS;';\n" +
+            "END"
+    @Shared
+    String sqlCreateTable = "EXECUTE BLOCK AS BEGIN\n" +
+            "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
+            "execute statement 'CREATE TABLE STARS (ID int, NAME varchar(255) NOT NULL, DATET timestamp, RADIUS int, DESTINATION int);';\n" +
+            "END"
+    @Shared
+    String sqlInsertTable = "EXECUTE BLOCK AS BEGIN\n" +
+            "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
+            "execute statement 'INSERT INTO STARS (ID, NAME) VALUES (1, \''Hello\'');';\n" +
+            "END"
 
     def setup() {
-        trigger = new SelectTrigger()
+        connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
+        connection.createStatement().execute(sqlDropTable);
+        connection.createStatement().execute(sqlCreateTable);
+        connection.createStatement().execute(sqlInsertTable);
+    }
+
+    def cleanup() {
+        connection.createStatement().execute(sqlDropTable);
+        connection.close()
     }
 
     def runTrigger(JsonObject config, JsonObject body, JsonObject snapshot) {
@@ -61,29 +79,18 @@ class SelectTriggerFirebirdSpec extends Specification {
                 .onRebound(reboundCallback)
                 .onHttpReplyCallback(onHttpReplyCallback).build()
         ExecutionParameters params = new ExecutionParameters(msg, emitter, config, snapshot)
+        trigger = new SelectTrigger()
         trigger.execute(params);
     }
 
     def getStarsConfig() {
         JsonObject config = TestUtils.getFirebirdConfigurationBuilder()
-                .add("sqlQuery", "SELECT * from stars where id = 1")
+                .add("sqlQuery", "SELECT * from STARS where ID = 1")
                 .build();
         return config;
     }
 
-    def prepareStarsTable() {
-        connection.createStatement().execute("CREATE TABLE stars (id int, name varchar(255) NOT NULL, datet timestamp, radius int, destination int)");
-        connection.createStatement().execute("INSERT INTO stars (id, name) VALUES (1,'Hello')");
-    }
-
-    def cleanupSpec() {
-        String sql = "DROP TABLE stars;"
-        connection.createStatement().execute(sql)
-        connection.close()
-    }
-
     def "one select"() {
-        prepareStarsTable();
         JsonObject snapshot = Json.createObjectBuilder().build();
         JsonObject body = Json.createObjectBuilder().build()
 

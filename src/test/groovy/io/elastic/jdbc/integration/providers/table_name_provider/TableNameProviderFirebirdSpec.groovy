@@ -14,43 +14,58 @@ class TableNameProviderFirebirdSpec extends Specification {
 
     @Shared
     Connection connection
-
     @Shared
-    JsonObject config
+    JsonObject config = TestUtils.getFirebirdConfigurationBuilder().build()
+    @Shared
+    String sqlDropUsersTable = "EXECUTE BLOCK AS BEGIN\n" +
+            "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'USERS')) then\n" +
+            "execute statement 'DROP TABLE USERS;';\n" +
+            "END"
+    @Shared
+    String sqlDropOrdersTable = "EXECUTE BLOCK AS BEGIN\n" +
+            "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'ORDERS')) then\n" +
+            "execute statement 'DROP TABLE ORDERS;';\n" +
+            "END"
+    @Shared
+    String sqlDropProductsTable = "EXECUTE BLOCK AS BEGIN\n" +
+            "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'PRODUCTS')) then\n" +
+            "execute statement 'DROP TABLE PRODUCTS;';\n" +
+            "END"
+    @Shared
+    String sqlCreateUsersTable = "EXECUTE BLOCK AS BEGIN\n" +
+            "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'USERS')) then\n" +
+            "execute statement 'CREATE TABLE USERS (ID int, NAME varchar(255) NOT NULL, RADIUS int, DESTINATION int);';\n" +
+            "END"
+    @Shared
+    String sqlCreateOrdersTable = "EXECUTE BLOCK AS BEGIN\n" +
+            "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'ORDERS')) then\n" +
+            "execute statement 'CREATE TABLE ORDERS (ID int, NAME varchar(255) NOT NULL, RADIUS int, DESTINATION int);';\n" +
+            "END"
+    @Shared
+    String sqlCreateProductsTable = "EXECUTE BLOCK AS BEGIN\n" +
+            "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'PRODUCTS')) then\n" +
+            "execute statement 'CREATE TABLE PRODUCTS (ID int, NAME varchar(255) NOT NULL, RADIUS int, DESTINATION int);';\n" +
+            "END"
 
     def setupSpec() {
-        Class.forName("com.mysql.jdbc.Driver");
-        JsonObject config = TestUtils.getFirebirdConfigurationBuilder().build()
         connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
-
-
-        connection.createStatement().execute(" DROP TABLE users");
-        connection.createStatement().execute(" DROP TABLE products");
-        connection.createStatement().execute(" DROP TABLE orders");
+        connection.createStatement().execute(sqlDropUsersTable);
+        connection.createStatement().execute(sqlDropProductsTable);
+        connection.createStatement().execute(sqlDropOrdersTable);
+        connection.createStatement().execute(sqlCreateUsersTable);
+        connection.createStatement().execute(sqlCreateProductsTable);
+        connection.createStatement().execute(sqlCreateOrdersTable);
     }
 
     def cleanupSpec() {
-        connection.createStatement().execute(" DROP TABLE users");
-        connection.createStatement().execute(" DROP TABLE products");
-        connection.createStatement().execute(" DROP TABLE orders");
-
+        connection.createStatement().execute(sqlDropUsersTable);
+        connection.createStatement().execute(sqlDropProductsTable);
+        connection.createStatement().execute(sqlDropOrdersTable);
         connection.close();
     }
 
     def "create tables, successful"() {
-
         JsonObjectBuilder config = TestUtils.getFirebirdConfigurationBuilder()
-                .add("tableName", "stars")
-
-        String sql1 = "CREATE TABLE users (id int, name varchar(255) NOT NULL, radius int, destination int)"
-        String sql2 = "CREATE TABLE products (id int, name varchar(255) NOT NULL, radius int, destination int)"
-        String sql3 = "CREATE TABLE orders (id int, name varchar(255) NOT NULL, radius int, destination int)"
-
-        connection.createStatement().execute(sql1);
-        connection.createStatement().execute(sql2);
-        connection.createStatement().execute(sql3);
-
-
         TableNameProvider provider = new TableNameProvider();
 
         when:
@@ -58,8 +73,8 @@ class TableNameProviderFirebirdSpec extends Specification {
 
         then:
         print model
-        model.getString("orders").equals("orders")
-        model.getString("products").equals("products")
-        model.getString("users").equals("users")
+        model.getString("ORDERS").equals("ORDERS")
+        model.getString("PRODUCTS").equals("PRODUCTS")
+        model.getString("USERS").equals("USERS")
     }
 }
