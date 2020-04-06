@@ -247,11 +247,11 @@ public class Utils {
         // ResultSet is empty, maybe we need to use null as Catalog?
         rs = md.getColumns(null, schemaName, tableName, "%");
       }
-      while (rs.next()) {
+      do {
         String name = rs.getString("COLUMN_NAME").toLowerCase();
         String type = detectColumnType(rs.getInt("DATA_TYPE"), rs.getString("TYPE_NAME"));
         columnTypes.put(name, type);
-      }
+      } while (rs.next());
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {

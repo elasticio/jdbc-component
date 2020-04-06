@@ -16,8 +16,7 @@ import java.sql.DriverManager
 class SelectFirebirdSpec extends Specification {
 
   @Shared
-  def credentials = TestUtils.getFirebirdConfigurationBuilder().build()
-
+  String dbEngine = "firebirdsql"
   @Shared
   Connection connection
   @Shared
@@ -38,26 +37,15 @@ class SelectFirebirdSpec extends Specification {
   EventEmitter emitter
   @Shared
   SelectAction action
-  @Shared
-  String sqlDropTable = "EXECUTE BLOCK AS BEGIN\n" +
-          "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-          "execute statement 'DROP TABLE STARS;';\n" +
-          "END"
-  @Shared
-  String sqlCreateTable = "EXECUTE BLOCK AS BEGIN\n" +
-          "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-          "execute statement 'CREATE TABLE stars (ID int PRIMARY KEY, NAME varchar(255) NOT NULL, DATET timestamp, RADIUS int, DESTINATION int);';\n" +
-          "END"
 
   def setupSpec() {
-    connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
+    connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"))
+    TestUtils.createTestTable(connection, dbEngine)
+    connection.createStatement().execute("INSERT INTO stars (id, name, radius, DESTINATION, visible, createdat) VALUES (1,'Hello', 1, 20, 0, '2015-02-19 10:10:10.0')");
+    connection.createStatement().execute("INSERT INTO stars (id, name, radius, DESTINATION, visible, createdat) VALUES (2,'World', 1, 30, 1, '2015-02-19 10:10:10.0')");
   }
 
   def setup() {
-    createAction()
-  }
-
-  def createAction() {
     action = new SelectAction()
   }
 
@@ -85,22 +73,13 @@ class SelectFirebirdSpec extends Specification {
     return config;
   }
 
-  def prepareStarsTable() {
-    connection.createStatement().execute(sqlCreateTable);
-    connection.createStatement().execute("INSERT INTO stars (id, name) VALUES (1,'Hello')");
-    connection.createStatement().execute("INSERT INTO stars (id, name) VALUES (2,'World')");
-  }
-
   def cleanupSpec() {
     connection.close()
-
-    connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
-    connection.createStatement().execute(sqlDropTable)
-    connection.close()
+    Connection deleteCon = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"))
+    TestUtils.deleteTestTable(deleteCon, dbEngine)
   }
 
   def "one select"() {
-    prepareStarsTable();
     JsonObject snapshot = Json.createObjectBuilder().build();
     JsonObject body = Json.createObjectBuilder()
         .add("ID", 1)

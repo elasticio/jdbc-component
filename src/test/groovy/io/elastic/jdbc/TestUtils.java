@@ -13,7 +13,7 @@ public class TestUtils {
   private static final String SQL_DELETE_TABLE =
       " DROP TABLE IF EXISTS " + TEST_TABLE_NAME;
   private static final String FIREBIRD_DELETE_TABLE =
-      " DROP TABLE " + TEST_TABLE_NAME + ";";
+      " DROP TABLE " + TEST_TABLE_NAME;
   private static final String ORACLE_DELETE_TABLE = "BEGIN"
       + "   EXECUTE IMMEDIATE 'DROP TABLE "
       + TEST_TABLE_NAME + "';"
@@ -57,14 +57,14 @@ public class TestUtils {
       + "visible bit, "
       + "createdat DATETIME, "
       + "diameter INT GENERATED ALWAYS AS (radius * 2));";
-  private static final String FIREBIRD_CREATE_TABLE = "CREATE TABLE "
-      + TEST_TABLE_NAME
-      + " (id INT PRIMARY KEY, "
-      + "name VARCHAR(255) NOT NULL, "
-      + "radius INT NOT NULL, "
-      + "destination FLOAT, "
-      + "visible SMALLINT, "
-      + "createdat TIMESTAMP);";
+  private static final String FIREBIRD_CREATE_TABLE =  "RECREATE TABLE "
+          + TEST_TABLE_NAME +
+          " (ID int, " +
+          "NAME varchar(255) NOT NULL, " +
+          "RADIUS int NOT NULL," +
+          "DESTINATION float," +
+          "VISIBLE smallint, " +
+          "createdat TIMESTAMP)";
   private static Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
   public static JsonObjectBuilder getMssqlConfigurationBuilder() {
@@ -88,7 +88,7 @@ public class TestUtils {
     final String port = dotenv.get("CONN_PORT_FIREBIRD");
     final String databaseName = dotenv.get("CONN_DBNAME_FIREBIRD");
     String configProperties = "";
-    if ((!dotenv.get("CONN_CONFIG_PROP_FIREBIRD").equals(""))) {
+    if ((!dotenv.get("CONN_CONFIG_PROP_FIREBIRD", "").equals(""))) {
       configProperties = dotenv.get("CONN_CONFIG_PROP_FIREBIRD");
     }
     final String connectionString =

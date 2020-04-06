@@ -16,7 +16,7 @@ import java.sql.ResultSet
 
 class DeleteActionFirebirdSpec extends Specification {
   @Shared
-  Connection connection
+  JsonObject config = getStarsConfig()
 
   @Shared
   EventEmitter.Callback errorCallback
@@ -33,20 +33,9 @@ class DeleteActionFirebirdSpec extends Specification {
   @Shared
   DeleteRowByPrimaryKey action
   @Shared
-  String sqlDropTable = "EXECUTE BLOCK AS BEGIN\n" +
-          "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-          "execute statement 'DROP TABLE STARS;';\n" +
-          "END"
+  String sqlCreateTable = "RECREATE TABLE STARS (ID int, NAME varchar(255) NOT NULL, DATET timestamp, RADIUS int, DESTINATION int, VISIBLE smallint, VISIBLEDATE date)"
   @Shared
-  String sqlCreateTable = "EXECUTE BLOCK AS BEGIN\n" +
-          "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-          "execute statement 'CREATE TABLE STARS (ID int PRIMARY KEY, NAME varchar(255) NOT NULL, DATET timestamp, RADIUS int, DESTINATION int, VISIBLE smallint, VISIBLEDATE date);';\n" +
-          "END"
-
-  def setupSpec() {
-    JsonObject config = getStarsConfig()
-    connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
-  }
+  String sqlDropTable = "DROP TABLE STARS"
 
   def setup() {
     createAction()
@@ -78,26 +67,28 @@ class DeleteActionFirebirdSpec extends Specification {
   }
 
   def prepareStarsTable() {
-    connection.createStatement().execute(sqlDropTable)
+    Connection connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
     connection.createStatement().execute(sqlCreateTable)
-    connection.createStatement().execute("INSERT INTO stars values (1,'Taurus', '2015-02-19 10:10:10.0'," +
-        " 123, 5, 0, '2015-02-19')")
-    connection.createStatement().execute("INSERT INTO stars values (2,'Eridanus', '2017-02-19 10:10:10.0'," +
-        " 852, 5, 0, '2015-07-19')")
+    connection.createStatement().execute("INSERT INTO stars values (1,'Taurus', '2015-02-19 10:10:10.0', 123, 5, 0, '2015-02-19')")
+    connection.createStatement().execute("INSERT INTO stars values (2,'Eridanus', '2017-02-19 10:10:10.0', 852, 5, 0, '2015-07-19')")
+    connection.close()
   }
 
   def getRecords(tableName) {
+    Connection connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
     ArrayList<String> records = new ArrayList<String>();
     String sql = "SELECT * FROM " + tableName;
     ResultSet rs = connection.createStatement().executeQuery(sql);
     while (rs.next()) {
       records.add(rs.toRowResult().toString());
     }
-    rs.close();
-    return records;
+    rs.close()
+    connection.close()
+    return records
   }
 
   def cleanupSpec() {
+    Connection connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
     connection.createStatement().execute(sqlDropTable)
     connection.close()
   }

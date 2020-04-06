@@ -15,143 +15,137 @@ import java.sql.DriverManager
 import java.sql.ResultSet
 
 class CustomQueryFirebirdSpec extends Specification {
-  @Shared
-  Connection connection
+    @Shared
+    EventEmitter.Callback errorCallback
+    @Shared
+    EventEmitter.Callback snapshotCallback
+    @Shared
+    EventEmitter.Callback dataCallback
+    @Shared
+    EventEmitter.Callback reboundCallback
+    @Shared
+    EventEmitter.Callback httpReplyCallback
+    @Shared
+    EventEmitter emitter
+    @Shared
+    CustomQuery action
+    @Shared
+    String sqlCreateTable = "RECREATE TABLE STARS (ID int, NAME varchar(255) NOT NULL, DATET timestamp, RADIUS int, DESTINATION int, VISIBLE smallint, VISIBLEDATE date)"
+    @Shared
+    String sqlDropTable = "DROP TABLE STARS"
 
-  @Shared
-  EventEmitter.Callback errorCallback
-  @Shared
-  EventEmitter.Callback snapshotCallback
-  @Shared
-  EventEmitter.Callback dataCallback
-  @Shared
-  EventEmitter.Callback reboundCallback
-  @Shared
-  EventEmitter.Callback httpReplyCallback
-  @Shared
-  EventEmitter emitter
-  @Shared
-  CustomQuery action
-  @Shared
-  String sqlDropTable = "EXECUTE BLOCK AS BEGIN\n" +
-          "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-          "execute statement 'DROP TABLE STARS;';\n" +
-          "END"
-  @Shared
-  String sqlCreateTable = "EXECUTE BLOCK AS BEGIN\n" +
-          "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-          "execute statement 'CREATE TABLE STARS (ID int PRIMARY KEY, NAME varchar(255) NOT NULL, DATET timestamp, RADIUS int, DESTINATION int, VISIBLE smallint, VISIBLEDATE date);';\n" +
-          "END"
 
-  def setupSpec() {
-    JsonObject config = getConfig()
-    connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
-    connection.createStatement().execute(sqlDropTable)
-    connection.createStatement().execute(sqlCreateTable)
-  }
-
-  def cleanupSpec() {
-    connection.createStatement().execute(sqlDropTable)
-    connection.close()
-  }
-
-  def setup() {
-    errorCallback = Mock(EventEmitter.Callback)
-    snapshotCallback = Mock(EventEmitter.Callback)
-    dataCallback = Mock(EventEmitter.Callback)
-    reboundCallback = Mock(EventEmitter.Callback)
-    httpReplyCallback = Mock(EventEmitter.Callback)
-    emitter = new EventEmitter.Builder().onData(dataCallback).onSnapshot(snapshotCallback).onError(errorCallback)
-            .onRebound(reboundCallback).onHttpReplyCallback(httpReplyCallback).build()
-    action = new CustomQuery()
-  }
-
-  def runAction(JsonObject config, JsonObject body, JsonObject snapshot) {
-    Message msg = new Message.Builder().body(body).build()
-    ExecutionParameters params = new ExecutionParameters(msg, emitter, config, snapshot)
-    action.execute(params);
-  }
-
-  def prepareStarsTable() {
-    connection.createStatement().execute(sqlDropTable)
-    connection.createStatement().execute(sqlCreateTable)
-    connection.createStatement().execute("INSERT INTO STARS VALUES (1,'Taurus', '2015-02-19 10:10:10.0'," +
-            " 123, 5, 0, '2015-02-19');")
-    connection.createStatement().execute("INSERT INTO STARS VALUES (2,'Eridanus', '2017-02-19 10:10:10.0'," +
-            " 852, 5, 0, '2015-07-19');")
-  }
-
-  def getRecords(tableName) {
-    ArrayList<String> records = new ArrayList<String>();
-    ResultSet rs = connection.createStatement().executeQuery("SELECT * FROM " + tableName + ";");
-    while (rs.next()) {
-      records.add(rs.toRowResult().toString());
+    def cleanupSpec() {
+        JsonObject config = getConfig()
+        Connection connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
+        connection.createStatement().execute(sqlDropTable)
+        connection.close()
     }
-    rs.close();
-    return records;
-  }
 
-  def "make insert"() {
-    prepareStarsTable();
+    def setup() {
+        errorCallback = Mock(EventEmitter.Callback)
+        snapshotCallback = Mock(EventEmitter.Callback)
+        dataCallback = Mock(EventEmitter.Callback)
+        reboundCallback = Mock(EventEmitter.Callback)
+        httpReplyCallback = Mock(EventEmitter.Callback)
+        emitter = new EventEmitter.Builder().onData(dataCallback).onSnapshot(snapshotCallback).onError(errorCallback)
+                .onRebound(reboundCallback).onHttpReplyCallback(httpReplyCallback).build()
+        action = new CustomQuery()
+        prepareStarsTable()
+    }
 
-    JsonObject snapshot = Json.createObjectBuilder().build()
+    def runAction(JsonObject config, JsonObject body, JsonObject snapshot) {
+        Message msg = new Message.Builder().body(body).build()
+        ExecutionParameters params = new ExecutionParameters(msg, emitter, config, snapshot)
+        action.execute(params);
 
-    JsonObject body = Json.createObjectBuilder()
-            .add("query", "INSERT INTO stars values (3, 'Rastaban', '2015-02-19 10:10:10.0', 123, 5, 1, '2018-02-19');")
-            .build();
+    }
 
-    when:
-    runAction(getConfig(), body, snapshot)
-    then:
-    0 * errorCallback.receive(_)
-    1 * dataCallback.receive({ it.getBody().getInt("updated") == 1 })
+    def prepareStarsTable() {
+        JsonObject config = getConfig()
+        Connection connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
+        connection.createStatement().execute(sqlCreateTable)
+        connection.createStatement().execute("INSERT INTO stars values (1,'Taurus', '2015-02-19 10:10:10.0', 123, 5, 0, '2015-02-19')")
+        connection.createStatement().execute("INSERT INTO stars values (2,'Eridanus', '2017-02-19 10:10:10.0', 852, 5, 0, '2015-07-19')")
+        connection.close()
+    }
 
-    int records = getRecords("STARS").size()
-    expect:
-    records == 3
-  }
 
-  def "make select"() {
-    prepareStarsTable();
+    def getRecords(tableName) {
+        ArrayList<String> records = new ArrayList<String>();
+        Connection connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
+        ResultSet rs = connection.createStatement().executeQuery("SELECT * FROM " + tableName + ";");
+        while (rs.next()) {
+            records.add(rs.toRowResult().toString());
+        }
+        rs.close();
+        connection.close()
+        return records;
+    }
 
-    JsonObject snapshot = Json.createObjectBuilder().build()
+    def "make insert"() {
+        JsonObject snapshot = Json.createObjectBuilder().build()
+        JsonObject body = Json.createObjectBuilder()
+                .add("query", "INSERT INTO stars values (3, 'Rastaban', '2015-02-19 10:10:10.0', 123, 5, 1, '2018-02-19');")
+                .build();
 
-    JsonObject body = Json.createObjectBuilder()
-            .add("query", "SELECT * FROM STARS;")
-            .build();
+        when:
+        runAction(getConfig(), body, snapshot)
+        then:
+        0 * errorCallback.receive(_)
+        1 * dataCallback.receive({ it.getBody().getInt("updated") == 1 })
 
-    when:
-    runAction(getConfig(), body, snapshot)
-    then:
-    0 * errorCallback.receive(_)
-    1 * dataCallback.receive({ it.getBody().getJsonArray("result").size() == 2 })
-  }
+        int records = getRecords("STARS").size()
+        expect:
+        records == 3
+    }
 
-  def "make delete"() {
-    prepareStarsTable();
+    def "make select"() {
+        JsonObject snapshot = Json.createObjectBuilder().build()
 
-    JsonObject snapshot = Json.createObjectBuilder().build()
+        JsonObject body = Json.createObjectBuilder()
+                .add("query", "SELECT * FROM STARS;")
+                .build();
 
-    JsonObject body = Json.createObjectBuilder()
-            .add("query", "DELETE FROM STARS WHERE ID = 1;")
-            .build();
+        when:
+        runAction(getConfig(), body, snapshot)
+        then:
+        0 * errorCallback.receive(_)
+        2 * dataCallback.receive({
+            JsonObject msgBody = it.getBody()
+            if (msgBody.getJsonArray("result") != null) {
+                msgBody.getJsonArray("result").size() == 2
+            } else {
+                msgBody.getInt("updated") == 0
+            }
+        }
+        )
 
-    when:
-    runAction(getConfig(), body, snapshot)
-    then:
-    0 * errorCallback.receive(_)
-    1 * dataCallback.receive({ it.getBody().getInt("updated") == 1 })
+    }
 
-    int records = getRecords("STARS").size()
-    expect:
-    records == 1
-  }
+    def "make delete"() {
+        JsonObject snapshot = Json.createObjectBuilder().build()
 
-  def getConfig() {
-    JsonObject config = TestUtils.getFirebirdConfigurationBuilder()
-            .add("tableName", "STARS")
-            .add("nullableResult", "true")
-            .build();
-    return config;
-  }
+        JsonObject body = Json.createObjectBuilder()
+                .add("query", "DELETE FROM STARS WHERE ID = 1;")
+                .build();
+
+        when:
+        runAction(getConfig(), body, snapshot)
+        then:
+        0 * errorCallback.receive(_)
+        1 * dataCallback.receive({ it.getBody().getInt("updated") == 1 })
+
+        int records = getRecords("STARS").size()
+        expect:
+        records == 1
+    }
+
+    def getConfig() {
+        JsonObject config = TestUtils.getFirebirdConfigurationBuilder()
+                .add("tableName", "STARS")
+                .add("nullableResult", "true")
+                .build();
+        return config;
+    }
 }

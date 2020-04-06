@@ -36,43 +36,29 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
   @Shared
   JsonObject config = getStarsConfig();
   @Shared
-  String sqlDropStarsTable = "EXECUTE BLOCK AS BEGIN\n" +
-          "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-          "execute statement 'DROP TABLE STARS;';\n" +
-          "END"
+  String sqlDropStarsTable = "DROP TABLE STARS"
   @Shared
-  String sqlCreateStarsTable = "EXECUTE BLOCK AS BEGIN\n" +
-          "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-          "execute statement 'CREATE TABLE stars (ID int PRIMARY KEY, NAME varchar(255) NOT NULL, DATET timestamp, RADIUS int, DESTINATION int, VISIBLE smallint, VISIBLEDATE date);';\n" +
-          "END"
+  String sqlCreateStarsTable = "RECREATE TABLE stars (ID int PRIMARY KEY, NAME varchar(255) NOT NULL, DATET timestamp, RADIUS int, DESTINATION int, VISIBLE smallint, VISIBLEDATE date)"
   @Shared
-  String sqlDropPersonsTable = "EXECUTE BLOCK AS BEGIN\n" +
-          "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'PERSONS')) then\n" +
-          "execute statement 'DROP TABLE PERSONS;';\n" +
-          "END"
+  String sqlDropPersonsTable = "DROP TABLE PERSONS"
   @Shared
-  String sqlCreatePersonsTable = "EXECUTE BLOCK AS BEGIN\n" +
-          "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'PERSONS')) then\n" +
-          "execute statement 'CREATE TABLE PERSONS (ID int, NAME varchar(255) NOT NULL, EMAIL varchar(255) NOT NULL PRIMARY KEY);';\n" +
-          "END"
-
-  def setupSpec() {
-    connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
-  }
+  String sqlCreatePersonsTable = "RECREATE TABLE PERSONS (ID int, NAME varchar(255) NOT NULL, EMAIL varchar(255) NOT NULL PRIMARY KEY)"
 
   def cleanupSpec() {
+    connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
+    connection.createStatement().execute(sqlDropStarsTable);
+    connection.createStatement().execute(sqlDropPersonsTable);
     connection.close()
   }
 
   def setup() {
+    connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
     connection.createStatement().execute(sqlCreateStarsTable);
     connection.createStatement().execute(sqlCreatePersonsTable);
     createAction()
   }
-
   def cleanup() {
-    connection.createStatement().execute(sqlDropStarsTable);
-    connection.createStatement().execute(sqlDropPersonsTable);
+    connection.close()
   }
 
   def createAction() {
@@ -115,7 +101,7 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
     JsonObject snapshot = Json.createObjectBuilder().build()
 
     JsonObject body = Json.createObjectBuilder()
-    .add("ID", "1")
+    .add("ID", 1)
     .add("NAME", "Taurus")
     .add("DATET", "2015-02-19 10:10:10.0")
     .add("RADIUS", 123)
@@ -137,7 +123,7 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
     JsonObject snapshot = Json.createObjectBuilder().build()
 
     JsonObject body = Json.createObjectBuilder()
-    .add("ID", "1")
+    .add("ID", 1)
     .add("NAME", "Taurus")
     .add("RADIUS", "test")
     .build()
@@ -158,14 +144,14 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
     JsonObject snapshot = Json.createObjectBuilder().build()
 
     JsonObject body1 = Json.createObjectBuilder()
-    .add("ID", "1")
+    .add("ID", 1)
     .add("NAME", "Taurus")
     .add("RADIUS", 123)
     .build()
     runAction(getStarsConfig(), body1, snapshot)
 
     JsonObject body2 = Json.createObjectBuilder()
-    .add("ID", "2")
+    .add("ID", 2)
     .add("NAME", "Eridanus")
     .add("RADIUS", 456)
     .build()
@@ -185,14 +171,14 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
     JsonObject snapshot = Json.createObjectBuilder().build()
 
     JsonObject body1 = Json.createObjectBuilder()
-    .add("ID", "1")
+    .add("ID", 1)
     .add("NAME", "Taurus")
     .add("RADIUS", 123)
     .build()
     runAction(getStarsConfig(), body1, snapshot)
 
     JsonObject body2 = Json.createObjectBuilder()
-    .add("ID", "1")
+    .add("ID", 1)
     .add("NAME", "Eridanus")
     .build()
     runAction(getStarsConfig(), body2, snapshot)
@@ -217,7 +203,7 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
     JsonObject snapshot = Json.createObjectBuilder().build()
 
     JsonObject body1 = Json.createObjectBuilder()
-    .add("ID", "1")
+    .add("ID", 1)
     .add("NAME", "O'Henry")
     .add("EMAIL", "ohenry@elastic.io")
     .build()
@@ -235,21 +221,21 @@ class UpsertRowByPrimaryFirebirdSpec extends Specification {
     JsonObject snapshot = Json.createObjectBuilder().build()
 
     JsonObject body1 = Json.createObjectBuilder()
-    .add("ID", "1")
+    .add("ID", 1)
     .add("NAME", "User1")
     .add("EMAIL", "user1@elastic.io")
     .build()
     runAction(getPersonsConfig(), body1, snapshot)
 
     JsonObject body2 = Json.createObjectBuilder()
-    .add("ID", "2")
+    .add("ID", 2)
     .add("NAME", "User2")
     .add("EMAIL", "user2@elastic.io")
     .build()
     runAction(getPersonsConfig(), body2, snapshot)
 
     JsonObject body3 = Json.createObjectBuilder()
-    .add("ID", "3")
+    .add("ID", 3)
     .add("NAME", "User3")
     .add("EMAIL", "user2@elastic.io")
     .build()
