@@ -28,6 +28,7 @@ test {
 }
 
 task integrationTest(type: Test) {
+    maxParallelForks = 1
     testLogging {
         showStandardStreams = true
     }

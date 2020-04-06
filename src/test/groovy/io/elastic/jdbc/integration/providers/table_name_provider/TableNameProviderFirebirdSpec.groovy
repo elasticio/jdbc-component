@@ -17,41 +17,20 @@ class TableNameProviderFirebirdSpec extends Specification {
     @Shared
     JsonObject config = TestUtils.getFirebirdConfigurationBuilder().build()
     @Shared
-    String sqlDropUsersTable = "EXECUTE BLOCK AS BEGIN\n" +
-            "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'USERS')) then\n" +
-            "execute statement 'DROP TABLE USERS;';\n" +
-            "END"
+    String sqlDropUsersTable = "DROP TABLE USERS"
     @Shared
-    String sqlDropOrdersTable = "EXECUTE BLOCK AS BEGIN\n" +
-            "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'ORDERS')) then\n" +
-            "execute statement 'DROP TABLE ORDERS;';\n" +
-            "END"
+    String sqlDropOrdersTable = "DROP TABLE ORDERS"
     @Shared
-    String sqlDropProductsTable = "EXECUTE BLOCK AS BEGIN\n" +
-            "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'PRODUCTS')) then\n" +
-            "execute statement 'DROP TABLE PRODUCTS;';\n" +
-            "END"
+    String sqlDropProductsTable = "DROP TABLE PRODUCTS"
     @Shared
-    String sqlCreateUsersTable = "EXECUTE BLOCK AS BEGIN\n" +
-            "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'USERS')) then\n" +
-            "execute statement 'CREATE TABLE USERS (ID int, NAME varchar(255) NOT NULL, RADIUS int, DESTINATION int);';\n" +
-            "END"
+    String sqlCreateUsersTable = "RECREATE TABLE USERS (ID int, NAME varchar(255) NOT NULL, RADIUS int, DESTINATION int)"
     @Shared
-    String sqlCreateOrdersTable = "EXECUTE BLOCK AS BEGIN\n" +
-            "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'ORDERS')) then\n" +
-            "execute statement 'CREATE TABLE ORDERS (ID int, NAME varchar(255) NOT NULL, RADIUS int, DESTINATION int);';\n" +
-            "END"
+    String sqlCreateOrdersTable = "RECREATE TABLE ORDERS (ID int, NAME varchar(255) NOT NULL, RADIUS int, DESTINATION int)"
     @Shared
-    String sqlCreateProductsTable = "EXECUTE BLOCK AS BEGIN\n" +
-            "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'PRODUCTS')) then\n" +
-            "execute statement 'CREATE TABLE PRODUCTS (ID int, NAME varchar(255) NOT NULL, RADIUS int, DESTINATION int);';\n" +
-            "END"
+    String sqlCreateProductsTable = "RECREATE TABLE PRODUCTS (ID int, NAME varchar(255) NOT NULL, RADIUS int, DESTINATION int)"
 
     def setupSpec() {
         connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
-        connection.createStatement().execute(sqlDropUsersTable);
-        connection.createStatement().execute(sqlDropProductsTable);
-        connection.createStatement().execute(sqlDropOrdersTable);
         connection.createStatement().execute(sqlCreateUsersTable);
         connection.createStatement().execute(sqlCreateProductsTable);
         connection.createStatement().execute(sqlCreateOrdersTable);

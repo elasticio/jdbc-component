@@ -14,8 +14,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 
 class SelectTriggerFirebirdSpec extends Specification {
-    @Shared
-    def credentials = TestUtils.getFirebirdConfigurationBuilder().build()
+
     @Shared
     Connection connection
     @Shared
@@ -38,31 +37,23 @@ class SelectTriggerFirebirdSpec extends Specification {
     @Shared
     SelectTrigger trigger
     @Shared
-    String sqlDropTable = "EXECUTE BLOCK AS BEGIN\n" +
-            "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-            "execute statement 'DROP TABLE STARS;';\n" +
-            "END"
+    String sqlDropTable = "DROP TABLE STARS"
     @Shared
-    String sqlCreateTable = "EXECUTE BLOCK AS BEGIN\n" +
-            "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-            "execute statement 'CREATE TABLE STARS (ID int, NAME varchar(255) NOT NULL, DATET timestamp, RADIUS int, DESTINATION int);';\n" +
-            "END"
+    String sqlCreateTable = "RECREATE TABLE STARS (ID int, NAME varchar(255) NOT NULL, DATET timestamp, RADIUS int, DESTINATION int)"
     @Shared
-    String sqlInsertTable = "EXECUTE BLOCK AS BEGIN\n" +
-            "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-            "execute statement 'INSERT INTO STARS (ID, NAME) VALUES (1, \''Hello\'');';\n" +
-            "END"
+    String sqlInsertTable = "INSERT INTO STARS (ID, NAME) VALUES (1, 'Hello')"
 
-    def setup() {
+    def setupSpec() {
         connection = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
-        connection.createStatement().execute(sqlDropTable);
         connection.createStatement().execute(sqlCreateTable);
         connection.createStatement().execute(sqlInsertTable);
+        connection.close()
     }
 
-    def cleanup() {
-        connection.createStatement().execute(sqlDropTable);
-        connection.close()
+    def cleanupSpec() {
+        Connection deleteCon = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
+        deleteCon.createStatement().execute(sqlDropTable);
+        deleteCon.close()
     }
 
     def runTrigger(JsonObject config, JsonObject body, JsonObject snapshot) {

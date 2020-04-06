@@ -23,29 +23,21 @@ class GetRowsPollingTriggerFirebirdSpec extends Specification {
   @Shared
   JsonObject config = TestUtils.getFirebirdConfigurationBuilder().build()
   @Shared
-  String sqlDropTable = "EXECUTE BLOCK AS BEGIN\n" +
-          "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-          "execute statement 'DROP TABLE STARS;';\n" +
-          "END"
+  String sqlDropTable = "DROP TABLE STARS"
   @Shared
-  String sqlCreateTable = "EXECUTE BLOCK AS BEGIN\n" +
-          "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-          "execute statement 'CREATE TABLE STARS (ID int, ISDEAD smallint, NAME varchar(255) NOT NULL, RADIUS int, DESTINATION float, CREATEDAT timestamp);';\n" +
-          "END"
+  String sqlCreateTable = "RECREATE TABLE STARS (ID int, ISDEAD smallint, NAME varchar(255) NOT NULL, RADIUS int, DESTINATION float, CREATEDAT timestamp)"
   @Shared
-  String sqlInsertTable = "EXECUTE BLOCK AS BEGIN\n" +
-          "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-          "execute statement 'INSERT INTO STARS (ID, ISDEAD, NAME, RADIUS, DESTINATION, CREATEDAT) VALUES (1, 0, \''Sun\'', 50, 170, \''2018-06-14 10:00:00\'');';\n" +
-          "END"
+  String sqlInsertTable = "INSERT INTO STARS (ID, ISDEAD, NAME, RADIUS, DESTINATION, CREATEDAT) VALUES (1, 0, 'Sun', 50, 170, '2018-06-14 10:00:00')"
 
   def setup() {
     connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
-    connection.createStatement().execute(sqlDropTable)
     connection.createStatement().execute(sqlCreateTable)
     connection.createStatement().execute(sqlInsertTable)
+    connection.close()
   }
 
   def cleanupSpec() {
+    connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
     connection.createStatement().execute(sqlDropTable)
     connection.close()
   }

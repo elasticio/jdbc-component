@@ -17,19 +17,12 @@ class TimeStampColumnNamesProviderFirebirdSpec extends Specification {
             .add("tableName", "STARS")
             .build()
     @Shared
-    String sqlDropTable = "EXECUTE BLOCK AS BEGIN\n" +
-            "if (exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-            "execute statement 'DROP TABLE STARS;';\n" +
-            "END"
+    String sqlDropTable = "DROP TABLE STARS"
     @Shared
-    String sqlCreateTable = "EXECUTE BLOCK AS BEGIN\n" +
-            "if (not exists(select 1 from rdb\$relations where rdb\$relation_name = 'STARS')) then\n" +
-            "execute statement 'CREATE TABLE STARS (ID int, NAME varchar(255) NOT NULL, RADIUS int, DESTINATION float, CREATEDAT timestamp);';\n" +
-            "END"
+    String sqlCreateTable = "RECREATE TABLE STARS (ID int, NAME varchar(255) NOT NULL, RADIUS int, DESTINATION float, CREATEDAT timestamp)"
 
     def setup() {
-        connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"));
-        connection.createStatement().execute(sqlDropTable);
+        connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
         connection.createStatement().execute(sqlCreateTable);
     }
 
