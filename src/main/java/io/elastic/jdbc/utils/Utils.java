@@ -234,8 +234,7 @@ public class Utils {
     DatabaseMetaData md;
     ResultSet rs = null;
     Map<String, String> columnTypes = new HashMap<>();
-    String schemaName = "";
-
+    String schemaName = null;
     try {
       md = connection.getMetaData();
       if (tableName.contains(".")) {
