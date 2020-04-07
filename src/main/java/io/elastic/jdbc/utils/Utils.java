@@ -2,6 +2,7 @@ package io.elastic.jdbc.utils;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Date;
@@ -53,6 +54,7 @@ public class Utils {
     reboundDbState.put(Engines.MSSQL.name(), Collections.singletonList("40001"));
     reboundDbState.put(Engines.MYSQL.name(), Arrays.asList("40001", "XA102"));
     reboundDbState.put(Engines.ORACLE.name(), Collections.singletonList("61000"));
+    reboundDbState.put(Engines.FIREBIRDSQL.name(), Arrays.asList("10054", "10038"));
   }
 
   public static Connection getConnection(final JsonObject config) throws SQLException {
@@ -135,11 +137,16 @@ public class Utils {
       JsonObject body) throws SQLException {
     try {
       if (isNumeric(colName)) {
-        if ((body.get(colName) != null) && (body.get(colName) != JsonValue.NULL)) {
-          statement.setBigDecimal(paramNumber, body.getJsonNumber(colName).bigDecimalValue());
-        } else {
-          statement.setBigDecimal(paramNumber, null);
-        }
+          if ((body.get(colName) != null) && (body.get(colName) != JsonValue.NULL)) {
+            // workaround for Firebase -> isNumeric=true, but value = "true" or "false"
+            if (body.get(colName).toString().equals("true") || body.get(colName).toString().equals("false")) {
+              statement.setBoolean(paramNumber, body.getBoolean(colName));
+            } else {
+              statement.setBigDecimal(paramNumber, body.getJsonNumber(colName).bigDecimalValue());
+            }
+          } else {
+            statement.setBigDecimal(paramNumber, null);
+          }
       } else if (isTimestamp(colName)) {
         if ((body.get(colName) != null) && (body.get(colName) != JsonValue.NULL)) {
           statement.setTimestamp(paramNumber, Timestamp.valueOf(body.getString(colName)));
@@ -165,7 +172,7 @@ public class Utils {
           statement.setNull(paramNumber, Types.VARCHAR);
         }
       }
-    } catch (java.lang.NumberFormatException e) {
+    } catch (java.lang.NumberFormatException | java.lang.ClassCastException e) {
       String message = String
           .format("Provided data: %s can't be cast to the column %s datatype", body.get(colName),
               colName);
@@ -223,8 +230,7 @@ public class Utils {
     return type != null && type.equals("boolean");
   }
 
-  public static Map<String, String> getColumnTypes(Connection connection, Boolean isOracle,
-      String tableName) {
+  public static Map<String, String> getColumnTypes(Connection connection, String tableName) {
     DatabaseMetaData md;
     ResultSet rs = null;
     Map<String, String> columnTypes = new HashMap<>();
@@ -236,6 +242,10 @@ public class Utils {
         tableName = tableName.split("\\.")[1];
       }
       rs = md.getColumns(null, schemaName, tableName, "%");
+      if (!rs.isBeforeFirst()){
+        // ResultSet is empty, maybe we need to use null as Catalog?
+        rs = md.getColumns(null, schemaName, tableName, "%");
+      }
       while (rs.next()) {
         String name = rs.getString("COLUMN_NAME").toLowerCase();
         String type = detectColumnType(rs.getInt("DATA_TYPE"), rs.getString("TYPE_NAME"));
@@ -366,14 +376,16 @@ public class Utils {
    * Converts table name according Engine Type
    *
    * @param configuration should contains tableName
-   * @param isOracle flag is Engine type equals `oracle`
+   * @param isOracleOrFirebird flag is Engine type equals `oracle`
    */
-  public static String getTableName(JsonObject configuration, boolean isOracle) {
+  public static String getTableName(JsonObject configuration, boolean isOracleOrFirebird) {
     if (configuration.containsKey(PROPERTY_TABLE_NAME)
         && getNonNullString(configuration, PROPERTY_TABLE_NAME).length() != 0) {
       String tableName = configuration.getString(PROPERTY_TABLE_NAME);
       if (tableName.contains(".")) {
-        tableName = isOracle ? tableName.split("\\.")[1].toUpperCase() : tableName.split("\\.")[1];
+        tableName = isOracleOrFirebird ? tableName.split("\\.")[1].toUpperCase() : tableName.split("\\.")[1];
+      } else {
+        tableName = isOracleOrFirebird ? tableName.toUpperCase() : tableName;
       }
       return tableName;
     } else {

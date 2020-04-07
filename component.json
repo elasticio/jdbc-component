@@ -13,7 +13,8 @@
           "mysql": "MySQL",
           "postgresql": "PostgreSQL",
           "oracle": "Oracle",
-          "mssql": "MSSQL"
+          "mssql": "MSSQL",
+          "firebirdsql": "Firebird"
         },
         "prompt": "Please Select Database Type"
       },

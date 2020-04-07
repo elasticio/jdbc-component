@@ -17,33 +17,38 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
-public class MySQL extends Query {
+public class Firebird extends Query {
 
   public ArrayList executePolling(Connection connection) throws SQLException {
     validateQuery();
-    StringBuilder sql = new StringBuilder("SELECT * FROM ");
+
+    /* workaround to set FIRST operation on the 1st position in the statement */
+    StringBuilder sql = new StringBuilder("WITH d AS (SELECT * FROM ");
     sql.append(tableName);
     sql.append(" WHERE ");
     sql.append(pollingField);
-    sql.append(" > ?");
+    sql.append(" > ?) ");
+    sql.append("SELECT FIRST ? * FROM d");
     if (orderField != null) {
       sql.append(" ORDER BY ").append(orderField).append(" ASC");
     }
-    sql.append(" LIMIT ?");
 
     return getRowsExecutePolling(connection, sql.toString());
   }
 
   public JsonObject executeLookup(Connection connection, JsonObject body) throws SQLException {
     validateQuery();
+
+    /* workaround to set FIRST operation on the 1st position in the statement */
     StringBuilder sql = new StringBuilder("SELECT * FROM ");
     sql.append(tableName);
     sql.append(" WHERE ");
     sql.append(lookupField);
     sql.append(" = ?");
     sql.append(" ORDER BY ").append(lookupField);
-    sql.append(" ASC LIMIT ? OFFSET ?");
-    return getLookupRow(connection, body, sql.toString(), countNumber, skipNumber);
+    sql.append(" ASC ROWS ? TO ?");
+
+    return getLookupRow(connection, body, sql.toString(), 1, skipNumber += countNumber);
   }
 
   public int executeDelete(Connection connection, JsonObject body) throws SQLException {
@@ -51,9 +56,7 @@ public class MySQL extends Query {
         " FROM " + tableName +
         " WHERE " + lookupField + " = ?";
     try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-      for (Map.Entry<String, JsonValue> entry : body.entrySet()) {
-        Utils.setStatementParam(stmt, 1, entry.getKey(), body);
-      }
+      stmt.setString(1, lookupValue);
       return stmt.executeUpdate();
     }
   }

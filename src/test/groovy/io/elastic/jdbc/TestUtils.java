@@ -12,6 +12,8 @@ public class TestUtils {
   public static final String TEST_TABLE_NAME = "stars";
   private static final String SQL_DELETE_TABLE =
       " DROP TABLE IF EXISTS " + TEST_TABLE_NAME;
+  private static final String FIREBIRD_DELETE_TABLE =
+      " DROP TABLE " + TEST_TABLE_NAME;
   private static final String ORACLE_DELETE_TABLE = "BEGIN"
       + "   EXECUTE IMMEDIATE 'DROP TABLE "
       + TEST_TABLE_NAME + "';"
@@ -55,6 +57,14 @@ public class TestUtils {
       + "visible bit, "
       + "createdat DATETIME, "
       + "diameter INT GENERATED ALWAYS AS (radius * 2));";
+  private static final String FIREBIRD_CREATE_TABLE =  "RECREATE TABLE "
+          + TEST_TABLE_NAME +
+          " (ID int, " +
+          "NAME varchar(255) NOT NULL, " +
+          "RADIUS int NOT NULL," +
+          "DESTINATION float," +
+          "VISIBLE smallint, " +
+          "createdat TIMESTAMP)";
   private static Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
   public static JsonObjectBuilder getMssqlConfigurationBuilder() {
@@ -73,12 +83,37 @@ public class TestUtils {
         .add("connectionString", connectionString);
   }
 
+  public static JsonObjectBuilder getFirebirdConfigurationBuilder() {
+    final String host = dotenv.get("CONN_HOST_FIREBIRD");
+    final String port = dotenv.get("CONN_PORT_FIREBIRD");
+    final String databaseName = dotenv.get("CONN_DBNAME_FIREBIRD");
+    String configProperties = "";
+    if ((!dotenv.get("CONN_CONFIG_PROP_FIREBIRD", "").equals(""))) {
+      configProperties = dotenv.get("CONN_CONFIG_PROP_FIREBIRD");
+    }
+    final String connectionString =
+        "jdbc:firebirdsql://" + host + ":" + port + "/" + databaseName + "?" + configProperties;
+    return Json.createObjectBuilder()
+        .add("dbEngine", "firebirdsql")
+        .add("host", host)
+        .add("port", port)
+        .add("databaseName", databaseName)
+        .add("user", dotenv.get("CONN_USER_FIREBIRD"))
+        .add("password", dotenv.get("CONN_PASSWORD_FIREBIRD"))
+        .add("configurationProperties", configProperties)
+        .add("connectionString", connectionString);
+  }
+
   public static JsonObjectBuilder getMysqlConfigurationBuilder() {
     final String host = dotenv.get("CONN_HOST_MYSQL");
     final String port = dotenv.get("CONN_PORT_MYSQL");
     final String databaseName = dotenv.get("CONN_DBNAME_MYSQL");
+    String configProperties = "";
+    if (!dotenv.get("CONN_CONFIG_PROP_MYSQL", "").equals("")) {
+      configProperties = dotenv.get("CONN_CONFIG_PROP_MYSQL");
+    }
     final String connectionString =
-        "jdbc:mysql://" + host + ":" + port + "/" + databaseName;
+        "jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?" + configProperties;
     return Json.createObjectBuilder()
         .add("dbEngine", "mysql")
         .add("host", host)
@@ -86,6 +121,7 @@ public class TestUtils {
         .add("databaseName", databaseName)
         .add("user", dotenv.get("CONN_USER_MYSQL"))
         .add("password", dotenv.get("CONN_PASSWORD_MYSQL"))
+        .add("configurationProperties", configProperties)
         .add("connectionString", connectionString);
   }
 
@@ -146,6 +182,9 @@ public class TestUtils {
       case "postgresql":
         connection.createStatement().execute(POSTGRESQL_CREATE_TABLE);
         break;
+      case "firebirdsql":
+        connection.createStatement().execute(FIREBIRD_CREATE_TABLE);
+        break;
       default:
         throw new RuntimeException("Unsupported dbEngine" + dbEngine);
     }
@@ -155,6 +194,8 @@ public class TestUtils {
       throws SQLException {
     if (dbEngine.toLowerCase().equals("oracle")){
       connection.createStatement().execute(ORACLE_DELETE_TABLE);
+    } else if (dbEngine.toLowerCase().equals("firebirdsql")){
+      connection.createStatement().execute(FIREBIRD_DELETE_TABLE);
     } else {
       connection.createStatement().execute(SQL_DELETE_TABLE);
     }

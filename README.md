@@ -58,6 +58,13 @@ For integration-testing is needed to specify following environment variables:
  - ``CONN_DBNAME_POSTGRESQL`` - DataBase name
  - ``CONN_HOST_POSTGRESQL`` - DataBase host
  - ``CONN_PORT_POSTGRESQL`` - DataBase port
+ 5. Connection to Firebird:
+ - ``CONN_USER_FIREBIRD`` - user login
+ - ``CONN_PASSWORD_FIREBIRD`` - user password
+ - ``CONN_DBNAME_FIREBIRD`` - DataBase name
+ - ``CONN_HOST_FIREBIRD`` - DataBase host
+ - ``CONN_PORT_FIREBIRD`` - DataBase port
+ - ``CONN_PORT_FIREBIRD`` - DataBase port
 #### Others
 ## Credentials
 You need to use following properties to configure credentials:
@@ -74,6 +81,7 @@ Optional field. Provide port of the server instance, as by default:
 - ``5432`` - PostgreSQL
 - ``1521`` - Oracle
 - ``1433`` - MSSQL
+- ``3050`` - Firebird
 ### Database Name
 Provide name of database at the instance that you want to interact with.
 ### User
@@ -341,15 +349,17 @@ Please use [**Upsert row by primary key**](#upsert-row-by-primary-key-action) in
 - ``PostgreSQL`` - compatible with PostgreSQL 8.2 and higher
 - ``Oracle`` - compatible with Oracle Database 8.1.7 - 12.1.0.2
 - ``MSSQL`` - compatible with Microsoft SQL Server 2008 R2 and higher
+- ``Firebird`` - compatible with Firebird 2.0 and higher
 3. The current implementation of the action ``Upsert By Primary Key`` doesn't mark non-nullable fields as required fields at a dynamic metadata. In case of updating such fields with an empty value you will get SQL Exception ``Cannot insert the value NULL into...``. You should manually fill in all non-nullable fields with previous data, if you want to update part of columns in a row, even if data in that fields doesn't change. 
 4. The current implementation of the action ``Execute stored procedure`` doesn't support ResultSet MSSQL output.
 5. The current implementation of the action ``Execute stored procedure`` doesn't support any array types parameters.
 (MySQL does not have schemas by definition)
 6. Rebound mechanism only works for this SQL State: 
- - ``MySQL``: 40001, XA102
- - ``Oracle``: 61000
- - ``MSSQL``: 40001
- - ``PostgreSQL``:  40P01
+- ``MySQL``: 40001, XA102
+- ``Oracle``: 61000
+- ``MSSQL``: 40001
+- ``PostgreSQL``:  40P01
+- ``Firebird``: 10054, 10038
 
 ## License
 Apache-2.0 © [elastic.io GmbH](https://www.elastic.io "elastic.io GmbH")

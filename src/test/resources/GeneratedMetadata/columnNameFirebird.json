@@ -1,0 +1,47 @@
+{
+  "out": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "required": true,
+        "title": "result",
+        "type": "boolean"
+      }
+    }
+  },
+  "in": {
+    "type": "object",
+    "properties": {
+      "ID": {
+        "required": true,
+        "title": "ID",
+        "type": "number"
+      },
+      "NAME": {
+        "required": true,
+        "title": "NAME",
+        "type": "string"
+      },
+      "RADIUS": {
+        "required": true,
+        "title": "RADIUS",
+        "type": "number"
+      },
+      "DESTINATION": {
+        "required": false,
+        "title": "DESTINATION",
+        "type": "number"
+      },
+      "CREATEDAT": {
+        "required": false,
+        "title": "CREATEDAT",
+        "type": "string"
+      },
+      "DIAMETER": {
+        "required": false,
+        "title": "DIAMETER",
+        "type": "number"
+      }
+    }
+  }
+}
