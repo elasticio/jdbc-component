@@ -241,7 +241,7 @@ public class Utils {
         schemaName = tableName.split("\\.")[0];
         tableName = tableName.split("\\.")[1];
       }
-      rs = md.getColumns("", schemaName, tableName, "%");
+      rs = md.getColumns(null, schemaName, tableName, "%");
       if (!rs.isBeforeFirst()){
         // ResultSet is empty, maybe we need to use null as Catalog?
         rs = md.getColumns(null, schemaName, tableName, "%");
