@@ -243,15 +243,15 @@ public class Utils {
         tableName = tableName.split("\\.")[1];
       }
       rs = md.getColumns("", schemaName, tableName, "%");
-      if (!rs.next()){
+      if (!rs.isBeforeFirst()){
         // ResultSet is empty, maybe we need to use null as Catalog?
         rs = md.getColumns(null, schemaName, tableName, "%");
       }
-      do {
+      while (rs.next()) {
         String name = rs.getString("COLUMN_NAME").toLowerCase();
         String type = detectColumnType(rs.getInt("DATA_TYPE"), rs.getString("TYPE_NAME"));
         columnTypes.put(name, type);
-      } while (rs.next());
+      }
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
