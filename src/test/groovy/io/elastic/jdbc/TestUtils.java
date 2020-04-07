@@ -109,7 +109,7 @@ public class TestUtils {
     final String port = dotenv.get("CONN_PORT_MYSQL");
     final String databaseName = dotenv.get("CONN_DBNAME_MYSQL");
     String configProperties = "";
-    if ((!dotenv.get("CONN_CONFIG_PROP_FIREBIRD").equals(""))) {
+    if (!dotenv.get("CONN_CONFIG_PROP_MYSQL", "").equals("")) {
       configProperties = dotenv.get("CONN_CONFIG_PROP_MYSQL");
     }
     final String connectionString =
