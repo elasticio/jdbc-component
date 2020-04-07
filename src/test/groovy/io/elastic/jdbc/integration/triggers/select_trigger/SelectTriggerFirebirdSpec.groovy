@@ -37,8 +37,6 @@ class SelectTriggerFirebirdSpec extends Specification {
     @Shared
     SelectTrigger trigger
     @Shared
-    String sqlDropTable = "DROP TABLE STARS"
-    @Shared
     String sqlCreateTable = "RECREATE TABLE STARS (ID int, NAME varchar(255) NOT NULL, DATET timestamp, RADIUS int, DESTINATION int)"
     @Shared
     String sqlInsertTable = "INSERT INTO STARS (ID, NAME) VALUES (1, 'Hello')"
@@ -50,11 +48,6 @@ class SelectTriggerFirebirdSpec extends Specification {
         connection.close()
     }
 
-    def cleanupSpec() {
-        Connection deleteCon = DriverManager.getConnection(configuration.getString("connectionString"), configuration.getString("user"), configuration.getString("password"));
-        deleteCon.createStatement().execute(sqlDropTable);
-        deleteCon.close()
-    }
 
     def runTrigger(JsonObject config, JsonObject body, JsonObject snapshot) {
         Message msg = new Message.Builder().body(body).build()
@@ -84,10 +77,10 @@ class SelectTriggerFirebirdSpec extends Specification {
     def "one select"() {
         JsonObject snapshot = Json.createObjectBuilder().build();
         JsonObject body = Json.createObjectBuilder().build()
-
         when:
         runTrigger(getStarsConfig(), body, snapshot)
         then:
         0 * errorCallback.receive(_)
+
     }
 }
