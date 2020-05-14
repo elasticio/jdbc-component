@@ -2,7 +2,7 @@ package io.elastic.jdbc.actions;
 
 import io.elastic.api.ExecutionParameters;
 import io.elastic.api.Message;
-import io.elastic.api.Module;
+import io.elastic.api.Function;
 import io.elastic.jdbc.query_builders.Query;
 import io.elastic.jdbc.utils.QueryFactory;
 import io.elastic.jdbc.utils.Utils;
@@ -15,7 +15,7 @@ import javax.json.JsonString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SelectAction implements Module {
+public class SelectAction implements Function {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SelectAction.class);
   private static final String SQL_QUERY_VALUE = "sqlQuery";

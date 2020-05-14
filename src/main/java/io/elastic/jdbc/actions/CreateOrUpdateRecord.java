@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.elastic.api.ExecutionParameters;
 import io.elastic.api.Message;
-import io.elastic.api.Module;
+import io.elastic.api.Function;
 import io.elastic.jdbc.utils.EnginesOld;
 import io.elastic.jdbc.utils.SailorVersionsAdapter;
 import io.elastic.jdbc.utils.UtilsOld;
@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Deprecated
-public class CreateOrUpdateRecord implements Module {
+public class CreateOrUpdateRecord implements Function {
     private static final Logger logger = LoggerFactory.getLogger(CreateOrUpdateRecord.class);
 
     private Connection connection = null;
