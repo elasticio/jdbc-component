@@ -2,7 +2,7 @@ package io.elastic.jdbc.triggers;
 
 import io.elastic.api.ExecutionParameters;
 import io.elastic.api.Message;
-import io.elastic.api.Module;
+import io.elastic.api.Function;
 import io.elastic.jdbc.query_builders.Query;
 import io.elastic.jdbc.utils.QueryFactory;
 import io.elastic.jdbc.utils.Utils;
@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class GetRowsPollingTrigger implements Module {
+public class GetRowsPollingTrigger implements Function {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetRowsPollingTrigger.class);
   private static final String PROPERTY_TABLE_NAME = "tableName";

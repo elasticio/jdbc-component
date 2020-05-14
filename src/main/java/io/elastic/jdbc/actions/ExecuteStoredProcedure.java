@@ -2,7 +2,7 @@ package io.elastic.jdbc.actions;
 
 import io.elastic.api.ExecutionParameters;
 import io.elastic.api.Message;
-import io.elastic.api.Module;
+import io.elastic.api.Function;
 import io.elastic.jdbc.query_builders.Query;
 import io.elastic.jdbc.utils.QueryFactory;
 import io.elastic.jdbc.utils.Utils;
@@ -13,7 +13,7 @@ import javax.json.JsonObject;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class ExecuteStoredProcedure implements Module {
+public class ExecuteStoredProcedure implements Function {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ExecuteStoredProcedure.class);
 

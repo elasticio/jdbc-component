@@ -2,7 +2,7 @@ package io.elastic.jdbc.actions;
 
 import io.elastic.api.ExecutionParameters;
 import io.elastic.api.Message;
-import io.elastic.api.Module;
+import io.elastic.api.Function;
 import io.elastic.jdbc.query_builders.Query;
 import io.elastic.jdbc.utils.Engines;
 import io.elastic.jdbc.utils.QueryFactory;
@@ -18,7 +18,7 @@ import javax.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeleteRowByPrimaryKey implements Module {
+public class DeleteRowByPrimaryKey implements Function {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LookupRowByPrimaryKey.class);
   private static final String PROPERTY_DB_ENGINE = "dbEngine";

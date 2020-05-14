@@ -1,25 +1,22 @@
 package io.elastic.jdbc.actions;
 
 import io.elastic.api.ExecutionParameters;
+import io.elastic.api.Function;
 import io.elastic.api.Message;
-import io.elastic.api.Module;
-import io.elastic.jdbc.utils.Engines;
 import io.elastic.jdbc.query_builders.Query;
+import io.elastic.jdbc.utils.Engines;
 import io.elastic.jdbc.utils.QueryFactory;
 import io.elastic.jdbc.utils.Utils;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.json.Json;
-import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InsertAction implements Module {
+import javax.json.Json;
+import javax.json.JsonObject;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+
+public class InsertAction implements Function {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(InsertAction.class);
 
