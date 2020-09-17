@@ -33,7 +33,7 @@ public class GetRowsPollingTrigger implements Module {
     LOGGER.info("About to execute select trigger");
     final JsonObject configuration = parameters.getConfiguration();
     JsonObject snapshot = parameters.getSnapshot();
-    LOGGER.info("Got snapshot: {}", snapshot.toString());
+    LOGGER.trace("Got snapshot: {}", snapshot.toString());
     checkConfig(configuration);
     String pollingField = "";
     Calendar cDate = Calendar.getInstance();
@@ -56,7 +56,7 @@ public class GetRowsPollingTrigger implements Module {
         .getNonNullString(configuration, PROPERTY_POLLING_VALUE).matches(DATETIME_REGEX)) {
       pollingValue = Timestamp.valueOf(configuration.getString(PROPERTY_POLLING_VALUE));
     } else {
-      LOGGER.info(
+      LOGGER.trace(
           "There is an empty value for Start Polling From at the config and snapshot. So, we set Current Date = "
               + formattedDate);
       pollingValue = cts;
@@ -72,8 +72,8 @@ public class GetRowsPollingTrigger implements Module {
       ArrayList<JsonObject> resultList = query.executePolling(connection);
 
       for (int i = 0; i < resultList.size(); i++) {
-        LOGGER.info("Row number: {} from {}", i + 1, resultList.size());
-        LOGGER.info("Emitting data {}", resultList.get(i).toString());
+        LOGGER.debug("Row number: {} from {}", i + 1, resultList.size());
+        LOGGER.trace("Emitting data {}", resultList.get(i).toString());
         parameters.getEventEmitter()
             .emitData(new Message.Builder().body(resultList.get(i)).build());
       }
@@ -83,11 +83,12 @@ public class GetRowsPollingTrigger implements Module {
             .add(PROPERTY_TABLE_NAME, tableName)
             .add(PROPERTY_POLLING_FIELD, pollingField)
             .add(PROPERTY_POLLING_VALUE, formattedDate).build();
-        LOGGER.info("Emitting new snapshot {}", snapshot.toString());
+        LOGGER.trace("Emitting new snapshot {}", snapshot.toString());
         parameters.getEventEmitter().emitSnapshot(snapshot);
       }
     } catch (SQLException e) {
-      LOGGER.error("Failed to make request", e.toString());
+      LOGGER.error("Failed to make request");
+      LOGGER.trace("Failed to make request, details:", e.toString());
       throw new RuntimeException(e);
     }
   }

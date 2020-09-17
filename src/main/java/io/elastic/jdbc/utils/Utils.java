@@ -66,7 +66,8 @@ public class Utils {
     engineType.loadDriverClass();
     final String connectionString = engineType.getConnectionString(host, port, databaseName);
     Properties properties = getConfigurationProperties(config, engineType);
-    LOGGER.info("Connecting to {}", connectionString);
+    LOGGER.info("Connecting to {}", host);
+    LOGGER.trace("Connection string: {}", connectionString);
     return DriverManager.getConnection(connectionString, properties);
   }
 
@@ -93,7 +94,7 @@ public class Utils {
         throw new RuntimeException(e);
       }
     }
-    LOGGER.info("Got properties: {}", properties);
+    LOGGER.trace("Got properties: {}", properties);
     properties.setProperty("user", user);
     properties.setProperty("password", password);
     return properties;

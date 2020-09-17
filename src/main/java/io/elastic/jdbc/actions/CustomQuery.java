@@ -33,7 +33,8 @@ public class CustomQuery implements Module {
     final JsonObject body = parameters.getMessage().getBody();
     final String dbEngine = Utils.getDbEngine(configuration);
     final String queryString = body.getString("query");
-    LOGGER.info("Found dbEngine: '{}' and query: '{}'", dbEngine, queryString);
+    LOGGER.info("Found dbEngine: '{}'", dbEngine);
+    LOGGER.trace("Query: '{}'", queryString);
 
     List<Message> messages = new ArrayList<>();
     try (Connection connection = Utils.getConnection(configuration)) {

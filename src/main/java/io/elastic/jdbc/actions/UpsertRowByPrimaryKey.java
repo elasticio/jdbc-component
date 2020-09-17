@@ -79,17 +79,17 @@ public class UpsertRowByPrimaryKey implements Module {
         if (primaryKeysCount == 1) {
           LOGGER.info("Executing upsert row by primary key action");
           Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
-          LOGGER.info("Detected column types: " + Utils.columnTypes);
+          LOGGER.trace("Detected column types: " + Utils.columnTypes);
           QueryFactory queryFactory = new QueryFactory();
           Query query = queryFactory.getQuery(dbEngine);
           LOGGER
-              .info("Execute upsert parameters by PK: '{}' = {}", primaryKey, body.get(primaryKey));
+              .trace("Execute upsert parameters by PK: '{}' = {}", primaryKey, body.get(primaryKey));
           query.from(tableName);
           resultRow = query.executeUpsert(connection, primaryKey, body);
-          LOGGER.info("Emit data= {}", resultRow);
+          LOGGER.trace("Emit data= {}", resultRow);
           parameters.getEventEmitter().emitData(new Message.Builder().body(resultRow).build());
           snapshot = Json.createObjectBuilder().add(PROPERTY_TABLE_NAME, tableName).build();
-          LOGGER.info("Emitting new snapshot {}", snapshot.toString());
+          LOGGER.trace("Emitting new snapshot {}", snapshot.toString());
           parameters.getEventEmitter().emitSnapshot(snapshot);
         } else if (primaryKeysCount == 0) {
           LOGGER.error("Error: Table has not Primary Key. Should be one Primary Key");

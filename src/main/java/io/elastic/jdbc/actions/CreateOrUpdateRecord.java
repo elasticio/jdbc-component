@@ -40,13 +40,13 @@ public class CreateOrUpdateRecord implements Module {
         if (!(!body.has(idColumn) || body.get(idColumn).isJsonNull() || body.get(idColumn).getAsString().isEmpty())) {
             idColumnValue = body.get(idColumn).getAsString();
         }
-        logger.info("ID column value: {}", idColumnValue);
+        logger.trace("ID column value: {}", idColumnValue);
         String db = configuration.get(UtilsOld.CFG_DB_ENGINE).getAsString();
         isOracle = db.equals(EnginesOld.ORACLE.name().toLowerCase());
         try {
             connection = UtilsOld.getConnection(configuration);
             columnTypes = getColumnTypes(tableName);
-            logger.info("Detected column types: " + columnTypes);
+            logger.debug("Detected column types: " + columnTypes);
             if (recordExists(tableName, idColumn, idColumnValue)) {
                 makeUpdate(tableName, idColumn, idColumnValue, body);
             } else {
@@ -151,7 +151,7 @@ public class CreateOrUpdateRecord implements Module {
         String query = "SELECT COUNT(*) FROM " + tableName + " WHERE " + idColumn + " = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         setStatementParam(statement, 1, idColumn, idValue);
-        logger.info("{}",statement);
+        logger.debug("{}",statement);
         ResultSet rs = statement.executeQuery();
         rs.next();
         return rs.getInt(1) > 0;

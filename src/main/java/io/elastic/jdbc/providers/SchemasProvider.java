@@ -21,10 +21,10 @@ public class SchemasProvider implements SelectModelProvider {
   public JsonObject getSelectModel(JsonObject configuration) {
     JsonObjectBuilder result = Json.createObjectBuilder();
 
-    LOGGER.info("Searching for %s db schemas...", configuration.getString("databaseName"));
+    LOGGER.trace("Searching for %s db schemas...", configuration.getString("databaseName"));
     List<String> proceduresNames = getSchemasList(configuration);
 
-    LOGGER.info("Found %d db schemas", proceduresNames.size());
+    LOGGER.trace("Found %d db schemas", proceduresNames.size());
     LOGGER.debug("Schemas: " + proceduresNames.stream().reduce((s1, s2) -> s1 + ", " + s2).orElse(""));
 
     proceduresNames.forEach(procedure -> result.add(procedure, procedure));

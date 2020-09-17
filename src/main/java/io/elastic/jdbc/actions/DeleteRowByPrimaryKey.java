@@ -64,7 +64,7 @@ public class DeleteRowByPrimaryKey implements Module {
     }
 
     for (Map.Entry<String, JsonValue> entry : body.entrySet()) {
-      LOGGER.info("{} = {}", entry.getKey(), entry.getValue());
+      LOGGER.trace("{} = {}", entry.getKey(), entry.getValue());
       primaryKey.append(entry.getKey());
       primaryValue.append(entry.getValue());
       primaryKeysCount++;
@@ -75,23 +75,23 @@ public class DeleteRowByPrimaryKey implements Module {
         LOGGER.info("Executing delete row by primary key action");
         boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
         Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
-        LOGGER.info("Detected column types: " + Utils.columnTypes);
+        LOGGER.debug("Detected column types: " + Utils.columnTypes);
         try {
           QueryFactory queryFactory = new QueryFactory();
           Query query = queryFactory.getQuery(dbEngine);
-          LOGGER.info("Lookup parameters: {} = {}", primaryKey.toString(), primaryValue.toString());
+          LOGGER.debug("Lookup parameters: {} = {}", primaryKey.toString(), primaryValue.toString());
           query.from(tableName).lookup(primaryKey.toString(), primaryValue.toString());
           checkConfig(configuration);
           JsonObject row = query.executeLookup(connection, body);
 
           for (Map.Entry<String, JsonValue> entry : configuration.entrySet()) {
-            LOGGER.info("Key = " + entry.getKey() + " Value = " + entry.getValue());
+            LOGGER.debug("Key = " + entry.getKey() + " Value = " + entry.getValue());
           }
 
           if (row.size() != 0) {
             int result = query.executeDelete(connection, body);
             if (result == 1) {
-              LOGGER.info("Emitting data {}", row);
+              LOGGER.trace("Emitting data {}", row);
               parameters.getEventEmitter().emitData(new Message.Builder().body(row).build());
             } else {
               LOGGER.info("Unexpected result");
@@ -112,7 +112,7 @@ public class DeleteRowByPrimaryKey implements Module {
               .add(PROPERTY_ID_COLUMN, primaryKey.toString())
               .add(PROPERTY_LOOKUP_VALUE, primaryValue.toString())
               .add(PROPERTY_NULLABLE_RESULT, nullableResult).build();
-          LOGGER.info("Emitting new snapshot {}", snapshot.toString());
+          LOGGER.trace("Emitting new snapshot {}", snapshot.toString());
           parameters.getEventEmitter().emitSnapshot(snapshot);
         } catch (SQLException e) {
           if (Utils.reboundIsEnabled(configuration)) {
@@ -124,11 +124,11 @@ public class DeleteRowByPrimaryKey implements Module {
               return;
             }
           }
-          LOGGER.error("Failed to make request", e.toString());
+          LOGGER.error("Failed to make request {}", e.toString());
           throw new RuntimeException(e);
         }
       } catch (SQLException e) {
-        LOGGER.error("Failed to close connection", e.toString());
+        LOGGER.error("Failed to close connection {}", e.toString());
       }
     } else {
       LOGGER.error("Error: Should be one Primary Key");

@@ -80,7 +80,7 @@ public class PrimaryColumnNamesProvider implements DynamicMetadataProvider, Sele
               tableName);
       while (rs.next()) {
         primaryKeys.add(rs.getString("COLUMN_NAME"));
-        LOGGER.info("Primary Key: {}", rs.getString("COLUMN_NAME"));
+        LOGGER.trace("Primary Key: {}", rs.getString("COLUMN_NAME"));
       }
       rs = dbMetaData
           .getColumns(null, ((isOracle && !schemaName.isEmpty()) ? schemaName : null), tableName,

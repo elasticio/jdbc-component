@@ -64,7 +64,7 @@ public class SelectTrigger implements Module {
     if (snapshot.get(PROPERTY_SKIP_NUMBER) != null) {
       skipNumber = snapshot.getInt(PROPERTY_SKIP_NUMBER);
     }
-    LOGGER.info("SQL QUERY {} : ", sqlQuery);
+    LOGGER.trace("SQL QUERY {} : ", sqlQuery);
     LOGGER.info("Executing select trigger");
     try {
       QueryFactory queryFactory = new QueryFactory();
@@ -74,12 +74,12 @@ public class SelectTrigger implements Module {
         sqlQuery = sqlQuery.replace(LAST_POLL_PLACEHOLDER, "?");
         query.selectPolling(sqlQuery, pollingValue);
       }
-      LOGGER.info("SQL Query: {}", sqlQuery);
+      LOGGER.trace("SQL Query: {}", sqlQuery);
       Connection connection = Utils.getConnection(configuration);
       ArrayList<JsonObject> resultList = query.executeSelectTrigger(connection, sqlQuery);
       for (int i = 0; i < resultList.size(); i++) {
-        LOGGER.info("Columns count: {} from {}", i + 1, resultList.size());
-        LOGGER.info("Emitting data {}", resultList.get(i).toString());
+        LOGGER.trace("Columns count: {} from {}", i + 1, resultList.size());
+        LOGGER.trace("Emitting data {}", resultList.get(i).toString());
         parameters.getEventEmitter()
             .emitData(new Message.Builder().body(resultList.get(i)).build());
       }
@@ -88,7 +88,7 @@ public class SelectTrigger implements Module {
           .add(PROPERTY_SKIP_NUMBER, skipNumber + resultList.size())
           .add(LAST_POLL_PLACEHOLDER, pollingValue.toString())
           .add(SQL_QUERY_VALUE, sqlQuery).build();
-      LOGGER.info("Emitting new snapshot {}", snapshot.toString());
+      LOGGER.trace("Emitting new snapshot {}", snapshot.toString());
       parameters.getEventEmitter().emitSnapshot(snapshot);
     } catch (SQLException e) {
       LOGGER.error("Failed to make request", e.toString());

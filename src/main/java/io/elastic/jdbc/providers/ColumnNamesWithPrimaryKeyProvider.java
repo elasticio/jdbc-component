@@ -104,21 +104,24 @@ public class ColumnNamesWithPrimaryKeyProvider implements DynamicMetadataProvide
         try {
           rs.close();
         } catch (SQLException e) {
-          LOGGER.error("Failed to close result set {}", e);
+          LOGGER.error("Failed to close result set");
+          LOGGER.trace("Failed to close result set, details: {}", e);
         }
       }
       if (rsPrimaryKeys != null) {
         try {
           rsPrimaryKeys.close();
         } catch (SQLException e) {
-          LOGGER.error("Failed to close result set {}", e);
+          LOGGER.error("Failed to close result set");
+          LOGGER.trace("Failed to close result set, details: {}", e);
         }
       }
       if (connection != null) {
         try {
           connection.close();
         } catch (SQLException e) {
-          LOGGER.error("Failed to close connection {}", e);
+          LOGGER.error("Failed to close connection");
+          LOGGER.trace("Failed to close connection, details: {}", e);
         }
       }
     }

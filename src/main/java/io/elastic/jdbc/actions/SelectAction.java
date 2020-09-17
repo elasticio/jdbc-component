@@ -44,20 +44,20 @@ public class SelectAction implements Module {
     }
 
     Utils.columnTypes = Utils.getVariableTypes(sqlQuery);
-    LOGGER.info("Detected column types: " + Utils.columnTypes);
+    LOGGER.trace("Detected column types: " + Utils.columnTypes);
     LOGGER.info("Executing select action");
     try {
       QueryFactory queryFactory = new QueryFactory();
       Query query = queryFactory.getQuery(dbEngine);
       sqlQuery = Query.preProcessSelect(sqlQuery);
-      LOGGER.info("SQL Query: {}", sqlQuery);
+      LOGGER.trace("SQL Query: {}", sqlQuery);
       ArrayList<JsonObject> resultList;
       try(Connection connection = Utils.getConnection(configuration)){
         resultList = query.executeSelectQuery(connection, sqlQuery, body);
       }
       for (int i = 0; i < resultList.size(); i++) {
-        LOGGER.info("Columns count: {} from {}", i + 1, resultList.size());
-        LOGGER.info("Emitting data {}", resultList.get(i).toString());
+        LOGGER.trace("Columns count: {} from {}", i + 1, resultList.size());
+        LOGGER.trace("Emitting data {}", resultList.get(i).toString());
         parameters.getEventEmitter()
             .emitData(new Message.Builder().body(resultList.get(i)).build());
       }
@@ -66,7 +66,7 @@ public class SelectAction implements Module {
         resultList.add(Json.createObjectBuilder()
             .add("empty dataset", "no data")
             .build());
-        LOGGER.info("Emitting data {}", resultList.get(0));
+        LOGGER.trace("Emitting data {}", resultList.get(0));
         parameters.getEventEmitter()
             .emitData(new Message.Builder().body(resultList.get(0)).build());
       } else if (resultList.size() == 0 && !nullableResult) {
@@ -78,7 +78,7 @@ public class SelectAction implements Module {
           .add(PROPERTY_SKIP_NUMBER, skipNumber + resultList.size())
           .add(SQL_QUERY_VALUE, sqlQuery)
           .add(PROPERTY_NULLABLE_RESULT, nullableResult).build();
-      LOGGER.info("Emitting new snapshot {}", snapshot.toString());
+      LOGGER.trace("Emitting new snapshot {}", snapshot.toString());
       parameters.getEventEmitter().emitSnapshot(snapshot);
     } catch (SQLException e) {
       throw new RuntimeException(e);

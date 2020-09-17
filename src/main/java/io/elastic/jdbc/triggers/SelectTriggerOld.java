@@ -73,7 +73,7 @@ public class SelectTriggerOld implements Module {
             }
             snapshot.addProperty("skipNumber", skipNumber + rows.size());
             snapshot.addProperty(PROPERTY_TABLE_NAME, tableName);
-            logger.info("Emitting new snapshot {}", snapshot.toString());
+            logger.trace("Emitting new snapshot {}", snapshot.toString());
             parameters.getEventEmitter().emitSnapshot(SailorVersionsAdapter.gsonToJavax(snapshot));
         } catch (SQLException e) {
             logger.error("Failed to make request", e.toString());

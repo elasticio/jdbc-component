@@ -26,9 +26,9 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
   public JsonObject getMetaModel(JsonObject configuration) {
     LOGGER.info("Getting metadata...");
     JsonObject inMetadata = getInputMetaData(configuration);
-    LOGGER.info("Generated input metadata {}", inMetadata);
+    LOGGER.trace("Generated input metadata {}", inMetadata);
     JsonObject outMetadata = getOutputMetaData();
-    LOGGER.info("Generated output metadata {}", outMetadata);
+    LOGGER.trace("Generated output metadata {}", outMetadata);
     return Json.createObjectBuilder()
         .add("out", outMetadata)
         .add("in", inMetadata)
@@ -61,10 +61,10 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
     try (Connection connection = Utils.getConnection(configuration)) {
       DatabaseMetaData dbMetaData;
       try {
-        LOGGER.info("Getting DatabaseMetaData for table: '{}'...", tableName);
+        LOGGER.debug("Getting DatabaseMetaData for table: '{}'...", tableName);
         dbMetaData = connection.getMetaData();
       } catch (SQLException e) {
-        LOGGER.error("Failed while getting DatabaseMetaData. Error: " + e.getMessage());
+        LOGGER.debug("Failed while getting DatabaseMetaData. Error: " + e.getMessage());
         throw new RuntimeException(e);
       }
 
@@ -78,21 +78,21 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
         final String catalog = isMySql ? configuration.getString("databaseName") : null;
         ArrayList<String> primaryKeysNames = Utils
             .getPrimaryKeyNames(catalog, schemaNamePattern, tableNamePattern, dbMetaData);
-        LOGGER.info("Found primary key name(s): '{}'", primaryKeysNames);
+        LOGGER.debug("Found primary key name(s): '{}'", primaryKeysNames);
 
         LOGGER.info("Starting processing columns...");
         while (resultSet.next()) {
           final String fieldName = resultSet.getString("COLUMN_NAME");
           final int sqlDataType = resultSet.getInt("DATA_TYPE");
           final String fieldType = Utils.convertType(sqlDataType);
-          LOGGER.info("Found column: name={}, type={}", fieldName, fieldType);
+          LOGGER.debug("Found column: name={}, type={}", fieldName, fieldType);
 
           final boolean isPrimaryKey = Utils.isPrimaryKey(primaryKeysNames, fieldName);
           final boolean isNotNull = Utils.isNotNull(resultSet);
           final boolean isAutoincrement = Utils.isAutoincrement(resultSet, isOracle);
           final boolean isCalculated = Utils.isCalculated(resultSet, dbEngine);
           LOGGER
-              .info(
+              .trace(
                   "Field '{}': isPrimaryKey={}, isNotNull={}, isAutoincrement={}, isCalculated={}",
                   fieldName, isPrimaryKey, isNotNull, isAutoincrement,
                   isCalculated);
