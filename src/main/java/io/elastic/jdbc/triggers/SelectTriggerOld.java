@@ -68,7 +68,7 @@ public class SelectTriggerOld implements Module {
                 }
                 rows.add(row);
                 logger.info("Emitting data");
-                logger.info(row.toString());
+                logger.trace(row.toString());
                 parameters.getEventEmitter().emitData(new Message.Builder().body(SailorVersionsAdapter.gsonToJavax(row)).build());
             }
             snapshot.addProperty("skipNumber", skipNumber + rows.size());

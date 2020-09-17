@@ -30,7 +30,8 @@ public class UtilsOld {
         logger.info("DB type {}", engineType);
         engineType.loadDriverClass();
         final String connectionString = engineType.getConnectionString(host, port, databaseName);
-        logger.info("Connecting to {}", connectionString);
+        logger.info("Connecting to {}", host);
+        logger.trace("Connection string {}", connectionString);
         try {
             return DriverManager.getConnection(connectionString, user, password);
         } catch (Exception e) {

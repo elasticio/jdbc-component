@@ -1,4 +1,8 @@
 # JDBC Component
+## 2.4.1 (September 20, 2020)
+
+* Remove sensitive data from component logs
+
 ## 2.3.2 (October 21, 2019)
 
 * Add rebound mechanism in case of deadlocks for actions: Insert, UpsertByPK, DeleteByPK
