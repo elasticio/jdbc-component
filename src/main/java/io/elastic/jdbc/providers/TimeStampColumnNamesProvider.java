@@ -39,7 +39,7 @@ public class TimeStampColumnNamesProvider implements SelectModelProvider {
           int sqlType = rs.getInt("DATA_TYPE");
           String name = rs.getString("COLUMN_NAME");
           String typeName = rs.getString("TYPE_NAME").toUpperCase();
-          LOGGER.debug("Found field with name: {}, sqlType: {}, typeName: {}", name, sqlType,
+          LOGGER.trace("Found field with name: {}, sqlType: {}, typeName: {}", name, sqlType,
               typeName);
           if (sqlType == Types.DATE || sqlType == Types.TIMESTAMP || typeName
               .contains("TIMESTAMP")) {

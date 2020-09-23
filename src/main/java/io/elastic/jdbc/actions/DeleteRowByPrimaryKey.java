@@ -79,13 +79,13 @@ public class DeleteRowByPrimaryKey implements Module {
         try {
           QueryFactory queryFactory = new QueryFactory();
           Query query = queryFactory.getQuery(dbEngine);
-          LOGGER.debug("Lookup parameters: {} = {}", primaryKey.toString(), primaryValue.toString());
+          LOGGER.trace("Lookup parameters: {} = {}", primaryKey.toString(), primaryValue.toString());
           query.from(tableName).lookup(primaryKey.toString(), primaryValue.toString());
           checkConfig(configuration);
           JsonObject row = query.executeLookup(connection, body);
 
           for (Map.Entry<String, JsonValue> entry : configuration.entrySet()) {
-            LOGGER.debug("Key = " + entry.getKey() + " Value = " + entry.getValue());
+            LOGGER.trace("Key = " + entry.getKey() + " Value = " + entry.getValue());
           }
 
           if (row.size() != 0) {

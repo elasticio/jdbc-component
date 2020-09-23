@@ -24,8 +24,8 @@ public class SchemasProvider implements SelectModelProvider {
     LOGGER.trace("Searching for %s db schemas...", configuration.getString("databaseName"));
     List<String> proceduresNames = getSchemasList(configuration);
 
-    LOGGER.trace("Found %d db schemas", proceduresNames.size());
-    LOGGER.debug("Schemas: " + proceduresNames.stream().reduce((s1, s2) -> s1 + ", " + s2).orElse(""));
+    LOGGER.debug("Found %d db schemas", proceduresNames.size());
+    LOGGER.trace("Schemas: " + proceduresNames.stream().reduce((s1, s2) -> s1 + ", " + s2).orElse(""));
 
     proceduresNames.forEach(procedure -> result.add(procedure, procedure));
 

@@ -151,7 +151,7 @@ public class CreateOrUpdateRecord implements Module {
         String query = "SELECT COUNT(*) FROM " + tableName + " WHERE " + idColumn + " = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         setStatementParam(statement, 1, idColumn, idValue);
-        logger.debug("{}",statement);
+        logger.trace("{}",statement);
         ResultSet rs = statement.executeQuery();
         rs.next();
         return rs.getInt(1) > 0;
@@ -173,7 +173,7 @@ public class CreateOrUpdateRecord implements Module {
             setStatementParam(statement, i, entry.getKey(), entry.getValue().getAsString());
             i++;
         }
-        logger.debug("{}",statement);
+        logger.trace("{}",statement);
         statement.execute();
     }
 

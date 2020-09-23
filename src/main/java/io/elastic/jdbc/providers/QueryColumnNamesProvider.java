@@ -53,8 +53,8 @@ public class QueryColumnNamesProvider implements DynamicMetadataProvider, Select
     if (matcher.find()) {
       do {
         matcherCheckCharacter.find();
-        LOGGER.debug("Var = {}", matcher.group());
-        LOGGER.debug("Var matcherCheckCharacter = {}", matcherCheckCharacter.group());
+        LOGGER.trace("Var = {}", matcher.group());
+        LOGGER.trace("Var matcherCheckCharacter = {}", matcherCheckCharacter.group());
         if (!matcher.group().equals(matcherCheckCharacter.group())){
           throw new RuntimeException(
               "Prepared statement variables name '"

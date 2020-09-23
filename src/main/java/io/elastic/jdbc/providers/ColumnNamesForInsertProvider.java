@@ -64,7 +64,7 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
         LOGGER.debug("Getting DatabaseMetaData for table: '{}'...", tableName);
         dbMetaData = connection.getMetaData();
       } catch (SQLException e) {
-        LOGGER.debug("Failed while getting DatabaseMetaData. Error: " + e.getMessage());
+        LOGGER.error("Failed while getting DatabaseMetaData");
         throw new RuntimeException(e);
       }
 
@@ -78,14 +78,14 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
         final String catalog = isMySql ? configuration.getString("databaseName") : null;
         ArrayList<String> primaryKeysNames = Utils
             .getPrimaryKeyNames(catalog, schemaNamePattern, tableNamePattern, dbMetaData);
-        LOGGER.debug("Found primary key name(s): '{}'", primaryKeysNames);
+        LOGGER.trace("Found primary key name(s): '{}'", primaryKeysNames);
 
         LOGGER.info("Starting processing columns...");
         while (resultSet.next()) {
           final String fieldName = resultSet.getString("COLUMN_NAME");
           final int sqlDataType = resultSet.getInt("DATA_TYPE");
           final String fieldType = Utils.convertType(sqlDataType);
-          LOGGER.debug("Found column: name={}, type={}", fieldName, fieldType);
+          LOGGER.trace("Found column: name={}, type={}", fieldName, fieldType);
 
           final boolean isPrimaryKey = Utils.isPrimaryKey(primaryKeysNames, fieldName);
           final boolean isNotNull = Utils.isNotNull(resultSet);
@@ -104,7 +104,7 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
                 .add("title", fieldName)
                 .add("type", fieldType)
                 .build();
-            LOGGER.debug("Field description '{}': {}", fieldName, field);
+            LOGGER.trace("Field description '{}': {}", fieldName, field);
             propertiesIn.add(fieldName, field);
             isEmpty = false;
           }

@@ -67,7 +67,7 @@ public class LookupRowByPrimaryKey implements Module {
     boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
 
     for (Map.Entry<String, JsonValue> entry : body.entrySet()) {
-      LOGGER.debug("{} = {}", entry.getKey(), entry.getValue());
+      LOGGER.trace("{} = {}", entry.getKey(), entry.getValue());
       primaryKey.append(entry.getKey());
       primaryValue.append(entry.getValue());
       primaryKeysCount++;
@@ -82,7 +82,7 @@ public class LookupRowByPrimaryKey implements Module {
         try {
           QueryFactory queryFactory = new QueryFactory();
           Query query = queryFactory.getQuery(dbEngine);
-          LOGGER.info("Lookup parameters: {} = {}", primaryKey.toString(), primaryValue.toString());
+          LOGGER.trace("Lookup parameters: {} = {}", primaryKey.toString(), primaryValue.toString());
           query.from(tableName).lookup(primaryKey.toString(), primaryValue.toString());
           checkConfig(configuration);
 

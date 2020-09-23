@@ -143,7 +143,7 @@ public class MSSQL extends Query {
         }
 
         String type = Utils.cleanJsonType(Utils.detectColumnType(parameter.getType(), ""));
-        LOGGER.info("Processing: " + parameter.getName());
+        LOGGER.debug("Processing: " + parameter.getName());
         switch (type) {
           case ("number"):
             stmt.setObject(inc,

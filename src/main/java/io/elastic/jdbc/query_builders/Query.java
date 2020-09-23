@@ -286,7 +286,7 @@ public abstract class Query {
     try (PreparedStatement stmt = connection.prepareStatement(sql)) {
       stmt.setTimestamp(1, pollingValue);
       stmt.setInt(2, countNumber);
-      LOGGER.info("SQL statement: {} with params: {}, {}", sql, pollingValue, countNumber);
+      LOGGER.trace("SQL statement: {} with params: {}, {}", sql, pollingValue, countNumber);
       try (ResultSet rs = stmt.executeQuery()) {
         ArrayList listResult = new ArrayList();
         JsonObjectBuilder row = Json.createObjectBuilder();
