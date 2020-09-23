@@ -61,7 +61,7 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
     try (Connection connection = Utils.getConnection(configuration)) {
       DatabaseMetaData dbMetaData;
       try {
-        LOGGER.debug("Getting DatabaseMetaData for table: '{}'...", tableName);
+        LOGGER.trace("Getting DatabaseMetaData for table: '{}'...", tableName);
         dbMetaData = connection.getMetaData();
       } catch (SQLException e) {
         LOGGER.error("Failed while getting DatabaseMetaData");

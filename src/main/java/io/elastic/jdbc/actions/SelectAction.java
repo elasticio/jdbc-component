@@ -44,7 +44,7 @@ public class SelectAction implements Module {
     }
 
     Utils.columnTypes = Utils.getVariableTypes(sqlQuery);
-    LOGGER.trace("Detected column types: " + Utils.columnTypes);
+    LOGGER.debug("Detected column types: " + Utils.columnTypes);
     LOGGER.info("Executing select action");
     try {
       QueryFactory queryFactory = new QueryFactory();

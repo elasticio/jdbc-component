@@ -91,7 +91,7 @@ public class SelectTrigger implements Module {
       LOGGER.trace("Emitting new snapshot {}", snapshot.toString());
       parameters.getEventEmitter().emitSnapshot(snapshot);
     } catch (SQLException e) {
-      LOGGER.error("Failed to make request", e.toString());
+      LOGGER.error("Failed to make request");
       throw new RuntimeException(e);
     }
   }

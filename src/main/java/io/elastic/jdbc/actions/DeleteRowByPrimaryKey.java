@@ -124,7 +124,8 @@ public class DeleteRowByPrimaryKey implements Module {
               return;
             }
           }
-          LOGGER.error("Failed to make request {}", e.toString());
+          LOGGER.error("Failed to make request..");
+          LOGGER.trace("Failed to make request {}", e.toString());
           throw new RuntimeException(e);
         }
       } catch (SQLException e) {

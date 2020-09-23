@@ -34,7 +34,7 @@ public class InsertAction implements Module {
     LOGGER.info("Found dbEngine: '{}' and tableName: '{}'", dbEngine, tableName);
     try (Connection connection = Utils.getConnection(configuration)) {
       Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
-      LOGGER.trace("Detected column types: " + Utils.columnTypes);
+      LOGGER.debug("Detected column types: " + Utils.columnTypes);
       LOGGER.trace("Inserting in table '{}' values '{}'", tableName, body);
       QueryFactory queryFactory = new QueryFactory();
       Query query = queryFactory.getQuery(dbEngine);

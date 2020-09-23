@@ -79,7 +79,7 @@ public class UpsertRowByPrimaryKey implements Module {
         if (primaryKeysCount == 1) {
           LOGGER.info("Executing upsert row by primary key action");
           Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
-          LOGGER.trace("Detected column types: " + Utils.columnTypes);
+          LOGGER.debug("Detected column types: " + Utils.columnTypes);
           QueryFactory queryFactory = new QueryFactory();
           Query query = queryFactory.getQuery(dbEngine);
           LOGGER

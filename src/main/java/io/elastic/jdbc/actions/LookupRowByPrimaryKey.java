@@ -78,7 +78,7 @@ public class LookupRowByPrimaryKey implements Module {
       try (Connection connection = Utils.getConnection(configuration)) {
         LOGGER.info("Executing lookup row by primary key action");
         Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
-        LOGGER.trace("Detected column types: " + Utils.columnTypes);
+        LOGGER.debug("Detected column types: " + Utils.columnTypes);
         try {
           QueryFactory queryFactory = new QueryFactory();
           Query query = queryFactory.getQuery(dbEngine);
