@@ -66,7 +66,7 @@ public class Utils {
     engineType.loadDriverClass();
     final String connectionString = engineType.getConnectionString(host, port, databaseName);
     Properties properties = getConfigurationProperties(config, engineType);
-    LOGGER.debug("Connecting to {}", host);
+    LOGGER.info("Connecting to {}", host);
     LOGGER.trace("Connection string: {}", connectionString);
     return DriverManager.getConnection(connectionString, properties);
   }
