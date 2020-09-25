@@ -31,7 +31,7 @@ public class InsertAction implements Module {
     final String dbEngine = Utils.getDbEngine(configuration);
     final boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
     final String tableName = Utils.getTableName(configuration, isOracle);
-    LOGGER.info("Found dbEngine: '{}' and tableName: '{}'", dbEngine, tableName);
+    LOGGER.info("Found dbEngine: '{}'", dbEngine);
     try (Connection connection = Utils.getConnection(configuration)) {
       Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
       LOGGER.debug("Detected column types: " + Utils.columnTypes);
