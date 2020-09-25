@@ -1,5 +1,5 @@
 # JDBC Component
-## 2.4.1 (September 20, 2020)
+## 2.4.1 (September 25, 2020)
 
 * Remove sensitive data from component logs
 
