@@ -33,7 +33,7 @@ public class CustomQuery implements Function {
     final JsonObject body = parameters.getMessage().getBody();
     final String dbEngine = Utils.getDbEngine(configuration);
     final String queryString = body.getString("query");
-    LOGGER.info("Found dbEngine: '{}' and query: '{}'", dbEngine, queryString);
+    LOGGER.info("Found dbEngine: '{}'", dbEngine);
 
     List<Message> messages = new ArrayList<>();
     try (Connection connection = Utils.getConnection(configuration)) {
@@ -66,7 +66,7 @@ public class CustomQuery implements Function {
     }
 
     messages.forEach(message -> {
-      LOGGER.trace("Emit data= {}", message.getBody());
+      LOGGER.trace("Emitting message data");
       parameters.getEventEmitter().emitData(message);
     });
 

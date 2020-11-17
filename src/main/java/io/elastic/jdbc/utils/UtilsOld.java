@@ -27,10 +27,10 @@ public class UtilsOld {
         final Integer port = getPort(config, engineType);
         final String password = getPassword(config, engineType);
         final String databaseName = getRequiredNonEmptyString(config, CFG_DATABASE_NAME, "Database name is required");
-        logger.info("DB type {}", engineType);
+        logger.debug("DB type {}", engineType);
         engineType.loadDriverClass();
         final String connectionString = engineType.getConnectionString(host, port, databaseName);
-        logger.info("Connecting to {}", connectionString);
+        logger.info("Connecting to the connection string");
         try {
             return DriverManager.getConnection(connectionString, user, password);
         } catch (Exception e) {

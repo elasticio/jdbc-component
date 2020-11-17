@@ -79,17 +79,16 @@ public class UpsertRowByPrimaryKey implements Function {
         if (primaryKeysCount == 1) {
           LOGGER.info("Executing upsert row by primary key action");
           Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
-          LOGGER.info("Detected column types: " + Utils.columnTypes);
+          LOGGER.debug("Detected column types");
           QueryFactory queryFactory = new QueryFactory();
           Query query = queryFactory.getQuery(dbEngine);
-          LOGGER
-              .info("Execute upsert parameters by PK: '{}' = {}", primaryKey, body.get(primaryKey));
+          LOGGER.debug("Execute upsert parameters");
           query.from(tableName);
           resultRow = query.executeUpsert(connection, primaryKey, body);
-          LOGGER.info("Emit data= {}", resultRow);
+          LOGGER.info("Emitting data");
           parameters.getEventEmitter().emitData(new Message.Builder().body(resultRow).build());
           snapshot = Json.createObjectBuilder().add(PROPERTY_TABLE_NAME, tableName).build();
-          LOGGER.info("Emitting new snapshot {}", snapshot.toString());
+          LOGGER.info("Emitting new snapshot");
           parameters.getEventEmitter().emitSnapshot(snapshot);
         } else if (primaryKeysCount == 0) {
           LOGGER.error("Error: Table has not Primary Key. Should be one Primary Key");
@@ -103,7 +102,9 @@ public class UpsertRowByPrimaryKey implements Function {
       if (Utils.reboundIsEnabled(configuration)) {
         List<String> states = Utils.reboundDbState.get(dbEngine);
         if (states.contains(e.getSQLState())) {
-          LOGGER.warn("Starting rebound max iter: {}, rebound ttl: {}. Reason: {}", System.getenv("ELASTICIO_REBOUND_LIMIT"), System.getenv("ELASTICIO_REBOUND_INITIAL_EXPIRATION"), e.getMessage());
+          LOGGER.warn("Starting rebound max iter: {}, rebound ttl: {} because of a SQL Exception",
+              System.getenv("ELASTICIO_REBOUND_LIMIT"),
+              System.getenv("ELASTICIO_REBOUND_INITIAL_EXPIRATION"));
           parameters.getEventEmitter().emitRebound(e);
           return;
         }

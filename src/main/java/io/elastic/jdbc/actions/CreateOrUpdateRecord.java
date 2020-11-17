@@ -40,13 +40,13 @@ public class CreateOrUpdateRecord implements Function {
         if (!(!body.has(idColumn) || body.get(idColumn).isJsonNull() || body.get(idColumn).getAsString().isEmpty())) {
             idColumnValue = body.get(idColumn).getAsString();
         }
-        logger.info("ID column value: {}", idColumnValue);
+        logger.debug("Got ID column value");
         String db = configuration.get(UtilsOld.CFG_DB_ENGINE).getAsString();
         isOracle = db.equals(EnginesOld.ORACLE.name().toLowerCase());
         try {
             connection = UtilsOld.getConnection(configuration);
             columnTypes = getColumnTypes(tableName);
-            logger.info("Detected column types: " + columnTypes);
+            logger.debug("Detected column types");
             if (recordExists(tableName, idColumn, idColumnValue)) {
                 makeUpdate(tableName, idColumn, idColumnValue, body);
             } else {
@@ -137,7 +137,7 @@ public class CreateOrUpdateRecord implements Function {
 
     private void setStatementParam(PreparedStatement statement, int paramNumber, String colName, String colValue) throws SQLException {
         if (isNumeric(colName)) {
-        	statement.setBigDecimal(paramNumber, new BigDecimal(colValue));
+            statement.setBigDecimal(paramNumber, new BigDecimal(colValue));
         } else if (isTimestamp(colName)) {
             statement.setTimestamp(paramNumber, Timestamp.valueOf(colValue));
         } else if (isDate(colName)) {
@@ -151,7 +151,7 @@ public class CreateOrUpdateRecord implements Function {
         String query = "SELECT COUNT(*) FROM " + tableName + " WHERE " + idColumn + " = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         setStatementParam(statement, 1, idColumn, idValue);
-        logger.info("{}",statement);
+        logger.info("Prepared a statement. Executing...");
         ResultSet rs = statement.executeQuery();
         rs.next();
         return rs.getInt(1) > 0;
@@ -173,7 +173,7 @@ public class CreateOrUpdateRecord implements Function {
             setStatementParam(statement, i, entry.getKey(), entry.getValue().getAsString());
             i++;
         }
-        logger.debug("{}",statement);
+        logger.info("Prepared a statement. Executing...");
         statement.execute();
     }
 
@@ -191,6 +191,7 @@ public class CreateOrUpdateRecord implements Function {
             i++;
         }
         setStatementParam(statement, i, idColumn, idValue);
+        logger.info("Prepared a statement. Executing...");
         statement.execute();
     }
 }

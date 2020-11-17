@@ -66,7 +66,7 @@ public class Utils {
     engineType.loadDriverClass();
     final String connectionString = engineType.getConnectionString(host, port, databaseName);
     Properties properties = getConfigurationProperties(config, engineType);
-    LOGGER.info("Connecting to {}", connectionString);
+    LOGGER.info("Connecting to connection string");
     return DriverManager.getConnection(connectionString, properties);
   }
 
@@ -89,11 +89,10 @@ public class Utils {
       try {
         properties.load(new StringReader(configurationProperties.replaceAll("&", "\n")));
       } catch (IOException e) {
-        LOGGER.error("Failed while parsing configuration properties. Error: " + e.getMessage());
+        LOGGER.error("Failed while parsing configuration properties");
         throw new RuntimeException(e);
       }
     }
-    LOGGER.info("Got properties: {}", properties);
     properties.setProperty("user", user);
     properties.setProperty("password", password);
     return properties;
@@ -118,7 +117,7 @@ public class Utils {
         }
       }
     } catch (NullPointerException | ClassCastException e) {
-      LOGGER.info("key {} doesn't have any mapping: {}", key, e);
+      LOGGER.info("Key doesn't have any mapping");
     }
     return value.toString().replaceAll("\"", "");
   }
@@ -341,7 +340,7 @@ public class Utils {
           break;
       }
     } catch (SQLException | java.lang.NullPointerException e) {
-      LOGGER.error("Failed to get data by type", e);
+      LOGGER.error("Failed to get data by type");
       throw new RuntimeException(e);
     }
     return row;
@@ -419,10 +418,10 @@ public class Utils {
       while (resultSet.next()) {
         primaryKeysNames.add(resultSet.getString("COLUMN_NAME"));
       }
-      LOGGER.debug("Found primary key(s): '{}'", primaryKeysNames);
+      LOGGER.debug("Found primary key(s)");
     } catch (SQLException e) {
       String errorMessage = "Cannot get Primary Keys Names";
-      LOGGER.error(errorMessage, e);
+      LOGGER.error(errorMessage);
       throw new RuntimeException(errorMessage, e);
     }
     return primaryKeysNames;
@@ -466,7 +465,7 @@ public class Utils {
         isAutoincrement = resultSet.getString("IS_AUTOINCREMENT").equals("YES");
       } catch (SQLException e) {
         String errorMessage = "Cannot get property 'IS_AUTOINCREMENT'";
-        LOGGER.error(errorMessage, e);
+        LOGGER.error(errorMessage);
         throw new RuntimeException(errorMessage, e);
       }
     }
@@ -483,7 +482,7 @@ public class Utils {
       return resultSet.getString("IS_NULLABLE").equals("NO");
     } catch (SQLException e) {
       String errorMessage = "Cannot get property 'IS_NULLABLE'";
-      LOGGER.error(errorMessage, e);
+      LOGGER.error(errorMessage);
       throw new RuntimeException(errorMessage, e);
     }
   }
@@ -501,7 +500,7 @@ public class Utils {
           return resultSet.getString("IS_GENERATEDCOLUMN").equals("YES");
         } catch (SQLException e) {
           String errorMessage = "Cannot get property 'IS_GENERATEDCOLUMN'";
-          LOGGER.error(errorMessage, e);
+          LOGGER.error(errorMessage);
           throw new RuntimeException(errorMessage, e);
         }
       case "mssql":
@@ -509,7 +508,7 @@ public class Utils {
           return resultSet.getString("SS_IS_COMPUTED").equals("1");
         } catch (SQLException e) {
           String errorMessage = "Cannot get property 'SS_IS_COMPUTED'";
-          LOGGER.error(errorMessage, e);
+          LOGGER.error(errorMessage);
           throw new RuntimeException(errorMessage, e);
         }
       case "postgresql":
@@ -518,7 +517,7 @@ public class Utils {
           columnDef = resultSet.getString("COLUMN_DEF");
         } catch (SQLException e) {
           String errorMessage = "Cannot get property 'COLUMN_DEF'";
-          LOGGER.error(errorMessage, e);
+          LOGGER.error(errorMessage);
           throw new RuntimeException(errorMessage, e);
         }
         return (columnDef != null) && columnDef.contains("nextval(");

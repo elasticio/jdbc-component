@@ -33,7 +33,7 @@ public class GetRowsPollingTrigger implements Function {
     LOGGER.info("About to execute select trigger");
     final JsonObject configuration = parameters.getConfiguration();
     JsonObject snapshot = parameters.getSnapshot();
-    LOGGER.info("Got snapshot: {}", snapshot.toString());
+    LOGGER.debug("Got snapshot");
     checkConfig(configuration);
     String pollingField = "";
     Calendar cDate = Calendar.getInstance();
@@ -73,7 +73,7 @@ public class GetRowsPollingTrigger implements Function {
 
       for (int i = 0; i < resultList.size(); i++) {
         LOGGER.info("Row number: {} from {}", i + 1, resultList.size());
-        LOGGER.info("Emitting data {}", resultList.get(i).toString());
+        LOGGER.info("Emitting data");
         parameters.getEventEmitter()
             .emitData(new Message.Builder().body(resultList.get(i)).build());
       }
@@ -83,11 +83,11 @@ public class GetRowsPollingTrigger implements Function {
             .add(PROPERTY_TABLE_NAME, tableName)
             .add(PROPERTY_POLLING_FIELD, pollingField)
             .add(PROPERTY_POLLING_VALUE, formattedDate).build();
-        LOGGER.info("Emitting new snapshot {}", snapshot.toString());
+        LOGGER.info("Emitting new snapshot");
         parameters.getEventEmitter().emitSnapshot(snapshot);
       }
     } catch (SQLException e) {
-      LOGGER.error("Failed to make request", e.toString());
+      LOGGER.error("Failed to make request");
       throw new RuntimeException(e);
     }
   }

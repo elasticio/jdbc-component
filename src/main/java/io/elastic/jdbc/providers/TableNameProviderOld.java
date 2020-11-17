@@ -59,7 +59,7 @@ public class TableNameProviderOld implements SelectModelProvider {
                 result.addProperty("", "no tables");
             }
         } catch (SQLException e) {
-            logger.error("Unexpected error", e);
+            logger.error("Unexpected error");
             throw new RuntimeException(e);
         } finally {
             if (rs != null) {

@@ -43,7 +43,7 @@ public class TimeStampColumnNamesProvider implements SelectModelProvider {
               typeName);
           if (sqlType == Types.DATE || sqlType == Types.TIMESTAMP || typeName
               .contains("TIMESTAMP")) {
-            LOGGER.info("Found similar to timestamp field: {}", name);
+            LOGGER.debug("Found similar to timestamp field: {}", name);
             columnNames.add(name, name);
           }
         }

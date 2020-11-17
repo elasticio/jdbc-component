@@ -26,9 +26,9 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
   public JsonObject getMetaModel(JsonObject configuration) {
     LOGGER.info("Getting metadata...");
     JsonObject inMetadata = getInputMetaData(configuration);
-    LOGGER.info("Generated input metadata {}", inMetadata);
+    LOGGER.debug("Generated input metadata {}", inMetadata);
     JsonObject outMetadata = getOutputMetaData();
-    LOGGER.info("Generated output metadata {}", outMetadata);
+    LOGGER.debug("Generated output metadata {}", outMetadata);
     return Json.createObjectBuilder()
         .add("out", outMetadata)
         .add("in", inMetadata)
@@ -64,7 +64,7 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
         LOGGER.info("Getting DatabaseMetaData for table: '{}'...", tableName);
         dbMetaData = connection.getMetaData();
       } catch (SQLException e) {
-        LOGGER.error("Failed while getting DatabaseMetaData. Error: " + e.getMessage());
+        LOGGER.error("Failed while getting DatabaseMetaData");
         throw new RuntimeException(e);
       }
 
@@ -78,7 +78,7 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
         final String catalog = isMySql ? configuration.getString("databaseName") : null;
         ArrayList<String> primaryKeysNames = Utils
             .getPrimaryKeyNames(catalog, schemaNamePattern, tableNamePattern, dbMetaData);
-        LOGGER.info("Found primary key name(s): '{}'", primaryKeysNames);
+        LOGGER.debug("Found primary key name(s)");
 
         LOGGER.info("Starting processing columns...");
         while (resultSet.next()) {
@@ -110,11 +110,11 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
           }
         }
       } catch (SQLException e) {
-        LOGGER.error("Failed while processing ResultSet. Error: " + e.getMessage());
+        LOGGER.error("Failed while processing ResultSet");
         throw new RuntimeException(e);
       }
     } catch (SQLException e) {
-      LOGGER.error("Failed while connecting. Error: " + e.getMessage());
+      LOGGER.error("Failed while connecting");
       throw new RuntimeException(e);
     }
 

@@ -1,9 +1,10 @@
 group = 'io.elastic'
-version = '2.4.1'
+version = '2.4.2'
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
+apply plugin: org.owasp.dependencycheck.gradle.DependencyCheckPlugin
 
 sourceSets {
     integrationTest {
@@ -50,30 +51,43 @@ repositories {
     maven {
         url "https://oss.sonatype.org/content/repositories/snapshots"
     }
-    maven {
-        url "https://oss.sonatype.org/content/repositories/ioelastic-1034"
-    }
     mavenCentral()
     mavenLocal()
 }
 
 dependencies {
-    compile "io.elastic:sailor-jvm:3.1.0"
-    compile "mysql:mysql-connector-java:8.0.11"
-    compile group: 'org.postgresql', name: 'postgresql', version: '42.2.4'
     compile files("./lib/ojdbc6.jar")
     compile files("./lib/sqljdbc4.jar")
-    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
-    compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre8'
-    compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
-    compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
+    // The following 3 dependencies are to workaround this: https://github.com/elasticio/sailor-jvm/issues/59
+    compile 'com.fasterxml.jackson.core:jackson-core:2.10.1'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.10.1'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.10.1'
+    compile 'com.google.code.gson:gson:2.8.6'
+    compile 'com.microsoft.sqlserver:mssql-jdbc:6.4.0.jre8'
+    compile 'io.elastic:sailor-jvm:3.3.1'
+    compile 'mysql:mysql-connector-java:8.0.20'
+    compile 'org.postgresql:postgresql:42.2.18'
 
-    testCompile group: 'io.github.cdimascio', name: 'java-dotenv', version: '5.1.0'
-    testCompile "org.spockframework:spock-core:1.1-groovy-2.4"
+    testCompile 'io.github.cdimascio:java-dotenv:5.1.0'
     testCompile 'org.hsqldb:hsqldb:2.0.0'
+    testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
 }
 
+check.dependsOn dependencyCheckAnalyze
+
+dependencyCheck {
+    format = 'ALL'
+    failBuildOnCVSS = 7
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.owasp:dependency-check-gradle:6.0.3'
+    }
+}
 
 wrapper {
     gradleVersion = '5.4.1'

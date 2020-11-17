@@ -1,4 +1,9 @@
-# JDBC Component
+## 2.4.2 (November 20, 2020)
+
+* Upgrade sailor to 3.3.1
+* Annual audit of the component code to check if it exposes a sensitive data in the logs
+* Annual dependencies vulnerabilities audit
+
 ## 2.4.1 (May 15, 2020)
 
 * Upgrade sailor to 3.1.0

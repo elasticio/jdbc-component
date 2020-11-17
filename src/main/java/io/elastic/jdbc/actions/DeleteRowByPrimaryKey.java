@@ -64,7 +64,6 @@ public class DeleteRowByPrimaryKey implements Function {
     }
 
     for (Map.Entry<String, JsonValue> entry : body.entrySet()) {
-      LOGGER.info("{} = {}", entry.getKey(), entry.getValue());
       primaryKey.append(entry.getKey());
       primaryValue.append(entry.getValue());
       primaryKeysCount++;
@@ -75,33 +74,28 @@ public class DeleteRowByPrimaryKey implements Function {
         LOGGER.info("Executing delete row by primary key action");
         boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
         Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
-        LOGGER.info("Detected column types: " + Utils.columnTypes);
+        LOGGER.debug("Detected column types");
         try {
           QueryFactory queryFactory = new QueryFactory();
           Query query = queryFactory.getQuery(dbEngine);
-          LOGGER.info("Lookup parameters: {} = {}", primaryKey.toString(), primaryValue.toString());
           query.from(tableName).lookup(primaryKey.toString(), primaryValue.toString());
           checkConfig(configuration);
           JsonObject row = query.executeLookup(connection, body);
 
-          for (Map.Entry<String, JsonValue> entry : configuration.entrySet()) {
-            LOGGER.info("Key = " + entry.getKey() + " Value = " + entry.getValue());
-          }
-
           if (row.size() != 0) {
             int result = query.executeDelete(connection, body);
             if (result == 1) {
-              LOGGER.info("Emitting data {}", row);
+              LOGGER.info("Emitting data...");
               parameters.getEventEmitter().emitData(new Message.Builder().body(row).build());
             } else {
-              LOGGER.info("Unexpected result");
+              LOGGER.error("Unexpected result");
               throw new RuntimeException("Unexpected result");
             }
           } else if (row.size() == 0 && nullableResult) {
             JsonObject emptyRow = Json.createObjectBuilder()
                 .add("empty dataset", "nothing to delete")
                 .build();
-            LOGGER.info("Emitting data {}", emptyRow);
+            LOGGER.info("Emitting data...");
             parameters.getEventEmitter().emitData(new Message.Builder().body(emptyRow).build());
           } else if (row.size() == 0 && !nullableResult) {
             LOGGER.info("Empty response. Error message will be returned");
@@ -112,23 +106,24 @@ public class DeleteRowByPrimaryKey implements Function {
               .add(PROPERTY_ID_COLUMN, primaryKey.toString())
               .add(PROPERTY_LOOKUP_VALUE, primaryValue.toString())
               .add(PROPERTY_NULLABLE_RESULT, nullableResult).build();
-          LOGGER.info("Emitting new snapshot {}", snapshot.toString());
+          LOGGER.info("Emitting new snapshot");
           parameters.getEventEmitter().emitSnapshot(snapshot);
         } catch (SQLException e) {
           if (Utils.reboundIsEnabled(configuration)) {
             List<String> states = Utils.reboundDbState.get(dbEngine);
             if (states.contains(e.getSQLState())) {
-              LOGGER.warn("Starting rebound max iter: {}, rebound ttl: {}. Reason: {}", System.getenv("ELASTICIO_REBOUND_LIMIT"),
-                  System.getenv("ELASTICIO_REBOUND_INITIAL_EXPIRATION"), e.getMessage());
+              LOGGER.warn("Starting rebound max iter: {}, rebound ttl: {} because of a SQL Exception",
+                  System.getenv("ELASTICIO_REBOUND_LIMIT"),
+                  System.getenv("ELASTICIO_REBOUND_INITIAL_EXPIRATION"));
               parameters.getEventEmitter().emitRebound(e);
               return;
             }
           }
-          LOGGER.error("Failed to make request", e.toString());
+          LOGGER.error("Failed to make request");
           throw new RuntimeException(e);
         }
       } catch (SQLException e) {
-        LOGGER.error("Failed to close connection", e.toString());
+        LOGGER.error("Failed to close connection");
       }
     } else {
       LOGGER.error("Error: Should be one Primary Key");

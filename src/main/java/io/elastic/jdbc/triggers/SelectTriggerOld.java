@@ -68,15 +68,14 @@ public class SelectTriggerOld implements Function {
                 }
                 rows.add(row);
                 logger.info("Emitting data");
-                logger.info(row.toString());
                 parameters.getEventEmitter().emitData(new Message.Builder().body(SailorVersionsAdapter.gsonToJavax(row)).build());
             }
             snapshot.addProperty("skipNumber", skipNumber + rows.size());
             snapshot.addProperty(PROPERTY_TABLE_NAME, tableName);
-            logger.info("Emitting new snapshot {}", snapshot.toString());
+            logger.info("Emitting new snapshot");
             parameters.getEventEmitter().emitSnapshot(SailorVersionsAdapter.gsonToJavax(snapshot));
         } catch (SQLException e) {
-            logger.error("Failed to make request", e.toString());
+            logger.error("Failed to make request");
             throw new RuntimeException(e);
         } finally {
             if (rs != null) {
