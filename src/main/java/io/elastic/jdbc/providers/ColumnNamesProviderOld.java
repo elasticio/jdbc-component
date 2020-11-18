@@ -87,14 +87,14 @@ public class ColumnNamesProviderOld implements DynamicMetadataProvider, SelectMo
                 try {
                     rs.close();
                 } catch (SQLException e) {
-                    logger.error("Failed to close result set", e.toString());
+                    logger.error("Failed to close result set!");
                 }
             }
             if (connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException e) {
-                    logger.error("Failed to close connection", e.toString());
+                    logger.error("Failed to close connection!");
                 }
             }
         }

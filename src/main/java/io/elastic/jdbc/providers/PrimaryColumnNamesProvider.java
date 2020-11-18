@@ -80,7 +80,7 @@ public class PrimaryColumnNamesProvider implements DynamicMetadataProvider, Sele
               tableName);
       while (rs.next()) {
         primaryKeys.add(rs.getString("COLUMN_NAME"));
-        LOGGER.debug("Primary Key: {}", rs.getString("COLUMN_NAME"));
+        LOGGER.debug("Primary Key was found");
       }
       rs = dbMetaData
           .getColumns(null, ((isOracle && !schemaName.isEmpty()) ? schemaName : null), tableName,
@@ -117,14 +117,14 @@ public class PrimaryColumnNamesProvider implements DynamicMetadataProvider, Sele
         try {
           rs.close();
         } catch (SQLException e) {
-          LOGGER.error("Failed to close result set", e);
+          LOGGER.error("Failed to close result set!");
         }
       }
       if (connection != null) {
         try {
           connection.close();
         } catch (SQLException e) {
-          LOGGER.error("Failed to close connection", e);
+          LOGGER.error("Failed to close connection!");
         }
       }
     }

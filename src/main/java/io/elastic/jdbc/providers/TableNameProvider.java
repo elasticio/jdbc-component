@@ -66,14 +66,14 @@ public class TableNameProvider implements SelectModelProvider {
         try {
           rs.close();
         } catch (SQLException e) {
-          LOGGER.error(e.toString());
+          LOGGER.error("Failed to close result set!");
         }
       }
       if (connection != null) {
         try {
           connection.close();
         } catch (SQLException e) {
-          LOGGER.error(e.toString());
+          LOGGER.error("Failed to close connection!");
         }
       }
     }

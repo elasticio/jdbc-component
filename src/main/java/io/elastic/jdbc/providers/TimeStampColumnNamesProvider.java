@@ -30,7 +30,7 @@ public class TimeStampColumnNamesProvider implements SelectModelProvider {
       schemaName = tableName.split("\\.")[0];
       tableName = tableName.split("\\.")[1];
     }
-    LOGGER.trace("Table name: {}, SchemaName: {}", tableName, schemaName);
+    LOGGER.trace("Table name and SchemaName found");
     JsonObjectBuilder columnNames = Json.createObjectBuilder();
     try (Connection connection = Utils.getConnection(configuration)) {
       DatabaseMetaData dbMetaData = connection.getMetaData();

@@ -60,7 +60,7 @@ public class CreateOrUpdateRecord implements Function {
                 try {
                     connection.close();
                 } catch (SQLException e) {
-                    logger.error(e.toString());
+                    logger.error("Failed to close connection!");
                 }
             }
         }
@@ -91,7 +91,7 @@ public class CreateOrUpdateRecord implements Function {
                 try {
                     rs.close();
                 } catch (Exception e) {
-                    logger.error(e.toString());
+                    logger.error("Failed to close result set!");
                 }
             }
         }

@@ -247,7 +247,7 @@ public class Utils {
         try {
           rs.close();
         } catch (Exception e) {
-          LOGGER.error(e.toString());
+          LOGGER.error("Failed to close result set!");
         }
       }
     }

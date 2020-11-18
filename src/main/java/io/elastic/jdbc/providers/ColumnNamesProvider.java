@@ -101,14 +101,14 @@ public class ColumnNamesProvider implements DynamicMetadataProvider, SelectModel
         try {
           rs.close();
         } catch (SQLException e) {
-          LOGGER.error("Failed to close result set {}", e);
+          LOGGER.error("Failed to close result set!");
         }
       }
       if (connection != null) {
         try {
           connection.close();
         } catch (SQLException e) {
-          LOGGER.error("Failed to close connection {}", e);
+          LOGGER.error("Failed to close connection!");
         }
       }
     }
