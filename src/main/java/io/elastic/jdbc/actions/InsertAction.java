@@ -53,7 +53,7 @@ public class InsertAction implements Function {
     JsonObject result = Json.createObjectBuilder()
         .add("result", true)
         .build();
-    LOGGER.info("Emit data...");
+    LOGGER.info("Emitting data...");
     parameters.getEventEmitter().emitData(new Message.Builder().body(result).build());
     LOGGER.info("Insert action is successfully executed");
   }

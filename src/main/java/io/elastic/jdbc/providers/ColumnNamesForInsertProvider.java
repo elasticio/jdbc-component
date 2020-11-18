@@ -61,7 +61,7 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
     try (Connection connection = Utils.getConnection(configuration)) {
       DatabaseMetaData dbMetaData;
       try {
-        LOGGER.info("Getting DatabaseMetaData for table: '{}'...", tableName);
+        LOGGER.trace("Getting DatabaseMetaData for table: '{}'...", tableName);
         dbMetaData = connection.getMetaData();
       } catch (SQLException e) {
         LOGGER.error("Failed while getting DatabaseMetaData");
@@ -85,14 +85,14 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
           final String fieldName = resultSet.getString("COLUMN_NAME");
           final int sqlDataType = resultSet.getInt("DATA_TYPE");
           final String fieldType = Utils.convertType(sqlDataType);
-          LOGGER.info("Found column: name={}, type={}", fieldName, fieldType);
+          LOGGER.trace("Found column: name={}, type={}", fieldName, fieldType);
 
           final boolean isPrimaryKey = Utils.isPrimaryKey(primaryKeysNames, fieldName);
           final boolean isNotNull = Utils.isNotNull(resultSet);
           final boolean isAutoincrement = Utils.isAutoincrement(resultSet, isOracle);
           final boolean isCalculated = Utils.isCalculated(resultSet, dbEngine);
           LOGGER
-              .info(
+              .trace(
                   "Field '{}': isPrimaryKey={}, isNotNull={}, isAutoincrement={}, isCalculated={}",
                   fieldName, isPrimaryKey, isNotNull, isAutoincrement,
                   isCalculated);
@@ -104,7 +104,7 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
                 .add("title", fieldName)
                 .add("type", fieldType)
                 .build();
-            LOGGER.debug("Field description '{}': {}", fieldName, field);
+            LOGGER.trace("Field description '{}': {}", fieldName, field);
             propertiesIn.add(fieldName, field);
             isEmpty = false;
           }

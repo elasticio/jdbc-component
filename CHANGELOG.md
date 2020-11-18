@@ -4,11 +4,7 @@
 * Annual audit of the component code to check if it exposes a sensitive data in the logs
 * Annual dependencies vulnerabilities audit
 
-## 2.4.1 (May 15, 2020)
-
-* Upgrade sailor to 3.1.0
-
-## 2.3.2 (October 21, 2019)
+## 2.4.1 (October 21, 2019)
 
 * Add rebound mechanism in case of deadlocks for actions: Insert, UpsertByPK, DeleteByPK
 

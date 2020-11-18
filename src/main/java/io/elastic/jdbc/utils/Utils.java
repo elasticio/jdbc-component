@@ -117,7 +117,7 @@ public class Utils {
         }
       }
     } catch (NullPointerException | ClassCastException e) {
-      LOGGER.info("Key doesn't have any mapping");
+      LOGGER.error("Key doesn't have any mapping");
     }
     return value.toString().replaceAll("\"", "");
   }
