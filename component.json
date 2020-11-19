@@ -15,7 +15,7 @@
           "oracle": "Oracle",
           "mssql": "MSSQL"
         },
-        "prompt": "Please Select Database Type"
+        "note": "Please Select Database Type"
       },
       "host": {
         "viewClass": "TextFieldView",
@@ -64,14 +64,14 @@
       "fields": {
         "tableName": {
           "viewClass": "SelectView",
-          "prompt": "Select a Table",
+          "note": "Select a Table",
           "label": "Tables List",
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProvider"
         },
         "pollingField": {
           "viewClass": "SelectView",
-          "prompt": "Select a Timestamp (or similar) Column",
+          "note": "Select a Timestamp (or similar) Column",
           "label": "Timestamp (or similar) Column",
           "model": "io.elastic.jdbc.providers.TimeStampColumnNamesProvider",
           "required": true,
@@ -81,7 +81,8 @@
         },
         "pollingValue": {
           "viewClass": "TextFieldView",
-          "label": "Start Polling From (optional)",
+          "label": "Start Polling From",
+          "note": "Current date is used if no value is specified",
           "required": false,
           "placeholder": "1970-01-01 00:00:00.000"
         }
@@ -119,14 +120,14 @@
       "fields": {
         "tableName": {
           "viewClass": "SelectView",
-          "prompt": "Select a Table",
+          "note": "Select a Table",
           "label": "Tables List",
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProviderOld"
         },
         "orderField": {
           "viewClass": "SelectView",
-          "prompt": "Select a field to order rows",
+          "note": "Select a field to order rows",
           "label": "Order Column",
           "model": "io.elastic.jdbc.providers.ColumnNamesProviderOld",
           "required": true,
@@ -177,7 +178,7 @@
       "fields": {
         "tableName": {
           "viewClass": "SelectView",
-          "prompt": "Select a Table",
+          "note": "Select a Table",
           "label": "Table",
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProvider"
@@ -196,14 +197,14 @@
       "fields": {
         "tableName": {
           "viewClass": "SelectView",
-          "prompt": "Select a Table",
+          "note": "Select a Table",
           "label": "Table",
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProvider"
         },
         "reboundEnabled" : {
           "viewClass": "SelectView",
-          "prompt": "Default is No",
+          "note": "Default is No",
           "label": "Enable Rebound",
           "required": false,
           "model" : {
@@ -221,14 +222,14 @@
       "fields": {
         "tableName": {
           "viewClass": "SelectView",
-          "prompt": "Select a Table",
+          "note": "Select a Table",
           "label": "Table",
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProvider"
         },
         "reboundEnabled" : {
           "viewClass": "SelectView",
-          "prompt": "Default is No",
+          "note": "Default is No",
           "label": "Enable Rebound",
           "required": false,
           "model" : {
@@ -246,7 +247,7 @@
       "fields": {
         "tableName": {
           "viewClass": "SelectView",
-          "prompt": "Select a Table",
+          "note": "Select a Table",
           "label": "Tables",
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProvider"
@@ -257,7 +258,7 @@
         },
         "reboundEnabled" : {
           "viewClass": "SelectView",
-          "prompt": "Default is No",
+          "note": "Default is No",
           "label": "Enable Rebound",
           "required": false,
           "model" : {
@@ -295,14 +296,14 @@
       "fields": {
         "tableName": {
           "viewClass": "SelectView",
-          "prompt": "Select a Table",
+          "note": "Select a Table",
           "label": "Tables",
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProviderOld"
         },
         "idColumn": {
           "viewClass": "SelectView",
-          "prompt": "Select an ID column",
+          "note": "Select an ID column",
           "label": "ID Column",
           "model": "io.elastic.jdbc.providers.ColumnNamesProviderOld",
           "required": true,
@@ -320,14 +321,14 @@
       "fields": {
         "schemaName": {
           "viewClass": "SelectView",
-          "prompt": "Select a Schema",
+          "note": "Select a Schema",
           "label": "DB Schema",
           "required": true,
           "model": "io.elastic.jdbc.providers.SchemasProvider"
         },
         "procedureName": {
           "viewClass": "SelectView",
-          "prompt": "Select a stored procedure name",
+          "note": "Select a stored procedure name",
           "label": "Stored procedure",
           "model": "io.elastic.jdbc.providers.ProcedureFieldsNameProvider",
           "required": true,
