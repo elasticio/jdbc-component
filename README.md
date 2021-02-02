@@ -353,6 +353,3 @@ Please use [**Upsert row by primary key**](#upsert-row-by-primary-key-action) in
 
 ## License
 Apache-2.0 © [elastic.io GmbH](https://www.elastic.io "elastic.io GmbH")
-
-## <System> API and Documentation links
-[elastic.io iPaaS Documentation](https://support.elastic.io/support/home "elastic.io iPaaS Documentation")
