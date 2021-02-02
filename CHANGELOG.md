@@ -8,13 +8,10 @@
 * Annual audit of the component code to check if it exposes a sensitive data in the logs
 * Annual dependencies vulnerabilities audit
 
-## 2.4.1 (October 21, 2019)
-
-* Add rebound mechanism in case of deadlocks for actions: Insert, UpsertByPK, DeleteByPK
-
 ## 2.4.0 (October 17, 2019)
 
 * Add `Custom Query` action
+* Add rebound mechanism in case of deadlocks for actions: Insert, UpsertByPK, DeleteByPK
 
 ## 2.3.1 (September 30, 2019)
  
