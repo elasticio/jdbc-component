@@ -49,9 +49,6 @@ targetCompatibility = 1.8
 
 repositories {
     maven {
-        url "https://oss.sonatype.org/content/repositories/ioelastic-1044"
-    }
-    maven {
         url "https://oss.sonatype.org/content/repositories/snapshots"
     }
     mavenCentral()
@@ -75,8 +72,8 @@ dependencies {
     testCompile 'org.hsqldb:hsqldb:2.0.0'
     testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
 }
-// must be fixed before merge to MASTER
-//check.dependsOn dependencyCheckAnalyze
+
+check.dependsOn dependencyCheckAnalyze
 
 dependencyCheck {
     format = 'ALL'
