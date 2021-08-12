@@ -1,3 +1,6 @@
+## 2.4.4 (August 12, 2021)
+* Remove dependencyCheckAnalyze task
+
 ## 2.4.3 (February 12, 2021)
 
 * Update sailor version to 3.3.2
