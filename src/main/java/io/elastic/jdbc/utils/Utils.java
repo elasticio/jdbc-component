@@ -49,7 +49,7 @@ public class Utils {
   }
 
   public static Connection getConnection(final JsonObject config) throws SQLException {
-    if (con != null) {
+    if (con != null && !con.isClosed()) {
       LOGGER.info("Use connection defined before");
       return con;
     }
