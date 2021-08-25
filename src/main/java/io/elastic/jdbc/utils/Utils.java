@@ -39,6 +39,7 @@ public class Utils {
   public static Map<String, String> columnTypes = null;
   public static final Map<String, List<String>> reboundDbState;
   private static Connection con;
+  private static JsonObject connectionConfig;
 
   static {
     reboundDbState = new HashMap<>();
@@ -49,10 +50,11 @@ public class Utils {
   }
 
   public static Connection getConnection(final JsonObject config) throws SQLException {
-    if (con != null && !con.isClosed()) {
+    if (con != null && !con.isClosed() && connectionConfig == config) {
       LOGGER.info("Use connection defined before");
       return con;
     }
+    connectionConfig = config;
     final String engine = getRequiredNonEmptyString(config, CFG_DB_ENGINE, "Engine is required")
         .toLowerCase();
     final String host = getRequiredNonEmptyString(config, CFG_HOST, "Host is required");
