@@ -19,8 +19,6 @@ import org.slf4j.LoggerFactory;
 
 
 public class SelectAction implements Function {
-  private static JsonObject configuration;
-
   private static final Logger LOGGER = LoggerFactory.getLogger(SelectAction.class);
   private static final String SQL_QUERY_VALUE = "sqlQuery";
   private static final String PROPERTY_NULLABLE_RESULT = "nullableResult";
@@ -29,7 +27,7 @@ public class SelectAction implements Function {
   @Override
   public void execute(ExecutionParameters parameters) {
     final JsonObject body = parameters.getMessage().getBody();
-    configuration = parameters.getConfiguration();
+    final JsonObject configuration = parameters.getConfiguration();
     JsonObject snapshot = parameters.getSnapshot();
     checkConfig(configuration);
     String dbEngine = configuration.getString("dbEngine");
