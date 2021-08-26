@@ -158,7 +158,7 @@ public class MySQL extends Query {
     Map<String, ProcedureParameter> procedureParams = ProcedureFieldsNameProvider
         .getProcedureMetadata(configuration).stream()
         .collect(Collectors.toMap(ProcedureParameter::getName, Function.identity()));
-
+    System.out.println("procedureParams: "+procedureParams);
     CallableStatement stmt = prepareCallableStatement(connection,
         configuration.getString("procedureName"), procedureParams, body);
 

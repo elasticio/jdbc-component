@@ -24,7 +24,7 @@ public class ExecuteStoredProcedure implements Function {
       System.out.println("connection: "+connection.toString());
       QueryFactory queryFactory = new QueryFactory();
       Query query = queryFactory.getQuery(configuration.getString("dbEngine"));
-
+      System.out.println("query: "+query.toString());
 
       JsonObject result = query.callProcedure(connection, body, configuration);
       System.out.println("result: "+result.toString());
