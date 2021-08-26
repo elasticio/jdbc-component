@@ -111,10 +111,8 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
         JsonObject snapshot = Json.createObjectBuilder().build()
 
         JsonObject body = Json.createObjectBuilder()
-                .add("@p_cus_id", 2)
-                .add("@o_name", "Bob")
-                .add("@o_city", "")
-                .add("@o_date", "")
+                .add("p_cus_id", 2)
+                .add("o_name", "Bob")
                 .build();
 
         when:
