@@ -14,6 +14,7 @@ import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
+import java.sql.SQLNonTransientConnectionException
 
 class ExecuteStoredProcedureMysqlSpec extends Specification {
 
@@ -60,7 +61,7 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
         ExecutionParameters params = new ExecutionParameters(msg, emitter, config, snapshot)
         try {
             action.execute(params);
-        } catch (SQLException e) {
+        } catch (SQLNonTransientConnectionException e) {
             println(e)
             throw new RuntimeException(e);
         }
