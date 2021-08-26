@@ -161,10 +161,11 @@ public class MySQL extends Query {
     System.out.println("procedureName: "+configuration.getString("procedureName"));
     System.out.println("connection isClosed: "+connection.isClosed());
     System.out.println("body: "+body.toString());
+    
+    CallableStatement stmt = prepareCallableStatement(connection,
+        configuration.getString("procedureName"), procedureParams, body);
 
     try {
-      CallableStatement stmt = prepareCallableStatement(connection,
-              configuration.getString("procedureName"), procedureParams, body);
       stmt.execute();
     } catch (SQLException e) {
       System.out.println("e: "+e);
