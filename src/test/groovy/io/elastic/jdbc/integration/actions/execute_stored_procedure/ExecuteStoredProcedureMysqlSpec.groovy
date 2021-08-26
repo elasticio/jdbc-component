@@ -13,6 +13,7 @@ import javax.json.Json
 import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
+import java.sql.SQLException
 
 class ExecuteStoredProcedureMysqlSpec extends Specification {
 
@@ -57,7 +58,11 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
     def runAction(JsonObject config, JsonObject body, JsonObject snapshot) {
         Message msg = new Message.Builder().body(body).build()
         ExecutionParameters params = new ExecutionParameters(msg, emitter, config, snapshot)
-        action.execute(params);
+        try {
+            action.execute(params);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     def getStarsConfig() {
