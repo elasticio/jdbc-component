@@ -61,6 +61,7 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
         try {
             action.execute(params);
         } catch (SQLException e) {
+            println(e)
             throw new RuntimeException(e);
         }
     }
