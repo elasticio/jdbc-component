@@ -163,9 +163,9 @@ public class MySQL extends Query {
         configuration.getString("procedureName"), procedureParams, body);
 
     stmt.execute();
-
+    System.out.println("CallableStatement execute: "+stmt);
     JsonObjectBuilder resultBuilder = Json.createObjectBuilder();
-
+    System.out.println("resultBuilder: "+resultBuilder.toString());
     procedureParams.values().stream()
         .filter(param -> param.getDirection() == Direction.OUT
             || param.getDirection() == Direction.INOUT)

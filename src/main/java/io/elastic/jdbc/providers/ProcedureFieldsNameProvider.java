@@ -132,8 +132,11 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
         parameters.add(new ProcedureParameter(columnName, columnReturn, columnDataType, order++));
       }
     } catch (Exception e) {
+      System.out.println("dbMetaData Exception");
       throw new RuntimeException(e);
     }
+
+    System.out.println("parameters: " + parameters);
 
     return parameters;
   }
