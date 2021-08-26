@@ -36,6 +36,7 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
 
     def setupSpec() {
         JsonObject config = getStarsConfig()
+        println(config)
         connection = DriverManager.getConnection(config.getString("connectionString"), config.getString("user"), config.getString("password"))
     }
 
