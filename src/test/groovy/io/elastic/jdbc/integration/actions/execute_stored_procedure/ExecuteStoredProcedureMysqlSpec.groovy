@@ -97,7 +97,8 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
     }
 
     def cleanupSpec() {
-        connection.createStatement().execute("DROP TABLE IF EXISTS GET_CUSTOMER_BY_ID_AND_NAME")
+        setupSpec()
+        connection.createStatement().execute("DROP TABLE IF EXISTS CUSTOMERS")
         connection.createStatement().execute("DROP PROCEDURE IF EXISTS GET_CUSTOMER_BY_ID_AND_NAME")
         connection.close()
     }
