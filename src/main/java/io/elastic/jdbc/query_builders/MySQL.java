@@ -160,8 +160,16 @@ public class MySQL extends Query {
     System.out.println("procedureParams: "+procedureParams);
     CallableStatement stmt = prepareCallableStatement(connection,
         configuration.getString("procedureName"), procedureParams, body);
+    System.out.println("procedureName: "+configuration.getString("procedureName"));
+    System.out.println("connection isClosed: "+connection.isClosed());
+    System.out.println("body: "+body.toString());
+    try {
+      stmt.execute();
+    } catch (SQLException e) {
+      System.out.println("e: "+e);
+      e.printStackTrace();
+    }
 
-    stmt.execute();
     System.out.println("CallableStatement execute: "+stmt);
     JsonObjectBuilder resultBuilder = Json.createObjectBuilder();
     System.out.println("resultBuilder: "+resultBuilder.toString());
