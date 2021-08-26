@@ -95,14 +95,13 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
   public static List<ProcedureParameter> getProcedureMetadata(JsonObject config) {
     List<ProcedureParameter> parameters = new LinkedList<>();
 
-    try (Connection conn = Utils.getConnection(config)) {
+    try {
+      Connection conn = Utils.getConnection(config);
       DatabaseMetaData dbMetaData = conn.getMetaData();
-      System.out.println("dbMetaData: " + dbMetaData.toString());
       ResultSet rs = dbMetaData.getProcedureColumns(conn.getCatalog(),
           config.getString("schemaName"),
           config.getString("procedureName"),
           null);
-      System.out.println("dbMetaData ResultSet: " + rs.toString());
 
       int order = 1;
       while (rs.next()) {
@@ -132,11 +131,8 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
         parameters.add(new ProcedureParameter(columnName, columnReturn, columnDataType, order++));
       }
     } catch (Exception e) {
-      System.out.println("dbMetaData Exception");
       throw new RuntimeException(e);
     }
-
-    System.out.println("parameters: " + parameters);
 
     return parameters;
   }

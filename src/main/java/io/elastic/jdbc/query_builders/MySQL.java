@@ -154,7 +154,6 @@ public class MySQL extends Query {
   @Override
   public JsonObject callProcedure(Connection connection, JsonObject body, JsonObject configuration)
       throws SQLException {
-    System.out.println("callProcedure: ");
     Map<String, ProcedureParameter> procedureParams = ProcedureFieldsNameProvider
         .getProcedureMetadata(configuration).stream()
         .collect(Collectors.toMap(ProcedureParameter::getName, Function.identity()));
