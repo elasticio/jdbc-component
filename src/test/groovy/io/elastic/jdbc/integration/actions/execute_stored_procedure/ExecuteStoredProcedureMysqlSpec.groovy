@@ -59,7 +59,6 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
     def runAction(JsonObject config, JsonObject body, JsonObject snapshot) {
         Message msg = new Message.Builder().body(body).build()
         ExecutionParameters params = new ExecutionParameters(msg, emitter, config, snapshot)
-        println(params.toString())
         action.execute(params);
     }
 
@@ -112,8 +111,10 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
         JsonObject snapshot = Json.createObjectBuilder().build()
 
         JsonObject body = Json.createObjectBuilder()
-                .add("p_cus_id", 2)
-                .add("o_name", "Bob")
+                .add("@p_cus_id", 2)
+                .add("@o_name", "Bob")
+                .add("@o_city", "")
+                .add("@o_date", "")
                 .build();
 
         when:
