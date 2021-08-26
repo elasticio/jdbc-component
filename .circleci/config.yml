@@ -19,7 +19,7 @@ jobs:
           command: ./gradlew test --daemon
       - run:
           name: Run Integration Tests
-          command: ./gradlew integrationTest --daemon
+          command: ./gradlew integrationTest --daemon --stacktrace
 workflows:
   version: 2
   build_and_test:
