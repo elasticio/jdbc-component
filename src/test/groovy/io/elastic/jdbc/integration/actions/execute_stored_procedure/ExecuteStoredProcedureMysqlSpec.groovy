@@ -59,12 +59,8 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
     def runAction(JsonObject config, JsonObject body, JsonObject snapshot) {
         Message msg = new Message.Builder().body(body).build()
         ExecutionParameters params = new ExecutionParameters(msg, emitter, config, snapshot)
-        try {
-            action.execute(params);
-        } catch (SQLNonTransientConnectionException e) {
-            println(e)
-            throw new RuntimeException(e);
-        }
+        println(params.toString())
+        action.execute(params);
     }
 
     def getStarsConfig() {
@@ -104,7 +100,6 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
     }
 
     def cleanupSpec() {
-        setupSpec()
         connection.createStatement().execute("DROP TABLE IF EXISTS CUSTOMERS")
         connection.createStatement().execute("DROP PROCEDURE IF EXISTS GET_CUSTOMER_BY_ID_AND_NAME")
         connection.close()
@@ -113,7 +108,6 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
     def "call procedure"() {
 
         prepareStarsTable();
-        connection.close();
 
         JsonObject snapshot = Json.createObjectBuilder().build()
 
