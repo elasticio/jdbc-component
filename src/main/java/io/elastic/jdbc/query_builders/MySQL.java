@@ -158,12 +158,13 @@ public class MySQL extends Query {
         .getProcedureMetadata(configuration).stream()
         .collect(Collectors.toMap(ProcedureParameter::getName, Function.identity()));
     System.out.println("procedureParams: "+procedureParams);
-    CallableStatement stmt = prepareCallableStatement(connection,
-        configuration.getString("procedureName"), procedureParams, body);
     System.out.println("procedureName: "+configuration.getString("procedureName"));
     System.out.println("connection isClosed: "+connection.isClosed());
     System.out.println("body: "+body.toString());
+
     try {
+      CallableStatement stmt = prepareCallableStatement(connection,
+              configuration.getString("procedureName"), procedureParams, body);
       stmt.execute();
     } catch (SQLException e) {
       System.out.println("e: "+e);
