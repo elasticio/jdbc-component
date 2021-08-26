@@ -65,23 +65,23 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
     def getStarsConfig() {
         JsonObject config = TestUtils.getMysqlConfigurationBuilder()
                 .add("schemaName", "ELASTICIO")
-                .add("procedureName", "GET_CUSTOMER_BY_ID_AND_NAME")
+                .add("procedureName", "GET_CUSTOMER_BY_ID_AND_NAME_")
                 .build();
         return config;
     }
 
     def prepareStarsTable() {
-        connection.createStatement().execute("DROP TABLE IF EXISTS CUSTOMERS")
-        connection.createStatement().execute("DROP PROCEDURE IF EXISTS GET_CUSTOMER_BY_ID_AND_NAME")
+        connection.createStatement().execute("DROP TABLE IF EXISTS CUSTOMERS_")
+        connection.createStatement().execute("DROP PROCEDURE IF EXISTS GET_CUSTOMER_BY_ID_AND_NAME_")
 
-        connection.createStatement().execute("create table CUSTOMERS (\n" +
+        connection.createStatement().execute("create table CUSTOMERS_ (\n" +
                 "PID INT NOT NULL,\n" +
                 "NAME varchar(128),\n" +
                 "CITY varchar(256),\n" +
                 "JOINDATE DATETIME(6))");
 
 
-        connection.createStatement().execute("create procedure GET_CUSTOMER_BY_ID_AND_NAME(\n" +
+        connection.createStatement().execute("create procedure GET_CUSTOMER_BY_ID_AND_NAME_(\n" +
                 "IN p_cus_id int,\n" +
                 "INOUT o_name varchar(128),\n" +
                 "OUT o_city varchar(256),\n" +
@@ -89,19 +89,19 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
                 "BEGIN\n" +
                 "  SELECT NAME, CITY, JOINDATE\n" +
                 "  INTO o_name, o_city, o_date\n" +
-                "  from  CUSTOMERS\n" +
+                "  from  CUSTOMERS_\n" +
                 "  WHERE PID = p_cus_id\n" +
                 "  AND NAME = o_name;\n" +
                 "END;");
 
-        connection.createStatement().execute("INSERT INTO CUSTOMERS (PID,NAME,CITY,JOINDATE) VALUES (1,'Alice','Kyiv',STR_TO_DATE('2019-07-09T09:20:30Z', '%Y-%m-%dT%TZ'))")
-        connection.createStatement().execute("INSERT INTO CUSTOMERS (PID,NAME,CITY,JOINDATE) VALUES (2,'Bob','London',STR_TO_DATE('2019-07-09T09:20:31Z', '%Y-%m-%dT%TZ'))")
+        connection.createStatement().execute("INSERT INTO CUSTOMERS_ (PID,NAME,CITY,JOINDATE) VALUES (1,'Alice','Kyiv',STR_TO_DATE('2019-07-09T09:20:30Z', '%Y-%m-%dT%TZ'))")
+        connection.createStatement().execute("INSERT INTO CUSTOMERS_ (PID,NAME,CITY,JOINDATE) VALUES (2,'Bob','London',STR_TO_DATE('2019-07-09T09:20:31Z', '%Y-%m-%dT%TZ'))")
     }
 
     def cleanupSpec() {
-        connection.createStatement().execute("DROP TABLE IF EXISTS CUSTOMERS")
-        connection.createStatement().execute("DROP PROCEDURE IF EXISTS GET_CUSTOMER_BY_ID_AND_NAME")
-        connection.close()
+//        connection.createStatement().execute("DROP TABLE IF EXISTS CUSTOMERS_")
+//        connection.createStatement().execute("DROP PROCEDURE IF EXISTS GET_CUSTOMER_BY_ID_AND_NAME_")
+//        connection.close()
     }
 
     def "call procedure"() {
