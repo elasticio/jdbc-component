@@ -17,17 +17,12 @@ public class ExecuteStoredProcedure implements Function {
   public void execute(ExecutionParameters parameters) {
     final JsonObject body = parameters.getMessage().getBody();
     final JsonObject configuration = parameters.getConfiguration();
-    System.out.println("body: "+body.toString());
-    System.out.println("configuration: "+configuration.toString());
     try {
       Connection connection = Utils.getConnection(configuration);
-      System.out.println("connection: "+connection.toString());
       QueryFactory queryFactory = new QueryFactory();
       Query query = queryFactory.getQuery(configuration.getString("dbEngine"));
-      System.out.println("query: "+query.toString());
 
       JsonObject result = query.callProcedure(connection, body, configuration);
-      System.out.println("result: "+result.toString());
       parameters.getEventEmitter()
           .emitData(new Message.Builder().body(result).build());
     } catch (SQLException e) {

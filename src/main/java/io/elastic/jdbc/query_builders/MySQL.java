@@ -154,27 +154,17 @@ public class MySQL extends Query {
   @Override
   public JsonObject callProcedure(Connection connection, JsonObject body, JsonObject configuration)
       throws SQLException {
+
     Map<String, ProcedureParameter> procedureParams = ProcedureFieldsNameProvider
         .getProcedureMetadata(configuration).stream()
         .collect(Collectors.toMap(ProcedureParameter::getName, Function.identity()));
-    System.out.println("procedureParams: "+procedureParams);
-    System.out.println("procedureName: "+configuration.getString("procedureName"));
-    System.out.println("connection isClosed: "+connection.isClosed());
-    System.out.println("body: "+body.toString());
 
     CallableStatement stmt = prepareCallableStatement(connection,
         configuration.getString("procedureName"), procedureParams, body);
 
-    try {
-      stmt.execute();
-    } catch (SQLException e) {
-      System.out.println("e: "+e);
-      e.printStackTrace();
-    }
+    stmt.execute();
 
-    System.out.println("CallableStatement execute: "+stmt);
     JsonObjectBuilder resultBuilder = Json.createObjectBuilder();
-    System.out.println("resultBuilder: "+resultBuilder.toString());
     procedureParams.values().stream()
         .filter(param -> param.getDirection() == Direction.OUT
             || param.getDirection() == Direction.INOUT)
