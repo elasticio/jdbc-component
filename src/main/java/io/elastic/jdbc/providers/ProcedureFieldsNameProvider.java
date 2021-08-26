@@ -97,10 +97,12 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
 
     try (Connection conn = Utils.getConnection(config)) {
       DatabaseMetaData dbMetaData = conn.getMetaData();
+      System.out.println("dbMetaData: " + dbMetaData.toString());
       ResultSet rs = dbMetaData.getProcedureColumns(conn.getCatalog(),
           config.getString("schemaName"),
           config.getString("procedureName"),
           null);
+      System.out.println("dbMetaData ResultSet: " + rs.toString());
 
       int order = 1;
       while (rs.next()) {

@@ -64,6 +64,7 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
 
     def getStarsConfig() {
         JsonObject config = TestUtils.getMysqlConfigurationBuilder()
+                .add("schemaName", "elasticio_testdb")
                 .add("procedureName", "GET_CUSTOMER_BY_ID_AND_NAME_")
                 .build();
         return config;
