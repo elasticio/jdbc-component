@@ -1,3 +1,6 @@
+## 2.4.5 (September 1, 2021)
+Open only one connection pool per one execution and reuse it
+
 ## 2.4.4 (August 12, 2021)
 * Remove dependencyCheckAnalyze task
 
