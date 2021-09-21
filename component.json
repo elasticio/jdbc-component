@@ -1,7 +1,7 @@
 {
   "title": "Database",
   "description": "Database JDBC connector",
-  "version": "2.4.5",
+  "version": "2.4.6",
   "buildType": "docker",
   "credentials": {
     "verifier": "io.elastic.jdbc.JdbcCredentialsVerifier",
