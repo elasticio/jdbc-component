@@ -314,7 +314,7 @@
           }
         }
       },
-      "dynamicMetadata": "io.elastic.jdbc.providers.QueryColumnNamesProvider"
+      "dynamicMetadata": "io.elastic.jdbc.providers.QueryColumnNamesAndAllowsZeroResultsProvider"
     },
     "createOrUpdateRecord": {
       "main": "io.elastic.jdbc.actions.CreateOrUpdateRecord",
