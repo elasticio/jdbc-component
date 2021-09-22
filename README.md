@@ -168,7 +168,8 @@ UPDATE stars SET radius = 5 WHERE id = 2;
 ```
 
 ### Select action
-![image](https://user-images.githubusercontent.com/40201204/43592439-39ec5738-967e-11e8-8632-3655b08982d3.png)
+![image](https://user-images.githubusercontent.com/16806832/134408205-04b84670-c976-41e7-b805-faabff4ae1e5.png)
+
 The action will execute an [SQL](https://en.wikipedia.org/wiki/SQL "SQL") query that can return multiple results, it has limitations on the query and suited only for SELECT type of queries.
 In SQL query you can use clause variables with specific data types. 
 Internally we use prepared statements, so all incoming data is
@@ -201,9 +202,14 @@ Following types are supported:
  * ``float``
  * ``date``
 
-![image](https://user-images.githubusercontent.com/40201204/43644974-332f2aa4-9739-11e8-8483-f7395e5d195d.png)
+![image](https://user-images.githubusercontent.com/16806832/134408591-b9faa51c-3b35-4cf2-992d-51dcd07c5cb5.png)
 
-Checkbox ``Don't throw Error on an Empty Result`` allows to emit an empty response, otherwise you will get an error on empty response.
+Dropdown **Emit Behaviour** contains following possible options:
+ * Fetch all - a single message with an array `results` will be emitted
+ * Emit Individually - multiple messages (one message per one row) will be emitted
+ * Expect Single - a single message with one result row will be emitted. If it is returned more than one result by query the error will be thrown. A boolean input "Allow Zero Results" (defaults to `false`) appears at input metadata. If `false` - error will be thrown, else - the empty object will be emitted.
+
+![image](https://user-images.githubusercontent.com/16806832/134408977-d4692d3f-e9fb-48be-9104-c4cb121accaa.png)
  
 #### Input fields description
 Component supports dynamic incoming metadata - as soon as your query is in place it will be parsed and incoming metadata will be generated accordingly.
@@ -331,6 +337,10 @@ As an input metadata you will get all fields of selected table. [PRIMARY KEY](ht
 ### Create or update record action (Deprecated)
 This action exists in JDBC component only for backward compatibility. 
 Please use [**Upsert row by primary key**](#upsert-row-by-primary-key-action) instead.
+
+### Select action (Deprecated)
+This action exists in JDBC component only for backward compatibility.
+Please use [**Select action**](#select-action) instead.
 
 ## Current limitations
 1. Only tables with one [PRIMARY KEY](https://en.wikipedia.org/wiki/Primary_key "PRIMARY KEY") is supported. You will see the message ``Table has not Primary Key. Should be one Primary Key

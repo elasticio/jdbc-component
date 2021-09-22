@@ -1,3 +1,7 @@
+## 2.4.6 (October 1, 2021)
+* Add New Select action
+* Deprecate old Select action
+
 ## 2.4.5 (September 1, 2021)
 Open only one connection pool per one execution and reuse it
 

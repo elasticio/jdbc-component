@@ -25,29 +25,22 @@ public class NewSelectAction implements Function {
   private static final Logger LOGGER = LoggerFactory.getLogger(NewSelectAction.class);
   private static final String SQL_QUERY_VALUE = "sqlQuery";
   private static final String PROPERTY_ALLOW_ZERO_RESULT = "allowZeroResults";
-  private static final String PROPERTY_SKIP_NUMBER = "skipNumber";
   private static final String EMIT_BEHAVIOUR = "emitBehaviour";
 
   @Override
   public void execute(ExecutionParameters parameters) {
     JsonObject body = parameters.getMessage().getBody();
     final JsonObject configuration = parameters.getConfiguration();
-    JsonObject snapshot = parameters.getSnapshot();
     EventEmitter eventEmitter = parameters.getEventEmitter();
     checkConfig(configuration);
     String dbEngine = configuration.getString("dbEngine");
     String sqlQuery = configuration.getString("sqlQuery");
-    int skipNumber = 0;
     String emitBehaviour = "emitIndividually";
 
     try {
       emitBehaviour = configuration.getString(EMIT_BEHAVIOUR);
     } catch (NullPointerException e) {
       LOGGER.info("No Emit behavior is specified, the default value Emit Individually will be used");
-    }
-
-    if (snapshot.get(PROPERTY_SKIP_NUMBER) != null) {
-      skipNumber = snapshot.getInt(PROPERTY_SKIP_NUMBER);
     }
 
     Utils.columnTypes = Utils.getVariableTypes(sqlQuery);
@@ -74,13 +67,6 @@ public class NewSelectAction implements Function {
           emitSingleData(resultList, eventEmitter, body);
           break;
       }
-
-      snapshot = Json.createObjectBuilder()
-          .add(PROPERTY_SKIP_NUMBER, skipNumber + resultList.size())
-          .add(SQL_QUERY_VALUE, sqlQuery)
-          .build();
-      LOGGER.info("Emitting new snapshot");
-      parameters.getEventEmitter().emitSnapshot(snapshot);
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
