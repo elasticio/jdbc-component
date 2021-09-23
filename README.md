@@ -9,12 +9,16 @@
    * [Select trigger](#select-trigger)
    * [Get Rows Polling trigger](#get-rows-polling-trigger)
 * [Actions](#actions)
-   * [Execute custom query action](#execute-custom-query-action)
+   * [Execute custom query](#execute-custom-query)
    * [Select action](#select-action)
    * [Lookup Row By Primary Key](#lookup-row-by-primary-key)
+   * [Insert action](#nsert-action)
    * [Delete Row By Primary Key](#delete-row-by-primary-key)
+   * [Execute stored procedure](#execute-stored-procedure)
    * [Upsert Row By Primary Key)](#upsert-row-by-primary-key)
 * [Known Limitations](#known-limitations)
+
+Execute stored procedure
 
 ## General information
 ### Description
