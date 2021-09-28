@@ -174,7 +174,7 @@ Following types are supported:
 ![image](https://user-images.githubusercontent.com/16806832/134408591-b9faa51c-3b35-4cf2-992d-51dcd07c5cb5.png)
 
 Dropdown **Emit Behaviour** contains following possible options:
- * Fetch all - a single message with an array `results` will be emitted
+ * Fetch all - a single message with an array `results` containing all the objects (rows) will be emitted
  * Emit Individually - multiple messages (one message per one row) will be emitted
  * Expect Single - a single message with one result row will be emitted. If it is returned more than one result by query the error will be thrown. A boolean input "Allow Zero Results" (defaults to `false`) appears at input metadata. If `false` - error will be thrown, else - the empty object will be emitted.
 
