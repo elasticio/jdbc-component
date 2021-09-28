@@ -116,12 +116,23 @@ public class NewSelectAction implements Function {
 
   private void emitSingleData(ArrayList<JsonObject> resultList, EventEmitter eventEmitter, JsonObject body) {
     LOGGER.info("Expect Single option detected");
-    boolean allowZeroResults = Utils.getNonNullString(body, PROPERTY_ALLOW_ZERO_RESULT)
-        .equals("true");
+    String allowZeroResults = Utils.getNonNullString(body, PROPERTY_ALLOW_ZERO_RESULT);
+    boolean isAllowZeroResults;
+    switch (allowZeroResults){
+      case "true":
+        isAllowZeroResults = true;
+        break;
+      case "false":
+      case "":
+        isAllowZeroResults = false;
+        break;
+      default:
+        throw new RuntimeException("Incorrect value for 'Allow Zero Results' property. Expected boolean value: true or false");
+    }
     if (resultList.size() == 1){
       LOGGER.info("Emitting data...");
       eventEmitter.emitData(new Message.Builder().body(resultList.get(0)).build());
-    } else if (resultList.size() == 0 && allowZeroResults){
+    } else if (resultList.size() == 0 && isAllowZeroResults){
       LOGGER.info("No data was found but `Allow Zero Results` option activated, emitting an empty object...");
       JsonObjectBuilder emptyResult = Json.createObjectBuilder();
       eventEmitter.emitData(new Message.Builder().body(emptyResult.build()).build());

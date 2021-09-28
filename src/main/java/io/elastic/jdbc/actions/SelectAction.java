@@ -17,7 +17,7 @@ import javax.json.JsonString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+@Deprecated
 public class SelectAction implements Function {
   private static final Logger LOGGER = LoggerFactory.getLogger(SelectAction.class);
   private static final String SQL_QUERY_VALUE = "sqlQuery";
