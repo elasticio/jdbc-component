@@ -1,3 +1,4 @@
+[![CircleCI](https://circleci.com/gh/elasticio/jdbc-component.svg?style=svg)](https://circleci.com/gh/elasticio/jdbc-component)
 # JDBC-component
 ## Table of Contents
 
@@ -12,7 +13,7 @@
    * [Execute custom query](#execute-custom-query)
    * [Select action](#select-action)
    * [Lookup Row By Primary Key](#lookup-row-by-primary-key)
-   * [Insert action](#nsert-action)
+   * [Insert action](#insert-action)
    * [Delete Row By Primary Key](#delete-row-by-primary-key)
    * [Execute stored procedure](#execute-stored-procedure)
    * [Upsert Row By Primary Key)](#upsert-row-by-primary-key)
@@ -106,7 +107,7 @@ Optional field, indicates the beginning time to start polling from (defaults to 
 This action exists in JDBC component only for backward compatibility. New [**Select trigger**](#select-trigger) is recommended to use.
 
 ## Actions
-### Execute custom query action
+### Execute custom query
 Action to execute custom SQL query from provided request string.
 
 **Note:** SQL request will be executed according to chosen database JDBC specification.
@@ -305,7 +306,7 @@ As an input metadata you will get all fields of selected table. [PRIMARY KEY](ht
 
 ### Create or update record (Deprecated)
 This action exists in JDBC component only for backward compatibility. 
-Please use [**Upsert row by primary key**](#upsert-row-by-primary-key-action) instead.
+Please use [**Upsert row by primary key**](#upsert-row-by-primary-key) instead.
 
 ### Select (Deprecated)
 This action exists in JDBC component only for backward compatibility.
