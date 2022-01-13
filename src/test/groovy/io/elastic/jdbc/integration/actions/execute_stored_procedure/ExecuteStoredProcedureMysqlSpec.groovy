@@ -13,6 +13,8 @@ import javax.json.Json
 import javax.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
+import java.sql.SQLException
+import java.sql.SQLNonTransientConnectionException
 
 class ExecuteStoredProcedureMysqlSpec extends Specification {
 
@@ -62,7 +64,7 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
 
     def getStarsConfig() {
         JsonObject config = TestUtils.getMysqlConfigurationBuilder()
-                .add("schemaName", "ELASTICIO")
+                .add("schemaName", "elasticio_testdb")
                 .add("procedureName", "GET_CUSTOMER_BY_ID_AND_NAME")
                 .build();
         return config;
@@ -97,7 +99,7 @@ class ExecuteStoredProcedureMysqlSpec extends Specification {
     }
 
     def cleanupSpec() {
-        connection.createStatement().execute("DROP TABLE IF EXISTS GET_CUSTOMER_BY_ID_AND_NAME")
+        connection.createStatement().execute("DROP TABLE IF EXISTS CUSTOMERS")
         connection.createStatement().execute("DROP PROCEDURE IF EXISTS GET_CUSTOMER_BY_ID_AND_NAME")
         connection.close()
     }

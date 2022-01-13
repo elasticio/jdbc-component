@@ -14,12 +14,8 @@ import java.util.List;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, SelectModelProvider {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(ProcedureFieldsNameProvider.class);
 
   @Override
   public JsonObject getSelectModel(JsonObject configuration) {
@@ -71,7 +67,6 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
     result.add("in", inMetadata.build()).add("out", outMetadata.build());
 
     JsonObject metadataResponse = result.build();
-    LOGGER.trace(metadataResponse.toString());
     return metadataResponse;
   }
 
@@ -100,7 +95,8 @@ public class ProcedureFieldsNameProvider implements DynamicMetadataProvider, Sel
   public static List<ProcedureParameter> getProcedureMetadata(JsonObject config) {
     List<ProcedureParameter> parameters = new LinkedList<>();
 
-    try (Connection conn = Utils.getConnection(config)) {
+    try {
+      Connection conn = Utils.getConnection(config);
       DatabaseMetaData dbMetaData = conn.getMetaData();
       ResultSet rs = dbMetaData.getProcedureColumns(conn.getCatalog(),
           config.getString("schemaName"),

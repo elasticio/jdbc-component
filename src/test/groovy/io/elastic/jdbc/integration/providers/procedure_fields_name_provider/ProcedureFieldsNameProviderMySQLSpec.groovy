@@ -100,8 +100,8 @@ class ProcedureFieldsNameProviderMySQLSpec extends Specification {
     }
 
     def cleanupSpec() {
-        String sql = "DROP TABLE IF EXISTS CUSTOMERS"
-        connection.createStatement().execute(sql)
+        connection.createStatement().execute("DROP TABLE IF EXISTS CUSTOMERS")
+        connection.createStatement().execute("DROP PROCEDURE GET_CUSTOMER_BY_ID_AND_NAME")
         connection.close()
     }
 

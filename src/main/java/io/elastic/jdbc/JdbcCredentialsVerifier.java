@@ -22,8 +22,9 @@ public class JdbcCredentialsVerifier implements CredentialsVerifier {
 
     try {
       connection = Utils.getConnection(configuration);
-      LOGGER.info("Successfully connected to database. Credentials verified.");
+      LOGGER.info("Credentials verified successfully");
     } catch (Exception e) {
+      LOGGER.error("Credentials verification failed");
       throw new InvalidCredentialsException("Failed to connect to database", e);
     } finally {
       if (connection != null) {
@@ -31,7 +32,7 @@ public class JdbcCredentialsVerifier implements CredentialsVerifier {
         try {
           connection.close();
         } catch (SQLException e) {
-          LOGGER.error("Failed to closed database connection", e);
+          LOGGER.error("Failed to close a database connection");
         }
       }
     }

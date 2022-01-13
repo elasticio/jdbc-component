@@ -167,7 +167,6 @@ public class MySQL extends Query {
     stmt.execute();
 
     JsonObjectBuilder resultBuilder = Json.createObjectBuilder();
-
     procedureParams.values().stream()
         .filter(param -> param.getDirection() == Direction.OUT
             || param.getDirection() == Direction.INOUT)

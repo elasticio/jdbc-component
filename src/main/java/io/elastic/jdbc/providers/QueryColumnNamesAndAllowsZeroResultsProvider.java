@@ -13,9 +13,10 @@ import javax.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QueryColumnNamesProvider implements DynamicMetadataProvider, SelectModelProvider {
+public class QueryColumnNamesAndAllowsZeroResultsProvider implements DynamicMetadataProvider, SelectModelProvider {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(QueryColumnNamesProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(
+      QueryColumnNamesAndAllowsZeroResultsProvider.class);
 
   public JsonObject getSelectModel(JsonObject configuration) {
     JsonObject result = Json.createObjectBuilder().build();
@@ -82,6 +83,19 @@ public class QueryColumnNamesProvider implements DynamicMetadataProvider, Select
       if (isEmpty) {
         properties.add("empty dataset", "no columns");
       }
+    }
+    String emitBehaviour = "emitIndividually";
+
+    try {
+      emitBehaviour = configuration.getString("emitBehaviour");
+    } catch (NullPointerException e) {
+      LOGGER.info("No Emit behavior is specified, the default value Emit Individually will be used");
+    }
+    if (emitBehaviour.equals("expectSingle")) {
+      JsonObjectBuilder field = Json.createObjectBuilder();
+      field.add("title", "Allow Zero Results")
+          .add("type", "boolean");
+      properties.add("allowZeroResults", field);
     }
 
     return properties.build();
