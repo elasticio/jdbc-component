@@ -1,7 +1,6 @@
 package io.elastic.jdbc.utils;
 
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -29,6 +28,7 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 public class Utils {
 
@@ -57,7 +57,23 @@ public class Utils {
     reboundDbState.put(Engines.FIREBIRDSQL.name(), Arrays.asList("10054", "10038"));
   }
 
+  public static class MyWriter extends java.io.PrintWriter {
+
+    public MyWriter(OutputStream out) {
+      super(out);
+    }
+
+    @Override
+    public void println(String x) {
+      LOGGER.info(x);
+    }
+  }
+
   public static Connection getConnection(final JsonObject config) throws SQLException {
+    SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
+    DriverManager.setLogStream(System.out);
+    PrintWriter myWriter = new MyWriter(System.out);
+    DriverManager.setLogWriter(myWriter);
     final String engine = getRequiredNonEmptyString(config, CFG_DB_ENGINE, "Engine is required")
         .toLowerCase();
     final String host = getRequiredNonEmptyString(config, CFG_HOST, "Host is required");

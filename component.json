@@ -107,6 +107,11 @@
           "label": "Start Polling From (optional)",
           "required": false,
           "placeholder": "1970-01-01 00:00:00.000"
+        },
+        "emitBulk": {
+          "viewClass": "CheckBoxView",
+          "label": "Emit bulk?",
+          "required": false
         }
       },
       "dynamicMetadata": "io.elastic.jdbc.providers.ColumnNamesProvider"
@@ -155,7 +160,7 @@
             }
           }
         },
-        "out":{
+        "out": {
           "type": "object",
           "required": false,
           "properties": {
@@ -202,14 +207,14 @@
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProvider"
         },
-        "reboundEnabled" : {
+        "reboundEnabled": {
           "viewClass": "SelectView",
           "prompt": "Default is No",
           "label": "Enable Rebound",
           "required": false,
-          "model" : {
-            "Yes" : "Yes",
-            "No" : "No"
+          "model": {
+            "Yes": "Yes",
+            "No": "No"
           }
         }
       },
@@ -227,14 +232,14 @@
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProvider"
         },
-        "reboundEnabled" : {
+        "reboundEnabled": {
           "viewClass": "SelectView",
           "prompt": "Default is No",
           "label": "Enable Rebound",
           "required": false,
-          "model" : {
-            "Yes" : "Yes",
-            "No" : "No"
+          "model": {
+            "Yes": "Yes",
+            "No": "No"
           }
         }
       },
@@ -256,14 +261,14 @@
           "label": "Don`t throw Error on an Empty Result",
           "viewClass": "CheckBoxView"
         },
-        "reboundEnabled" : {
+        "reboundEnabled": {
           "viewClass": "SelectView",
           "prompt": "Default is No",
           "label": "Enable Rebound",
           "required": false,
-          "model" : {
-            "Yes" : "Yes",
-            "No" : "No"
+          "model": {
+            "Yes": "Yes",
+            "No": "No"
           }
         }
       },
@@ -339,5 +344,7 @@
       },
       "dynamicMetadata": "io.elastic.jdbc.providers.ProcedureFieldsNameProvider"
     }
-  }
+  },
+  "language": "java",
+  "sailor_version": "2.1.3"
 }
