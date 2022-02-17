@@ -31,7 +31,7 @@ public class UpsertRowByPrimaryKey implements Function {
     JsonObject resultRow;
     String tableName;
     String dbEngine;
-    String catalog = null;
+    String catalog = "";
     String schemaName = "";
     String primaryKey = "";
     int primaryKeysCount = 0;
@@ -55,14 +55,17 @@ public class UpsertRowByPrimaryKey implements Function {
     }
 
     LOGGER.info("Executing lookup primary key");
-    boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
-    Boolean isMysql = configuration.getString("dbEngine").equals("mysql");
+    final boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
+    final boolean isMysql = dbEngine.equals(Engines.MYSQL.name().toLowerCase());
+    final boolean isFirebird = dbEngine.equals(Engines.FIREBIRDSQL.name().toLowerCase());
 
-    try {
-      Connection connection = Utils.getConnection(configuration);
+    try (Connection connection = Utils.getConnection(configuration)) {
       DatabaseMetaData dbMetaData = connection.getMetaData();
       if (isMysql) {
         catalog = configuration.getString("databaseName");
+      }
+      if (isFirebird) {
+        tableName = tableName.toUpperCase();
       }
       if (tableName.contains(".")) {
         schemaName =
@@ -79,17 +82,18 @@ public class UpsertRowByPrimaryKey implements Function {
         }
         if (primaryKeysCount == 1) {
           LOGGER.info("Executing upsert row by primary key action");
-          Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
-          LOGGER.debug("Detected column types");
+          Utils.columnTypes = Utils.getColumnTypes(connection, tableName);
+          LOGGER.info("Detected column types: " + Utils.columnTypes);
           QueryFactory queryFactory = new QueryFactory();
           Query query = queryFactory.getQuery(dbEngine);
-          LOGGER.debug("Execute upsert parameters");
+          LOGGER
+              .info("Execute upsert parameters by PK: '{}' = {}", primaryKey, body.get(primaryKey));
           query.from(tableName);
           resultRow = query.executeUpsert(connection, primaryKey, body);
-          LOGGER.info("Emitting data");
+          LOGGER.info("Emit data= {}", resultRow);
           parameters.getEventEmitter().emitData(new Message.Builder().body(resultRow).build());
           snapshot = Json.createObjectBuilder().add(PROPERTY_TABLE_NAME, tableName).build();
-          LOGGER.info("Emitting new snapshot");
+          LOGGER.info("Emitting new snapshot {}", snapshot.toString());
           parameters.getEventEmitter().emitSnapshot(snapshot);
         } else if (primaryKeysCount == 0) {
           LOGGER.error("Error: Table has not Primary Key. Should be one Primary Key");
@@ -103,9 +107,7 @@ public class UpsertRowByPrimaryKey implements Function {
       if (Utils.reboundIsEnabled(configuration)) {
         List<String> states = Utils.reboundDbState.get(dbEngine);
         if (states.contains(e.getSQLState())) {
-          LOGGER.warn("Starting rebound max iter: {}, rebound ttl: {} because of a SQL Exception",
-              System.getenv("ELASTICIO_REBOUND_LIMIT"),
-              System.getenv("ELASTICIO_REBOUND_INITIAL_EXPIRATION"));
+          LOGGER.warn("Starting rebound max iter: {}, rebound ttl: {}. Reason: {}", System.getenv("ELASTICIO_REBOUND_LIMIT"), System.getenv("ELASTICIO_REBOUND_INITIAL_EXPIRATION"), e.getMessage());
           parameters.getEventEmitter().emitRebound(e);
           return;
         }

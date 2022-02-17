@@ -1,28 +1,6 @@
-[![CircleCI](https://circleci.com/gh/elasticio/jdbc-component.svg?style=svg)](https://circleci.com/gh/elasticio/jdbc-component)
 # JDBC-component
-## Table of Contents
 
-* [General information](#general-information)
-   * [Description](#description)
-   * [Completeness Matrix](#completeness-matrix)
-* [Credentials](#credentials)
-* [Triggers](#triggers)
-   * [Select trigger](#select-trigger)
-   * [Get Rows Polling trigger](#get-rows-polling-trigger)
-* [Actions](#actions)
-   * [Execute custom query](#execute-custom-query)
-   * [Select action](#select-action)
-   * [Lookup Row By Primary Key](#lookup-row-by-primary-key)
-   * [Insert action](#insert-action)
-   * [Delete Row By Primary Key](#delete-row-by-primary-key)
-   * [Execute stored procedure](#execute-stored-procedure)
-   * [Upsert Row By Primary Key)](#upsert-row-by-primary-key)
-* [Known Limitations](#known-limitations)
-
-Execute stored procedure
-
-## General information
-### Description
+## Description
 This is an open source component for working with object-relational database management systems on [elastic.io platform](http://www.elastic.io "elastic.io platform").
 
 ### Completeness Matrix
@@ -30,27 +8,88 @@ This is an open source component for working with object-relational database man
 
 [JDBC Component Completeness Matrix](https://docs.google.com/spreadsheets/d/1sZr9ydJbMK8v-TguctmFDiqgjRKcrpbdj4CeFuZEkQU/edit?usp=sharing)
 
+### Purpose
+With this component you will have following triggers:
+
+``SELECT`` - this trigger will execute an [SQL](https://en.wikipedia.org/wiki/SQL "SQL") query that returns multiple results, it has limitations on the query and suited only for SELECT type of queries. The trigger will remember last execution timestamp and let you build queries on it.
+
+``GET ROWS POLLING`` - this trigger will execute select query from specified table with simple criteria of selected datetime or timestamp table. The trigger will remember last execution timestamp and let you build queries on it.
+
+Following actions are inside:
+
+``SELECT`` - this action will execute an [SQL](https://en.wikipedia.org/wiki/SQL "SQL") query that returns multiple results, it has limitations on the query and suited only for SELECT type of queries.
+
+``LOOKUP BY PRIMARY KEY`` - this action will execute select query from specified table, as criteria can be used only [PRIMARY KEY](https://en.wikipedia.org/wiki/Primary_key "PRIMARY KEY"). The action returns only one result (a primary key is unique). 
+
+``UPSERT BY PRIMARY KEY`` - this action will execute select command from specified table, as search criteria can be used only [PRIMARY KEY](https://en.wikipedia.org/wiki/Primary_key "PRIMARY KEY"), and execute insert command by PRIMARY KEY with specified field, if result does not found, else - action will execute update command by PRIMARY KEY with specified field. The action returns only one result row (a primary key is unique).
+
+``DELETE BY PRIMARY KEY`` - this action will execute delete query from specified table, as criteria can be used only [PRIMARY KEY](https://en.wikipedia.org/wiki/Primary_key "PRIMARY KEY"). The action returns an integer value that indicates the number of rows affected, the returned value can be 0 or 1 (a primary key is unique).
+
+``INSERT`` - this action will execute insert query into the specified table. The action returns boolean value is execution insert successful or not.
+
+### How works
+
+### Requirements
+Before you can deploy any code into elastic.io **you must be a registered elastic.io platform user**. Please see our home page at [http://www.elastic.io](http://www.elastic.io) to learn how. 
+
+#### Environment variables
+For integration-testing is needed to specify following environment variables:
+1. Connection to MSSQL:
+ - ``CONN_USER_MSSQL`` - user login
+ - ``CONN_PASSWORD_MSSQL`` - user password
+ - ``CONN_DBNAME_MSSQL`` - DataBase name
+ - ``CONN_HOST_MSSQL`` - DataBase host
+ - ``CONN_PORT_MSSQL`` - DataBase port
+2. Connection to MySQL:
+ - ``CONN_USER_MYSQL`` - user login
+ - ``CONN_PASSWORD_MYSQL`` - user password
+ - ``CONN_DBNAME_MYSQL`` - DataBase name
+ - ``CONN_HOST_MYSQL`` - DataBase host
+ - ``CONN_PORT_MYSQL`` - DataBase port
+3. Connection to Oracle:
+ - ``CONN_USER_ORACLE`` - user login
+ - ``CONN_PASSWORD_ORACLE`` - user password
+ - ``CONN_DBNAME_ORACLE`` - DataBase name
+ - ``CONN_HOST_ORACLE`` - DataBase host
+ - ``CONN_PORT_ORACLE`` - DataBase port
+4. Connection to PostgreSQL:
+ - ``CONN_USER_POSTGRESQL`` - user login
+ - ``CONN_PASSWORD_POSTGRESQL`` - user password
+ - ``CONN_DBNAME_POSTGRESQL`` - DataBase name
+ - ``CONN_HOST_POSTGRESQL`` - DataBase host
+ - ``CONN_PORT_POSTGRESQL`` - DataBase port
+ 5. Connection to Firebird:
+ - ``CONN_USER_FIREBIRD`` - user login
+ - ``CONN_PASSWORD_FIREBIRD`` - user password
+ - ``CONN_DBNAME_FIREBIRD`` - DataBase name
+ - ``CONN_HOST_FIREBIRD`` - DataBase host
+ - ``CONN_PORT_FIREBIRD`` - DataBase port
+ - ``CONN_PORT_FIREBIRD`` - DataBase port
+#### Others
 ## Credentials
 You need to use following properties to configure credentials:
 
-```DB Engine``` - Choose one of existing database types:
+### DB Engine
+Choose one of existing database types:
 ![image](https://user-images.githubusercontent.com/40201204/43577772-6f85bdea-9655-11e8-96e1-368493a36c9d.png)
 
-```Connection URI``` - Provide hostname of the server, e.g. ``acme.com``
-
-```Connection port``` - Optional field. Provide port of the server instance, as by default:
+### Connection URI
+Provide hostname of the server, e.g. ``acme.com``
+### Connection port
+Optional field. Provide port of the server instance, as by default:
 - ``3306`` - MySQL
 - ``5432`` - PostgreSQL
 - ``1521`` - Oracle
 - ``1433`` - MSSQL
-
-```Database Name``` - Provide name of database at the instance that you want to interact with.
-
-```User``` - Provide a username that has permissions to interact with the Database.
-
-```Password``` - Provide a password of the user that has permissions to interact with the Database.
-
-```Configuration properties``` - Optional field. Provide a configuration properties for connections to the Database, e.g. ``useUnicode=true&serverTimezone=UTC``
+- ``3050`` - Firebird
+### Database Name
+Provide name of database at the instance that you want to interact with.
+### User
+Provide a username that has permissions to interact with the Database.
+### Password
+Provide a password of the user that has permissions to interact with the Database.
+### Configuration properties
+Optional field. Provide a configuration properties for connections to the Database, e.g. ``useUnicode=true&serverTimezone=UTC``
 
 **Limitation:** `Configuration properties` value may not be checked during Credentials Verifacation, so in case of using this field make sure that it contains correct input. 
 
@@ -69,7 +108,6 @@ The format of ``Start Polling From (optional)`` field should be like ``yyyy-mm-d
 - ``mi`` - minute
 - ``ss`` - second
 - ``sss`` - millisecond (optional)
-- 
 ### Get Rows Polling trigger
 This trigger can polling data from provided table. As WHERE clause you can use column, which has datatype like DATE or TIMESTAMP.
 ![image](https://user-images.githubusercontent.com/40201204/43591332-c99f6b3e-967b-11e8-8a77-bf8386e83d51.png)
@@ -107,7 +145,7 @@ Optional field, indicates the beginning time to start polling from (defaults to 
 This action exists in JDBC component only for backward compatibility. New [**Select trigger**](#select-trigger) is recommended to use.
 
 ## Actions
-### Execute custom query
+### Execute custom query action
 Action to execute custom SQL query from provided request string.
 
 **Note:** SQL request will be executed according to chosen database JDBC specification.
@@ -138,8 +176,7 @@ UPDATE stars SET radius = 5 WHERE id = 2;
 ```
 
 ### Select action
-![image](https://user-images.githubusercontent.com/16806832/134408205-04b84670-c976-41e7-b805-faabff4ae1e5.png)
-
+![image](https://user-images.githubusercontent.com/40201204/43592439-39ec5738-967e-11e8-8632-3655b08982d3.png)
 The action will execute an [SQL](https://en.wikipedia.org/wiki/SQL "SQL") query that can return multiple results, it has limitations on the query and suited only for SELECT type of queries.
 In SQL query you can use clause variables with specific data types. 
 Internally we use prepared statements, so all incoming data is
@@ -172,14 +209,9 @@ Following types are supported:
  * ``float``
  * ``date``
 
-![image](https://user-images.githubusercontent.com/16806832/134408591-b9faa51c-3b35-4cf2-992d-51dcd07c5cb5.png)
+![image](https://user-images.githubusercontent.com/40201204/43644974-332f2aa4-9739-11e8-8483-f7395e5d195d.png)
 
-Dropdown **Emit Behaviour** contains following possible options:
- * Fetch all - a single message with an array `results` containing all the objects (rows) will be emitted
- * Emit Individually - multiple messages (one message per one row) will be emitted
- * Expect Single - a single message with one result row will be emitted. If more than one row is returned the error will be thrown. A boolean input "Allow Zero Results" (defaults to `false`) appears at input metadata. If `false` - error will be thrown, else - the empty object will be emitted.
-
-![image](https://user-images.githubusercontent.com/16806832/134408977-d4692d3f-e9fb-48be-9104-c4cb121accaa.png)
+Checkbox ``Don't throw Error on an Empty Result`` allows to emit an empty response, otherwise you will get an error on empty response.
  
 #### Input fields description
 Component supports dynamic incoming metadata - as soon as your query is in place it will be parsed and incoming metadata will be generated accordingly.
@@ -217,7 +249,7 @@ As output metadata, you will get execution insert result like:
 }
 ```
 
-### Delete Row By Primary Key
+### Delete Row By Primary Key action
 ![image](https://user-images.githubusercontent.com/40201204/43592505-5b6bbfe8-967e-11e8-845e-2ce8ac707357.png)
 The action will execute delete query from a ``Table`` dropdown field, as criteria can be used only [PRIMARY KEY](https://en.wikipedia.org/wiki/Primary_key "PRIMARY KEY"). The action returns count of affected rows.
 Checkbox ``Don't throw Error on an Empty Result`` allows to emit an empty response, otherwise you will get an error on empty response.
@@ -266,7 +298,7 @@ Component generates next metadata:
 
 ![image](https://user-images.githubusercontent.com/22715422/62056735-edd26200-b226-11e9-871e-0efc305d70b2.png)
 
-### Upsert Row By Primary Key
+### Upsert Row By Primary Key action
 The action will execute ``SELECT`` command from a ``Tables`` dropdown field, as search criteria can be used only [PRIMARY KEY](https://en.wikipedia.org/wiki/Primary_key "PRIMARY KEY"), and execute ``INSERT`` command by PRIMARY KEY with specified field, if result does not found, else - action will execute ``UPDATE`` command by PRIMARY KEY with specified field. The action returns only one result row (a primary key is unique).
 1. Find and select jdbc-component in the component repository
 ![image](https://user-images.githubusercontent.com/16806832/44981615-c70a9d80-af7b-11e8-8055-3b553abe8212.png)
@@ -304,15 +336,11 @@ As an input metadata you will get all fields of selected table. [PRIMARY KEY](ht
 ![image](https://user-images.githubusercontent.com/16806832/44397461-1a76f780-a549-11e8-8247-9a6f9aa3f3b4.png)
 
 
-### Create or update record (Deprecated)
+### Create or update record action (Deprecated)
 This action exists in JDBC component only for backward compatibility. 
-Please use [**Upsert row by primary key**](#upsert-row-by-primary-key) instead.
+Please use [**Upsert row by primary key**](#upsert-row-by-primary-key-action) instead.
 
-### Select (Deprecated)
-This action exists in JDBC component only for backward compatibility.
-Please use [**Select action**](#select-action) instead.
-
-## Known limitations
+## Current limitations
 1. Only tables with one [PRIMARY KEY](https://en.wikipedia.org/wiki/Primary_key "PRIMARY KEY") is supported. You will see the message ``Table has not Primary Key. Should be one Primary Key
 ``, if the selected table doesn't have a primary key. Also, you will see the message ``Composite Primary Key is not supported
 ``, if the selected table has composite primary key.
@@ -321,15 +349,20 @@ Please use [**Select action**](#select-action) instead.
 - ``PostgreSQL`` - compatible with PostgreSQL 8.2 and higher
 - ``Oracle`` - compatible with Oracle Database 8.1.7 - 12.1.0.2
 - ``MSSQL`` - compatible with Microsoft SQL Server 2008 R2 and higher
+- ``Firebird`` - compatible with Firebird 2.0 and higher
 3. The current implementation of the action ``Upsert By Primary Key`` doesn't mark non-nullable fields as required fields at a dynamic metadata. In case of updating such fields with an empty value you will get SQL Exception ``Cannot insert the value NULL into...``. You should manually fill in all non-nullable fields with previous data, if you want to update part of columns in a row, even if data in that fields doesn't change. 
 4. The current implementation of the action ``Execute stored procedure`` doesn't support ResultSet MSSQL output.
 5. The current implementation of the action ``Execute stored procedure`` doesn't support any array types parameters.
 (MySQL does not have schemas by definition)
 6. Rebound mechanism only works for this SQL State: 
- - ``MySQL``: 40001, XA102
- - ``Oracle``: 61000
- - ``MSSQL``: 40001
- - ``PostgreSQL``:  40P01
+- ``MySQL``: 40001, XA102
+- ``Oracle``: 61000
+- ``MSSQL``: 40001
+- ``PostgreSQL``:  40P01
+- ``Firebird``: 10054, 10038
 
 ## License
 Apache-2.0 © [elastic.io GmbH](https://www.elastic.io "elastic.io GmbH")
+
+## <System> API and Documentation links
+[elastic.io iPaaS Documentation](https://support.elastic.io/support/home "elastic.io iPaaS Documentation")

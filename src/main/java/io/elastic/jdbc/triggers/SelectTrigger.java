@@ -15,6 +15,8 @@ import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,7 @@ public class SelectTrigger implements Function {
   private static final String PROPERTY_DB_ENGINE = "dbEngine";
   private static final String LAST_POLL_PLACEHOLDER = "%%EIO_LAST_POLL%%";
   private static final String SQL_QUERY_VALUE = "sqlQuery";
+  private static final String EMIT_BULK = "emitBulk";
   private static final String PROPERTY_POLLING_VALUE = "pollingValue";
   private static final String PROPERTY_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss.sss";
   private static final String PROPERTY_SKIP_NUMBER = "skipNumber";
@@ -36,8 +39,14 @@ public class SelectTrigger implements Function {
     final JsonObject configuration = parameters.getConfiguration();
     checkConfig(configuration);
     String sqlQuery = configuration.getString(SQL_QUERY_VALUE);
+    Boolean emitBulk = false;
     JsonObject snapshot = parameters.getSnapshot();
+    JsonArrayBuilder bulk = Json.createArrayBuilder();
     Integer skipNumber = 0;
+
+    if (Utils.getNonNullString(configuration, EMIT_BULK).equals("true")) {
+      emitBulk = true;
+    }
 
     Calendar cDate = Calendar.getInstance();
     cDate.set(cDate.get(Calendar.YEAR), cDate.get(Calendar.MONTH), cDate.get(Calendar.DATE), 0, 0,
@@ -59,11 +68,12 @@ public class SelectTrigger implements Function {
               + formattedDate);
       pollingValue = cts;
     }
-    LOGGER.debug("EIO_LAST_POLL = {}", pollingValue);
+    LOGGER.info("EIO_LAST_POLL = {}", pollingValue);
 
     if (snapshot.get(PROPERTY_SKIP_NUMBER) != null) {
       skipNumber = snapshot.getInt(PROPERTY_SKIP_NUMBER);
     }
+    LOGGER.info("SQL QUERY {} : ", sqlQuery);
     LOGGER.info("Executing select trigger");
     try {
       QueryFactory queryFactory = new QueryFactory();
@@ -73,23 +83,36 @@ public class SelectTrigger implements Function {
         sqlQuery = sqlQuery.replace(LAST_POLL_PLACEHOLDER, "?");
         query.selectPolling(sqlQuery, pollingValue);
       }
+      LOGGER.info("SQL Query: {}", sqlQuery);
       Connection connection = Utils.getConnection(configuration);
       ArrayList<JsonObject> resultList = query.executeSelectTrigger(connection, sqlQuery);
-      for (int i = 0; i < resultList.size(); i++) {
-        LOGGER.info("Columns count: {} from {}", i + 1, resultList.size());
-        LOGGER.info("Emitting data");
+
+      if (emitBulk) {
+        LOGGER.info("Building result");
+        for(JsonObject row : resultList) {
+          bulk.add(row);
+        }
+        LOGGER.debug("Emitting data {}", resultList.toString());
         parameters.getEventEmitter()
-            .emitData(new Message.Builder().body(resultList.get(i)).build());
+                .emitData(new Message.Builder().body(Json.createObjectBuilder()
+                        .add("result", bulk).build()).build());
+      } else {
+        for (int i = 0; i < resultList.size(); i++) {
+          LOGGER.info("Columns count: {} from {}", i + 1, resultList.size());
+          LOGGER.debug("Emitting data {}", resultList.get(i).toString());
+          parameters.getEventEmitter()
+                  .emitData(new Message.Builder().body(resultList.get(i)).build());
+        }
       }
 
       snapshot = Json.createObjectBuilder()
           .add(PROPERTY_SKIP_NUMBER, skipNumber + resultList.size())
           .add(LAST_POLL_PLACEHOLDER, pollingValue.toString())
           .add(SQL_QUERY_VALUE, sqlQuery).build();
-      LOGGER.info("Emitting new snapshot");
+      LOGGER.info("Emitting new snapshot {}", snapshot.toString());
       parameters.getEventEmitter().emitSnapshot(snapshot);
     } catch (SQLException e) {
-      LOGGER.error("Failed to make request");
+      LOGGER.error("Failed to make request", e.toString());
       throw new RuntimeException(e);
     }
   }
@@ -109,4 +132,5 @@ public class SelectTrigger implements Function {
           + "'");
     }
   }
+
 }

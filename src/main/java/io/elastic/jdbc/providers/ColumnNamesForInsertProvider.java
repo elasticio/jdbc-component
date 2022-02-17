@@ -54,7 +54,8 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
     LOGGER.info("Getting input metadata...");
     final String dbEngine = Utils.getDbEngine(configuration);
     final boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
-    final String tableName = Utils.getTableName(configuration, isOracle);
+    final boolean isFirebird = dbEngine.equals(Engines.FIREBIRDSQL.name().toLowerCase());
+    final String tableName = Utils.getTableName(configuration, (isOracle || isFirebird));
     JsonObjectBuilder propertiesIn = Json.createObjectBuilder();
     boolean isEmpty = true;
 
@@ -89,7 +90,7 @@ public class ColumnNamesForInsertProvider implements DynamicMetadataProvider {
 
           final boolean isPrimaryKey = Utils.isPrimaryKey(primaryKeysNames, fieldName);
           final boolean isNotNull = Utils.isNotNull(resultSet);
-          final boolean isAutoincrement = Utils.isAutoincrement(resultSet, isOracle);
+          final boolean isAutoincrement = Utils.isAutoincrement(resultSet, (isOracle || isFirebird));
           final boolean isCalculated = Utils.isCalculated(resultSet, dbEngine);
           LOGGER
               .trace(

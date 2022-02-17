@@ -1,8 +1,17 @@
 package io.elastic.jdbc.utils;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.sql.*;
+import java.io.*;
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,6 +28,7 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 public class Utils {
 
@@ -38,23 +48,32 @@ public class Utils {
   private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
   public static Map<String, String> columnTypes = null;
   public static final Map<String, List<String>> reboundDbState;
-  private static Connection con;
-  private static JsonObject connectionConfig;
-
   static {
     reboundDbState = new HashMap<>();
     reboundDbState.put(Engines.POSTGRESQL.name(), Collections.singletonList("40P01"));
     reboundDbState.put(Engines.MSSQL.name(), Collections.singletonList("40001"));
     reboundDbState.put(Engines.MYSQL.name(), Arrays.asList("40001", "XA102"));
     reboundDbState.put(Engines.ORACLE.name(), Collections.singletonList("61000"));
+    reboundDbState.put(Engines.FIREBIRDSQL.name(), Arrays.asList("10054", "10038"));
+  }
+
+  public static class MyWriter extends java.io.PrintWriter {
+
+    public MyWriter(OutputStream out) {
+      super(out);
+    }
+
+    @Override
+    public void println(String x) {
+      LOGGER.info(x);
+    }
   }
 
   public static Connection getConnection(final JsonObject config) throws SQLException {
-    if (con != null && !con.isClosed() && connectionConfig == config) {
-      LOGGER.info("Use connection defined before");
-      return con;
-    }
-    connectionConfig = config;
+    SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
+    DriverManager.setLogStream(System.out);
+    PrintWriter myWriter = new MyWriter(System.out);
+    DriverManager.setLogWriter(myWriter);
     final String engine = getRequiredNonEmptyString(config, CFG_DB_ENGINE, "Engine is required")
         .toLowerCase();
     final String host = getRequiredNonEmptyString(config, CFG_HOST, "Host is required");
@@ -65,18 +84,9 @@ public class Utils {
     engineType.loadDriverClass();
     final String connectionString = engineType.getConnectionString(host, port, databaseName);
     Properties properties = getConfigurationProperties(config, engineType);
-    LOGGER.info("Connecting to connection string");
-    con = DriverManager.getConnection(connectionString, properties);
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      try {
-        if(!con.isClosed()) con.close();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-    }));
-    return con;
+    LOGGER.info("Connecting to {}", connectionString);
+    return DriverManager.getConnection(connectionString, properties);
   }
-
 
   private static String getPassword(final JsonObject config, final Engines engineType) {
     final String password = getNonNullString(config, CFG_PASSWORD);
@@ -97,10 +107,11 @@ public class Utils {
       try {
         properties.load(new StringReader(configurationProperties.replaceAll("&", "\n")));
       } catch (IOException e) {
-        LOGGER.error("Failed while parsing configuration properties");
+        LOGGER.error("Failed while parsing configuration properties. Error: " + e.getMessage());
         throw new RuntimeException(e);
       }
     }
+    LOGGER.info("Got properties: {}", properties);
     properties.setProperty("user", user);
     properties.setProperty("password", password);
     return properties;
@@ -125,7 +136,7 @@ public class Utils {
         }
       }
     } catch (NullPointerException | ClassCastException e) {
-      LOGGER.error("Key doesn't have any mapping");
+      LOGGER.info("key {} doesn't have any mapping: {}", key, e);
     }
     return value.toString().replaceAll("\"", "");
   }
@@ -142,11 +153,16 @@ public class Utils {
       JsonObject body) throws SQLException {
     try {
       if (isNumeric(colName)) {
-        if ((body.get(colName) != null) && (body.get(colName) != JsonValue.NULL)) {
-          statement.setBigDecimal(paramNumber, body.getJsonNumber(colName).bigDecimalValue());
-        } else {
-          statement.setBigDecimal(paramNumber, null);
-        }
+          if ((body.get(colName) != null) && (body.get(colName) != JsonValue.NULL)) {
+            // workaround for Firebase -> isNumeric=true, but value = "true" or "false"
+            if (body.get(colName).toString().equals("true") || body.get(colName).toString().equals("false")) {
+              statement.setBoolean(paramNumber, body.getBoolean(colName));
+            } else {
+              statement.setBigDecimal(paramNumber, body.getJsonNumber(colName).bigDecimalValue());
+            }
+          } else {
+            statement.setBigDecimal(paramNumber, null);
+          }
       } else if (isTimestamp(colName)) {
         if ((body.get(colName) != null) && (body.get(colName) != JsonValue.NULL)) {
           statement.setTimestamp(paramNumber, Timestamp.valueOf(body.getString(colName)));
@@ -172,7 +188,7 @@ public class Utils {
           statement.setNull(paramNumber, Types.VARCHAR);
         }
       }
-    } catch (java.lang.NumberFormatException e) {
+    } catch (java.lang.NumberFormatException | java.lang.ClassCastException e) {
       String message = String
           .format("Provided data: %s can't be cast to the column %s datatype", body.get(colName),
               colName);
@@ -230,8 +246,7 @@ public class Utils {
     return type != null && type.equals("boolean");
   }
 
-  public static Map<String, String> getColumnTypes(Connection connection, Boolean isOracle,
-      String tableName) {
+  public static Map<String, String> getColumnTypes(Connection connection, String tableName) {
     DatabaseMetaData md;
     ResultSet rs = null;
     Map<String, String> columnTypes = new HashMap<>();
@@ -243,6 +258,10 @@ public class Utils {
         tableName = tableName.split("\\.")[1];
       }
       rs = md.getColumns(null, schemaName, tableName, "%");
+      if (!rs.isBeforeFirst()){
+        // ResultSet is empty, maybe we need to use null as Catalog?
+        rs = md.getColumns(null, schemaName, tableName, "%");
+      }
       while (rs.next()) {
         String name = rs.getString("COLUMN_NAME").toLowerCase();
         String type = detectColumnType(rs.getInt("DATA_TYPE"), rs.getString("TYPE_NAME"));
@@ -255,7 +274,7 @@ public class Utils {
         try {
           rs.close();
         } catch (Exception e) {
-          LOGGER.error("Failed to close result set!");
+          LOGGER.error(e.toString());
         }
       }
     }
@@ -348,7 +367,7 @@ public class Utils {
           break;
       }
     } catch (SQLException | java.lang.NullPointerException e) {
-      LOGGER.error("Failed to get data by type");
+      LOGGER.error("Failed to get data by type", e);
       throw new RuntimeException(e);
     }
     return row;
@@ -373,14 +392,16 @@ public class Utils {
    * Converts table name according Engine Type
    *
    * @param configuration should contains tableName
-   * @param isOracle flag is Engine type equals `oracle`
+   * @param isOracleOrFirebird flag is Engine type equals `oracle`
    */
-  public static String getTableName(JsonObject configuration, boolean isOracle) {
+  public static String getTableName(JsonObject configuration, boolean isOracleOrFirebird) {
     if (configuration.containsKey(PROPERTY_TABLE_NAME)
         && getNonNullString(configuration, PROPERTY_TABLE_NAME).length() != 0) {
       String tableName = configuration.getString(PROPERTY_TABLE_NAME);
       if (tableName.contains(".")) {
-        tableName = isOracle ? tableName.split("\\.")[1].toUpperCase() : tableName.split("\\.")[1];
+        tableName = isOracleOrFirebird ? tableName.split("\\.")[1].toUpperCase() : tableName.split("\\.")[1];
+      } else {
+        tableName = isOracleOrFirebird ? tableName.toUpperCase() : tableName;
       }
       return tableName;
     } else {
@@ -426,10 +447,10 @@ public class Utils {
       while (resultSet.next()) {
         primaryKeysNames.add(resultSet.getString("COLUMN_NAME"));
       }
-      LOGGER.debug("Found primary key(s)");
+      LOGGER.debug("Found primary key(s): '{}'", primaryKeysNames);
     } catch (SQLException e) {
       String errorMessage = "Cannot get Primary Keys Names";
-      LOGGER.error(errorMessage);
+      LOGGER.error(errorMessage, e);
       throw new RuntimeException(errorMessage, e);
     }
     return primaryKeysNames;
@@ -473,7 +494,7 @@ public class Utils {
         isAutoincrement = resultSet.getString("IS_AUTOINCREMENT").equals("YES");
       } catch (SQLException e) {
         String errorMessage = "Cannot get property 'IS_AUTOINCREMENT'";
-        LOGGER.error(errorMessage);
+        LOGGER.error(errorMessage, e);
         throw new RuntimeException(errorMessage, e);
       }
     }
@@ -490,7 +511,7 @@ public class Utils {
       return resultSet.getString("IS_NULLABLE").equals("NO");
     } catch (SQLException e) {
       String errorMessage = "Cannot get property 'IS_NULLABLE'";
-      LOGGER.error(errorMessage);
+      LOGGER.error(errorMessage, e);
       throw new RuntimeException(errorMessage, e);
     }
   }
@@ -508,7 +529,7 @@ public class Utils {
           return resultSet.getString("IS_GENERATEDCOLUMN").equals("YES");
         } catch (SQLException e) {
           String errorMessage = "Cannot get property 'IS_GENERATEDCOLUMN'";
-          LOGGER.error(errorMessage);
+          LOGGER.error(errorMessage, e);
           throw new RuntimeException(errorMessage, e);
         }
       case "mssql":
@@ -516,7 +537,7 @@ public class Utils {
           return resultSet.getString("SS_IS_COMPUTED").equals("1");
         } catch (SQLException e) {
           String errorMessage = "Cannot get property 'SS_IS_COMPUTED'";
-          LOGGER.error(errorMessage);
+          LOGGER.error(errorMessage, e);
           throw new RuntimeException(errorMessage, e);
         }
       case "postgresql":
@@ -525,7 +546,7 @@ public class Utils {
           columnDef = resultSet.getString("COLUMN_DEF");
         } catch (SQLException e) {
           String errorMessage = "Cannot get property 'COLUMN_DEF'";
-          LOGGER.error(errorMessage);
+          LOGGER.error(errorMessage, e);
           throw new RuntimeException(errorMessage, e);
         }
         return (columnDef != null) && columnDef.contains("nextval(");

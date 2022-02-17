@@ -1,34 +1,20 @@
-## 2.5.1 (November 26, 2021)
-* Updated the sailor version to 3.3.6
-* Reduced the size of component icon file
+# JDBC Component
 
-## 2.5.0 (October 1, 2021)
+## 2.4.1 (May 15, 2020)
 
-* Add New Select action
-* Deprecate old Select action
+* Upgrade sailor to 3.1.0
 
-## 2.4.5 (September 1, 2021)
+## 2.4.0 (March 12, 2020) 
 
-Open only one connection pool per one execution and reuse it
+* Add Firebird RDBMS support
 
-## 2.4.4 (August 12, 2021)
+## 2.3.2 (October 21, 2019)
 
-* Remove dependencyCheckAnalyze task
+* Add rebound mechanism in case of deadlocks for actions: Insert, UpsertByPK, DeleteByPK
 
-## 2.4.3 (February 12, 2021)
-
-* Update sailor version to 3.3.2
-
-## 2.4.2 (November 20, 2020)
-
-* Update sailor version to 3.3.1
-* Annual audit of the component code to check if it exposes a sensitive data in the logs
-* Annual dependencies vulnerabilities audit
-
-## 2.4.0 (October 17, 2019)
+## 2.4.0 (october 17, 2019)
 
 * Add `Custom Query` action
-* Add rebound mechanism in case of deadlocks for actions: Insert, UpsertByPK, DeleteByPK
 
 ## 2.3.1 (September 30, 2019)
  

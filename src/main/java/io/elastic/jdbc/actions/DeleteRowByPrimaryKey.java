@@ -35,27 +35,11 @@ public class DeleteRowByPrimaryKey implements Function {
     StringBuilder primaryKey = new StringBuilder();
     StringBuilder primaryValue = new StringBuilder();
     Integer primaryKeysCount = 0;
-    String tableName = "";
-    String dbEngine = "";
     Boolean nullableResult = false;
-
-    if (configuration.containsKey(PROPERTY_TABLE_NAME)
-        && Utils.getNonNullString(configuration, PROPERTY_TABLE_NAME).length() != 0) {
-      tableName = configuration.getString(PROPERTY_TABLE_NAME);
-    } else if (snapshot.containsKey(PROPERTY_TABLE_NAME)
-        && Utils.getNonNullString(snapshot, PROPERTY_TABLE_NAME).length() != 0) {
-      tableName = snapshot.getString(PROPERTY_TABLE_NAME);
-    } else {
-      throw new RuntimeException("Table name is required field");
-    }
-
-    if (Utils.getNonNullString(configuration, PROPERTY_DB_ENGINE).length() != 0) {
-      dbEngine = configuration.getString(PROPERTY_DB_ENGINE);
-    } else if (Utils.getNonNullString(snapshot, PROPERTY_DB_ENGINE).length() != 0) {
-      dbEngine = snapshot.getString(PROPERTY_DB_ENGINE);
-    } else {
-      throw new RuntimeException("DB Engine is required field");
-    }
+    final String dbEngine = Utils.getDbEngine(configuration);
+    final boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
+    final boolean isFirebird = dbEngine.equals(Engines.FIREBIRDSQL.name().toLowerCase());
+    final String tableName = Utils.getTableName(configuration, (isOracle || isFirebird));
 
     if (Utils.getNonNullString(configuration, PROPERTY_NULLABLE_RESULT).equals("true")) {
       nullableResult = true;
@@ -64,39 +48,43 @@ public class DeleteRowByPrimaryKey implements Function {
     }
 
     for (Map.Entry<String, JsonValue> entry : body.entrySet()) {
+      LOGGER.info("{} = {}", entry.getKey(), entry.getValue());
       primaryKey.append(entry.getKey());
       primaryValue.append(entry.getValue());
       primaryKeysCount++;
     }
 
     if (primaryKeysCount == 1) {
-      try {
-        Connection connection = Utils.getConnection(configuration);
+      try (Connection connection = Utils.getConnection(configuration)) {
         LOGGER.info("Executing delete row by primary key action");
-        boolean isOracle = dbEngine.equals(Engines.ORACLE.name().toLowerCase());
-        Utils.columnTypes = Utils.getColumnTypes(connection, isOracle, tableName);
-        LOGGER.debug("Detected column types");
+        Utils.columnTypes = Utils.getColumnTypes(connection, tableName);
+        LOGGER.info("Detected column types: " + Utils.columnTypes);
         try {
           QueryFactory queryFactory = new QueryFactory();
           Query query = queryFactory.getQuery(dbEngine);
+          LOGGER.info("Lookup parameters: {} = {}", primaryKey.toString(), primaryValue.toString());
           query.from(tableName).lookup(primaryKey.toString(), primaryValue.toString());
           checkConfig(configuration);
           JsonObject row = query.executeLookup(connection, body);
 
+          for (Map.Entry<String, JsonValue> entry : configuration.entrySet()) {
+            LOGGER.info("Key = " + entry.getKey() + " Value = " + entry.getValue());
+          }
+
           if (row.size() != 0) {
             int result = query.executeDelete(connection, body);
             if (result == 1) {
-              LOGGER.info("Emitting data...");
+              LOGGER.info("Emitting data {}", row);
               parameters.getEventEmitter().emitData(new Message.Builder().body(row).build());
             } else {
-              LOGGER.error("Unexpected result");
+              LOGGER.info("Unexpected result");
               throw new RuntimeException("Unexpected result");
             }
           } else if (row.size() == 0 && nullableResult) {
             JsonObject emptyRow = Json.createObjectBuilder()
                 .add("empty dataset", "nothing to delete")
                 .build();
-            LOGGER.info("Emitting data...");
+            LOGGER.info("Emitting data {}", emptyRow);
             parameters.getEventEmitter().emitData(new Message.Builder().body(emptyRow).build());
           } else if (row.size() == 0 && !nullableResult) {
             LOGGER.info("Empty response. Error message will be returned");
@@ -107,24 +95,23 @@ public class DeleteRowByPrimaryKey implements Function {
               .add(PROPERTY_ID_COLUMN, primaryKey.toString())
               .add(PROPERTY_LOOKUP_VALUE, primaryValue.toString())
               .add(PROPERTY_NULLABLE_RESULT, nullableResult).build();
-          LOGGER.info("Emitting new snapshot");
+          LOGGER.info("Emitting new snapshot {}", snapshot.toString());
           parameters.getEventEmitter().emitSnapshot(snapshot);
         } catch (SQLException e) {
           if (Utils.reboundIsEnabled(configuration)) {
             List<String> states = Utils.reboundDbState.get(dbEngine);
             if (states.contains(e.getSQLState())) {
-              LOGGER.warn("Starting rebound max iter: {}, rebound ttl: {} because of a SQL Exception",
-                  System.getenv("ELASTICIO_REBOUND_LIMIT"),
-                  System.getenv("ELASTICIO_REBOUND_INITIAL_EXPIRATION"));
+              LOGGER.warn("Starting rebound max iter: {}, rebound ttl: {}. Reason: {}", System.getenv("ELASTICIO_REBOUND_LIMIT"),
+                  System.getenv("ELASTICIO_REBOUND_INITIAL_EXPIRATION"), e.getMessage());
               parameters.getEventEmitter().emitRebound(e);
               return;
             }
           }
-          LOGGER.error("Failed to make request");
+          LOGGER.error("Failed to make request", e.toString());
           throw new RuntimeException(e);
         }
       } catch (SQLException e) {
-        LOGGER.error("Failed to close connection");
+        LOGGER.error("Failed to close connection", e.toString());
       }
     } else {
       LOGGER.error("Error: Should be one Primary Key");
