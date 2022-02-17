@@ -1,3 +1,6 @@
+## 2.5.2 (February 25, 2022)
+* Updated the sailor version to 3.3.8
+
 ## 2.5.1 (November 26, 2021)
 * Updated the sailor version to 3.3.6
 * Reduced the size of component icon file

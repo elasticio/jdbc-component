@@ -62,7 +62,7 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.10.1'
     compile 'com.google.code.gson:gson:2.8.6'
     compile 'com.microsoft.sqlserver:mssql-jdbc:6.4.0.jre8'
-    compile 'io.elastic:sailor-jvm:3.3.6'
+    compile 'io.elastic:sailor-jvm:3.3.8-SNAPSHOT'
     compile 'mysql:mysql-connector-java:8.0.20'
     compile 'org.postgresql:postgresql:42.2.18'
 
