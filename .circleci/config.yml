@@ -79,7 +79,6 @@ jobs:
       - checkout
       - restore_cache:
           key: gradle-{{ checksum "build.gradle" }}
-
       - run: ./gradlew downloadDependencies --daemon
       - save_cache:
           key: gradle-{{ checksum "build.gradle" }}

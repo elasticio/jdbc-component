@@ -1,3 +1,6 @@
+## 2.5.3 (April 22, 2022)
+* Add an automated vulnerability check
+
 ## 2.5.2 (April 08, 2022)
 * Updated the Sailor version to 3.3.9
 
