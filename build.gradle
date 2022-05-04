@@ -80,6 +80,7 @@ dependencyCheck {
     // It should be configured to 7 (high and critical), but so far is not possible as 'axis' library
     // and log4j issues which does not have any updates that solve the problem
     failBuildOnCVSS = 7
+    suppressionFile='./dependencyCheck-suppression.xml'
 }
 
 buildscript {
