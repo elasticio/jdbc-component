@@ -3,6 +3,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
+apply plugin: org.owasp.dependencycheck.gradle.DependencyCheckPlugin
 
 sourceSets {
     integrationTest {
@@ -59,16 +60,36 @@ dependencies {
     // The following 3 dependencies are to workaround this: https://github.com/elasticio/sailor-jvm/issues/59
     compile 'com.fasterxml.jackson.core:jackson-core:2.10.1'
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.10.1'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.10.1'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.13.2.2'
     compile 'com.google.code.gson:gson:2.8.6'
     compile 'com.microsoft.sqlserver:mssql-jdbc:6.4.0.jre8'
     compile 'io.elastic:sailor-jvm:3.3.9'
-    compile 'mysql:mysql-connector-java:8.0.20'
-    compile 'org.postgresql:postgresql:42.2.18'
+    compile 'mysql:mysql-connector-java:8.0.29'
+    compile 'org.postgresql:postgresql:42.2.25'
 
     testCompile 'io.github.cdimascio:java-dotenv:5.1.0'
     testCompile 'org.hsqldb:hsqldb:2.0.0'
     testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
+}
+
+check.dependsOn dependencyCheckAnalyze
+
+dependencyCheck {
+    format = 'ALL'
+    // Dependency Check script will fail in case there are critical (9.0-10.0) vulnerabilities.
+    // It should be configured to 7 (high and critical), but so far is not possible as 'axis' library
+    // and log4j issues which does not have any updates that solve the problem
+    failBuildOnCVSS = 7
+    suppressionFile='./dependencyCheck-suppression.xml'
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.owasp:dependency-check-gradle:6.0.3'
+    }
 }
 
 wrapper {
