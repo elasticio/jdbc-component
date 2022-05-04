@@ -64,7 +64,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.6'
     compile 'com.microsoft.sqlserver:mssql-jdbc:6.4.0.jre8'
     compile 'io.elastic:sailor-jvm:3.3.9'
-    compile 'mysql:mysql-connector-java:8.0.22'
+    compile 'mysql:mysql-connector-java:8.0.29'
     compile 'org.postgresql:postgresql:42.2.25'
 
     testCompile 'io.github.cdimascio:java-dotenv:5.1.0'
