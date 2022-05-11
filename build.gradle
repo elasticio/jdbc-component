@@ -3,7 +3,18 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
-apply plugin: org.owasp.dependencycheck.gradle.DependencyCheckPlugin
+
+if (hasProperty('runWithDependencyCheck')) {
+    apply plugin: org.owasp.dependencycheck.gradle.DependencyCheckPlugin
+
+    check.dependsOn dependencyCheckAnalyze
+
+    dependencyCheck {
+        format = 'HTML'
+        failBuildOnCVSS = 7
+        suppressionFile='./dependencyCheck-suppression.xml'
+    }
+}
 
 sourceSets {
     integrationTest {
@@ -72,23 +83,12 @@ dependencies {
     testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
 }
 
-check.dependsOn dependencyCheckAnalyze
-
-dependencyCheck {
-    format = 'ALL'
-    // Dependency Check script will fail in case there are critical (9.0-10.0) vulnerabilities.
-    // It should be configured to 7 (high and critical), but so far is not possible as 'axis' library
-    // and log4j issues which does not have any updates that solve the problem
-    failBuildOnCVSS = 7
-    suppressionFile='./dependencyCheck-suppression.xml'
-}
-
 buildscript {
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.owasp:dependency-check-gradle:6.0.3'
+        classpath 'org.owasp:dependency-check-gradle:7.1.0.1'
     }
 }
 
