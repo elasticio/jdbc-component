@@ -1,3 +1,6 @@
+## 2.5.5 (May 20, 2022)
+* Set default `connectionTimeZone` parameter for MYSQL to `SERVER`
+
 ## 2.5.4 (May 11, 2022)
 * Made an automated vulnerability check run in CI/CD
 
