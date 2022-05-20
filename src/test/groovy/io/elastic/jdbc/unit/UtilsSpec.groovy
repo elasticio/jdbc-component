@@ -16,6 +16,7 @@ class UtilsSpec extends Specification {
         .add("password", "password")
         .build();
     Properties expectedProperties = new Properties();
+    expectedProperties.setProperty("connectionTimeZone", "SERVER")
     expectedProperties.setProperty("user", "user")
     expectedProperties.setProperty("password", "password")
     Properties properties = Utils.getConfigurationProperties(config, engineType)
@@ -31,6 +32,7 @@ class UtilsSpec extends Specification {
         .add("configurationProperties", "ssl=true")
         .build();
     Properties expectedProperties = new Properties();
+    expectedProperties.setProperty("connectionTimeZone", "SERVER")
     expectedProperties.setProperty("user", "user")
     expectedProperties.setProperty("password", "password")
     expectedProperties.setProperty("ssl", "true")
@@ -47,6 +49,7 @@ class UtilsSpec extends Specification {
         .add("configurationProperties", "ssl=true&serverTimezone=UTC")
         .build();
     Properties expectedProperties = new Properties();
+    expectedProperties.setProperty("connectionTimeZone", "SERVER")
     expectedProperties.setProperty("user", "user")
     expectedProperties.setProperty("password", "password")
     expectedProperties.setProperty("ssl", "true")

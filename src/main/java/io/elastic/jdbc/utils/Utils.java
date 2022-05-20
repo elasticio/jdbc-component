@@ -101,6 +101,9 @@ public class Utils {
         throw new RuntimeException(e);
       }
     }
+    if (properties.getProperty("connectionTimeZone") == null && engineType == Engines.MYSQL) {
+      properties.setProperty("connectionTimeZone", "SERVER");
+    }
     properties.setProperty("user", user);
     properties.setProperty("password", password);
     return properties;
