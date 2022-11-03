@@ -1,5 +1,6 @@
 ## 2.5.6 (November 04, 2022)
 * Added limitations in readme about custom timezone behavior
+* Update Sailor version to 3.5.0
 
 ## 2.5.5 (May 20, 2022)
 * Set default `connectionTimeZone` parameter for MYSQL to `SERVER`

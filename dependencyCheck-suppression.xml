@@ -11,6 +11,14 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
+      file name: protobuf-java-3.19.4.jar
+      ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:maven/com\.google\.protobuf/protobuf\-java@.*$</packageUrl>
+    <cve>CVE-2022-3171</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
       file name: logback-json-classic-0.1.5.jar
       ]]>
     </notes>
