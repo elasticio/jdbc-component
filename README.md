@@ -330,6 +330,7 @@ Please use [**Select action**](#select-action) instead.
  - ``Oracle``: 61000
  - ``MSSQL``: 40001
  - ``PostgreSQL``:  40P01
+ 7. If your database server configured to custom timezone (differ from UTC) JDBC driver may convert time appropriate - for example if you want to use `Insert action` with `MySQL` which is configured to `+2:00` time zone and provide `2022-01-01 15:00:00` as value to some datetime field in database it will be saved as `2022-01-01 17:00:00`.
 
 ## License
 Apache-2.0 © [elastic.io GmbH](https://www.elastic.io "elastic.io GmbH")
