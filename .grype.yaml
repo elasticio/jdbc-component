@@ -1,0 +1,4 @@
+ignore:
+  - package:
+      name: protobuf-java
+      version: 3.19.4
