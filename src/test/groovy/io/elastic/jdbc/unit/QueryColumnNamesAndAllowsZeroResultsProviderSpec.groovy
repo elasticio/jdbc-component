@@ -3,9 +3,9 @@ package io.elastic.jdbc.unit
 import io.elastic.jdbc.providers.QueryColumnNamesAndAllowsZeroResultsProvider
 import spock.lang.Specification
 
-import javax.json.Json
-import javax.json.JsonObject
-import javax.json.JsonObjectBuilder
+import jakarta.json.Json
+import jakarta.json.JsonObject
+import jakarta.json.JsonObjectBuilder
 
 class QueryColumnNamesAndAllowsZeroResultsProviderSpec extends Specification {
 

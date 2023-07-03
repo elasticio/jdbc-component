@@ -6,8 +6,8 @@ import org.junit.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
-import javax.json.Json
-import javax.json.JsonObject
+import jakarta.json.Json
+import jakarta.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 

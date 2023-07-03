@@ -3,9 +3,9 @@ package io.elastic.jdbc.integration.providers.primary_column_names_provider
 import io.elastic.jdbc.providers.PrimaryColumnNamesProvider
 import spock.lang.*
 
-import javax.json.Json
-import javax.json.JsonObject
-import javax.json.JsonObjectBuilder
+import jakarta.json.Json
+import jakarta.json.JsonObject
+import jakarta.json.JsonObjectBuilder
 import java.sql.Connection
 import java.sql.DriverManager
 

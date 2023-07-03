@@ -4,8 +4,8 @@ import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.providers.PrimaryColumnNamesProvider
 import spock.lang.*
 
-import javax.json.JsonObject
-import javax.json.JsonObjectBuilder
+import jakarta.json.JsonObject
+import jakarta.json.JsonObjectBuilder
 import java.sql.Connection
 import java.sql.DriverManager
 

@@ -7,7 +7,7 @@ import io.elastic.api.Message
 import io.elastic.jdbc.triggers.SelectTrigger
 import spock.lang.*
 
-import javax.json.JsonObject
+import jakarta.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 import java.time.LocalDateTime

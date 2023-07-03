@@ -20,7 +20,7 @@ import java.util.Map;
 public class ColumnNamesProviderOld implements DynamicMetadataProvider, SelectModelProvider {
     private static final Logger logger = LoggerFactory.getLogger(ColumnNamesProviderOld.class);
 
-    public javax.json.JsonObject getSelectModel(javax.json.JsonObject configuration) {
+    public jakarta.json.JsonObject getSelectModel(jakarta.json.JsonObject configuration) {
         JsonObject result = new JsonObject();
         JsonObject properties = SailorVersionsAdapter.javaxToGson(getColumns(configuration));
         for (Map.Entry<String, JsonElement> entry : properties.entrySet()) {
@@ -37,7 +37,7 @@ public class ColumnNamesProviderOld implements DynamicMetadataProvider, SelectMo
      * @return
      */
 
-    public javax.json.JsonObject getMetaModel(javax.json.JsonObject configuration) {
+    public jakarta.json.JsonObject getMetaModel(jakarta.json.JsonObject configuration) {
         JsonObject result = new JsonObject();
         JsonObject inMetadata = new JsonObject();
         JsonObject properties = SailorVersionsAdapter.javaxToGson(getColumns(configuration));
@@ -48,7 +48,7 @@ public class ColumnNamesProviderOld implements DynamicMetadataProvider, SelectMo
         return SailorVersionsAdapter.gsonToJavax(result);
     }
 
-    public javax.json.JsonObject getColumns(javax.json.JsonObject configuration) {
+    public jakarta.json.JsonObject getColumns(jakarta.json.JsonObject configuration) {
         if (SailorVersionsAdapter.javaxToGson(configuration).get("tableName") == null ||
                 SailorVersionsAdapter.javaxToGson(configuration).get("tableName").getAsString().isEmpty()) {
             throw new RuntimeException("Table name is required");

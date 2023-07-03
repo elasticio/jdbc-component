@@ -19,7 +19,7 @@ public class TableNameProviderOld implements SelectModelProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(TableNameProviderOld.class);
 
-    public javax.json.JsonObject getSelectModel(javax.json.JsonObject configuration) {
+    public jakarta.json.JsonObject getSelectModel(jakarta.json.JsonObject configuration) {
         logger.info("About to retrieve table name");
 
         JsonObject result = new JsonObject();
