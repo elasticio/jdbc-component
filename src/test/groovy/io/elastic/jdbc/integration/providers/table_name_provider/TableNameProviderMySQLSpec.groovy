@@ -5,8 +5,8 @@ import io.elastic.jdbc.providers.TableNameProvider
 import spock.lang.Shared
 import spock.lang.Specification
 
-import javax.json.JsonObject
-import javax.json.JsonObjectBuilder
+import jakarta.json.JsonObject
+import jakarta.json.JsonObjectBuilder
 import java.sql.Connection
 import java.sql.DriverManager
 

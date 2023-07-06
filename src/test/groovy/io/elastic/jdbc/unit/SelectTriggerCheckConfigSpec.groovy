@@ -3,8 +3,8 @@ package io.elastic.jdbc.unit
 import spock.lang.Shared
 import spock.lang.Specification
 
-import javax.json.Json
-import javax.json.JsonObjectBuilder
+import jakarta.json.Json
+import jakarta.json.JsonObjectBuilder
 import io.elastic.jdbc.triggers.SelectTrigger
 
 class SelectTriggerCheckConfigSpec extends Specification {

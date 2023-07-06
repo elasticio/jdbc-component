@@ -5,7 +5,7 @@ import org.junit.Test
 import spock.lang.Shared
 import spock.lang.Specification
 
-import javax.json.JsonObject
+import jakarta.json.JsonObject
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException

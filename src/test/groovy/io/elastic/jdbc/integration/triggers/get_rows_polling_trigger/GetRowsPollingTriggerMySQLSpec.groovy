@@ -8,9 +8,9 @@ import io.elastic.jdbc.TestUtils
 import io.elastic.jdbc.triggers.GetRowsPollingTrigger
 import spock.lang.*
 
-import javax.json.Json
-import javax.json.JsonObject
-import javax.json.JsonObjectBuilder
+import jakarta.json.Json
+import jakarta.json.JsonObject
+import jakarta.json.JsonObjectBuilder
 import java.sql.Connection
 import java.sql.DriverManager
 

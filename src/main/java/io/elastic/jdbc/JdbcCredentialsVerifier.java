@@ -5,7 +5,7 @@ import io.elastic.api.InvalidCredentialsException;
 import io.elastic.jdbc.utils.Utils;
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
