@@ -4,7 +4,7 @@ ignore:
       version: 3.19.4
   - package:
       name: jackson-databind
-      version: 2.13.4.2
+      version: 2.14.2
   - package:
       name: guava
       version: 30.1-jre
