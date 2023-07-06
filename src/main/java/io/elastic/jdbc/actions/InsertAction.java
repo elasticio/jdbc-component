@@ -10,8 +10,8 @@ import io.elastic.jdbc.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.Json;
-import javax.json.JsonObject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;

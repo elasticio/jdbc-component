@@ -3,9 +3,9 @@ package io.elastic.jdbc.unit
 import io.elastic.jdbc.providers.QueryColumnNamesProvider
 import spock.lang.*
 
-import javax.json.Json
-import javax.json.JsonObject
-import javax.json.JsonObjectBuilder
+import jakarta.json.Json
+import jakarta.json.JsonObject
+import jakarta.json.JsonObjectBuilder
 
 class QueryColumnNamesProviderSpec extends Specification {
 

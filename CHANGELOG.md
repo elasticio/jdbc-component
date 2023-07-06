@@ -1,3 +1,6 @@
+## 2.5.7 (July 07, 2023)
+* Bumped Sailor to 4.0.1
+
 ## 2.5.6 (November 04, 2022)
 * Added limitations in readme about custom timezone behavior
 * Update Sailor version to 3.5.0
