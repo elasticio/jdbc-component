@@ -30,7 +30,14 @@ public class NewSelectAction implements Function {
   @Override
   public void execute(ExecutionParameters parameters) {
     JsonObject body = parameters.getMessage().getBody();
+    JsonObject passthrough = parameters.getMessage().getPassthrough();
     final JsonObject configuration = parameters.getConfiguration();
+    System.out.println("Pass===============================");
+    System.out.println(passthrough.toString());
+    System.out.println("Pass===============================");
+    System.out.println("Body===============================");
+    System.out.println(body.toString());
+    System.out.println("Body===============================");
     EventEmitter eventEmitter = parameters.getEventEmitter();
     checkConfig(configuration);
     String dbEngine = configuration.getString("dbEngine");

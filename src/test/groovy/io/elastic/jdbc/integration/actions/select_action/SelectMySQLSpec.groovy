@@ -4,8 +4,7 @@ import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
 import io.elastic.jdbc.TestUtils
-import io.elastic.jdbc.actions.SelectAction
-import spock.lang.Ignore
+import io.elastic.jdbc.actions.NewSelectAction
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -47,7 +46,7 @@ class SelectMySQLSpec extends Specification {
   @Shared
   EventEmitter emitter
   @Shared
-  SelectAction action
+  NewSelectAction action
 
   def setupSpec() {
     connection = DriverManager.getConnection(connectionString, user, password)
@@ -58,30 +57,75 @@ class SelectMySQLSpec extends Specification {
   }
 
   def createAction() {
-    action = new SelectAction()
+    action = new NewSelectAction()
   }
 
   def runAction(JsonObject config, JsonObject body, JsonObject snapshot) {
-    Message msg = new Message.Builder().body(body).build()
+    String passthrough = "{\n" +
+            "  \"id\": \"a405c0da-cf68-4196-a6b7-ab58998bc632\",\n" +
+            "  \"attachments\": {},\n" +
+            "  \"body\": {\n" +
+            "    \"EmpID\": 8,\n" +
+            "    \"EmpName\": \"Alex Rid\",\n" +
+            "    \"Designation\": \"QA\",\n" +
+            "    \"Department\": \"IT\",\n" +
+            "    \"JoiningDate\": \"2019-08-27\",\n" +
+            "    \"ColumnTIMESTAMP\": \"2019-05-03 00:00:01.0\"\n" +
+            "  },\n" +
+            "  \"headers\": {},\n" +
+            "  \"passthrough\": {\n" +
+            "    \"step_3\": {\n" +
+            "      \"id\": \"a405c0da-cf68-4196-a6b7-ab58998bc632\",\n" +
+            "      \"attachments\": {},\n" +
+            "      \"body\": {\n" +
+            "        \"EmpID\": 8,\n" +
+            "        \"EmpName\": \"Alex Rid\",\n" +
+            "        \"Designation\": \"QA\",\n" +
+            "        \"Department\": \"IT\",\n" +
+            "        \"JoiningDate\": \"2019-08-27\",\n" +
+            "        \"ColumnTIMESTAMP\": \"2019-05-03 00:00:01.0\"\n" +
+            "      },\n" +
+            "      \"headers\": {},\n" +
+            "      \"stepId\": \"step_3\"\n" +
+            "    },\n" +
+            "    \"step_2\": {\n" +
+            "      \"body\": {}\n" +
+            "    },\n" +
+            "    \"step_1\": {\n" +
+            "      \"body\": [\n" +
+            "        {\n" +
+            "          \"a\": 1\n" +
+            "        }\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  },\n" +
+            "  \"stepId\": \"step_3\"\n" +
+            "}";
+    jakarta.json.JsonObject passthroughJson = Json.createReader(new StringReader(passthrough)).readObject();
+    Message msg = new Message.Builder()
+            .body(body)
+            .passthrough(passthroughJson)
+            .build()
     errorCallback = Mock(EventEmitter.Callback)
     snapshotCallback = Mock(EventEmitter.Callback)
     dataCallback = Mock(EventEmitter.Callback)
     reboundCallback = Mock(EventEmitter.Callback)
     onHttpReplyCallback = Mock(EventEmitter.Callback)
     emitter = new EventEmitter.Builder()
-        .onData(dataCallback)
-        .onSnapshot(snapshotCallback)
-        .onError(errorCallback)
-        .onRebound(reboundCallback)
-        .onHttpReplyCallback(onHttpReplyCallback).build()
+            .onData(dataCallback)
+            .onSnapshot(snapshotCallback)
+            .onError(errorCallback)
+            .onRebound(reboundCallback)
+            .onHttpReplyCallback(onHttpReplyCallback).build()
     ExecutionParameters params = new ExecutionParameters(msg, emitter, config, snapshot)
     action.execute(params);
   }
 
   def getStarsConfig() {
     JsonObject config = TestUtils.getMysqlConfigurationBuilder()
-        .add("sqlQuery", "SELECT * from stars where @id:number =id AND name=@name")
-        .build()
+//        .add("sqlQuery", "SELECT * from stars where @id:number =id AND name=@name")
+            .add("sqlQuery", "SELECT * from stars")
+            .build()
     return config;
   }
 
@@ -101,13 +145,55 @@ class SelectMySQLSpec extends Specification {
 
   def "one select"() {
     prepareStarsTable();
-    JsonObject snapshot = Json.createObjectBuilder().build();
-    JsonObject body = Json.createObjectBuilder()
-        .add("id", 1)
-        .add("name", "Hello")
-        .build()
+//    String passthrough = "{\n" +
+//            "  \"id\": \"a405c0da-cf68-4196-a6b7-ab58998bc632\",\n" +
+//            "  \"attachments\": {},\n" +
+//            "  \"body\": {\n" +
+//            "    \"EmpID\": 8,\n" +
+//            "    \"EmpName\": \"Alex Rid\",\n" +
+//            "    \"Designation\": \"QA\",\n" +
+//            "    \"Department\": \"IT\",\n" +
+//            "    \"JoiningDate\": \"2019-08-27\",\n" +
+//            "    \"ColumnTIMESTAMP\": \"2019-05-03 00:00:01.0\"\n" +
+//            "  },\n" +
+//            "  \"headers\": {},\n" +
+//            "  \"passthrough\": {\n" +
+//            "    \"step_3\": {\n" +
+//            "      \"id\": \"a405c0da-cf68-4196-a6b7-ab58998bc632\",\n" +
+//            "      \"attachments\": {},\n" +
+//            "      \"body\": {\n" +
+//            "        \"EmpID\": 8,\n" +
+//            "        \"EmpName\": \"Alex Rid\",\n" +
+//            "        \"Designation\": \"QA\",\n" +
+//            "        \"Department\": \"IT\",\n" +
+//            "        \"JoiningDate\": \"2019-08-27\",\n" +
+//            "        \"ColumnTIMESTAMP\": \"2019-05-03 00:00:01.0\"\n" +
+//            "      },\n" +
+//            "      \"headers\": {},\n" +
+//            "      \"stepId\": \"step_3\"\n" +
+//            "    },\n" +
+//            "    \"step_2\": {\n" +
+//            "      \"body\": {}\n" +
+//            "    },\n" +
+//            "    \"step_1\": {\n" +
+//            "      \"body\": [\n" +
+//            "        {\n" +
+//            "          \"a\": 1\n" +
+//            "        }\n" +
+//            "      ]\n" +
+//            "    }\n" +
+//            "  },\n" +
+//            "  \"stepId\": \"step_3\"\n" +
+//            "}";
+//    jakarta.json.JsonObject jsonBody = Json.createReader(new StringReader(body)).readObject();
+    jakarta.json.JsonObject jsonBody = Json.createReader(new StringReader("{}")).readObject();
+    jakarta.json.JsonObject snapshot = Json.createObjectBuilder().build();
+//    JsonObject body = Json.createObjectBuilder()
+//        .add("id", 1)
+//        .add("name", "Hello")
+//        .build()
     when:
-    runAction(getStarsConfig(), body, snapshot)
+    runAction(getStarsConfig(), jsonBody, snapshot)
     then:
     0 * errorCallback.receive(_)
   }
