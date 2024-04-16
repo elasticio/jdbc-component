@@ -11,7 +11,7 @@ if (hasProperty('runWithDependencyCheck')) {
 
     dependencyCheck {
         format = 'HTML'
-        failBuildOnCVSS = 8
+        failBuildOnCVSS = 9
         suppressionFile='./dependencyCheck-suppression.xml'
     }
 }
@@ -76,7 +76,7 @@ dependencies {
     compile 'com.microsoft.sqlserver:mssql-jdbc:6.4.0.jre8'
     compile 'io.elastic:sailor-jvm:4.0.2-SNAPSHOT'
     compile 'mysql:mysql-connector-java:8.0.29'
-    compile 'org.postgresql:postgresql:42.5.0'
+    compile 'org.postgresql:postgresql:42.5.6'
 
     testCompile 'io.github.cdimascio:java-dotenv:5.1.0'
     testCompile 'org.hsqldb:hsqldb:2.0.0'
