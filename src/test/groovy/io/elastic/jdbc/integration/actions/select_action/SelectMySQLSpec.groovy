@@ -4,8 +4,7 @@ import io.elastic.api.EventEmitter
 import io.elastic.api.ExecutionParameters
 import io.elastic.api.Message
 import io.elastic.jdbc.TestUtils
-import io.elastic.jdbc.actions.SelectAction
-import spock.lang.Ignore
+import io.elastic.jdbc.actions.NewSelectAction
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -47,7 +46,7 @@ class SelectMySQLSpec extends Specification {
   @Shared
   EventEmitter emitter
   @Shared
-  SelectAction action
+  NewSelectAction action
 
   def setupSpec() {
     connection = DriverManager.getConnection(connectionString, user, password)
@@ -58,22 +57,24 @@ class SelectMySQLSpec extends Specification {
   }
 
   def createAction() {
-    action = new SelectAction()
+    action = new NewSelectAction()
   }
 
   def runAction(JsonObject config, JsonObject body, JsonObject snapshot) {
-    Message msg = new Message.Builder().body(body).build()
+    Message msg = new Message.Builder()
+            .body(body)
+            .build()
     errorCallback = Mock(EventEmitter.Callback)
     snapshotCallback = Mock(EventEmitter.Callback)
     dataCallback = Mock(EventEmitter.Callback)
     reboundCallback = Mock(EventEmitter.Callback)
     onHttpReplyCallback = Mock(EventEmitter.Callback)
     emitter = new EventEmitter.Builder()
-        .onData(dataCallback)
-        .onSnapshot(snapshotCallback)
-        .onError(errorCallback)
-        .onRebound(reboundCallback)
-        .onHttpReplyCallback(onHttpReplyCallback).build()
+            .onData(dataCallback)
+            .onSnapshot(snapshotCallback)
+            .onError(errorCallback)
+            .onRebound(reboundCallback)
+            .onHttpReplyCallback(onHttpReplyCallback).build()
     ExecutionParameters params = new ExecutionParameters(msg, emitter, config, snapshot)
     action.execute(params);
   }
@@ -81,7 +82,7 @@ class SelectMySQLSpec extends Specification {
   def getStarsConfig() {
     JsonObject config = TestUtils.getMysqlConfigurationBuilder()
         .add("sqlQuery", "SELECT * from stars where @id:number =id AND name=@name")
-        .build()
+            .build()
     return config;
   }
 
