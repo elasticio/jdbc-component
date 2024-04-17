@@ -61,11 +61,8 @@ class SelectMySQLSpec extends Specification {
   }
 
   def runAction(JsonObject config, JsonObject body, JsonObject snapshot) {
-    String passthrough = "{\"step_2\":{\"body\":{}},\"step_1\":{\"body\":[{\"a\":1}]}}";
-    jakarta.json.JsonObject passthroughJson = Json.createReader(new StringReader(passthrough)).readObject();
     Message msg = new Message.Builder()
             .body(body)
-            .passthrough(passthroughJson)
             .build()
     errorCallback = Mock(EventEmitter.Callback)
     snapshotCallback = Mock(EventEmitter.Callback)
@@ -84,8 +81,7 @@ class SelectMySQLSpec extends Specification {
 
   def getStarsConfig() {
     JsonObject config = TestUtils.getMysqlConfigurationBuilder()
-//        .add("sqlQuery", "SELECT * from stars where @id:number =id AND name=@name")
-            .add("sqlQuery", "SELECT * from stars")
+        .add("sqlQuery", "SELECT * from stars where @id:number =id AND name=@name")
             .build()
     return config;
   }
@@ -106,55 +102,13 @@ class SelectMySQLSpec extends Specification {
 
   def "one select"() {
     prepareStarsTable();
-//    String passthrough = "{\n" +
-//            "  \"id\": \"a405c0da-cf68-4196-a6b7-ab58998bc632\",\n" +
-//            "  \"attachments\": {},\n" +
-//            "  \"body\": {\n" +
-//            "    \"EmpID\": 8,\n" +
-//            "    \"EmpName\": \"Alex Rid\",\n" +
-//            "    \"Designation\": \"QA\",\n" +
-//            "    \"Department\": \"IT\",\n" +
-//            "    \"JoiningDate\": \"2019-08-27\",\n" +
-//            "    \"ColumnTIMESTAMP\": \"2019-05-03 00:00:01.0\"\n" +
-//            "  },\n" +
-//            "  \"headers\": {},\n" +
-//            "  \"passthrough\": {\n" +
-//            "    \"step_3\": {\n" +
-//            "      \"id\": \"a405c0da-cf68-4196-a6b7-ab58998bc632\",\n" +
-//            "      \"attachments\": {},\n" +
-//            "      \"body\": {\n" +
-//            "        \"EmpID\": 8,\n" +
-//            "        \"EmpName\": \"Alex Rid\",\n" +
-//            "        \"Designation\": \"QA\",\n" +
-//            "        \"Department\": \"IT\",\n" +
-//            "        \"JoiningDate\": \"2019-08-27\",\n" +
-//            "        \"ColumnTIMESTAMP\": \"2019-05-03 00:00:01.0\"\n" +
-//            "      },\n" +
-//            "      \"headers\": {},\n" +
-//            "      \"stepId\": \"step_3\"\n" +
-//            "    },\n" +
-//            "    \"step_2\": {\n" +
-//            "      \"body\": {}\n" +
-//            "    },\n" +
-//            "    \"step_1\": {\n" +
-//            "      \"body\": [\n" +
-//            "        {\n" +
-//            "          \"a\": 1\n" +
-//            "        }\n" +
-//            "      ]\n" +
-//            "    }\n" +
-//            "  },\n" +
-//            "  \"stepId\": \"step_3\"\n" +
-//            "}";
-//    jakarta.json.JsonObject jsonBody = Json.createReader(new StringReader(body)).readObject();
-    jakarta.json.JsonObject jsonBody = Json.createReader(new StringReader("{}")).readObject();
-    jakarta.json.JsonObject snapshot = Json.createObjectBuilder().build();
-//    JsonObject body = Json.createObjectBuilder()
-//        .add("id", 1)
-//        .add("name", "Hello")
-//        .build()
+    JsonObject snapshot = Json.createObjectBuilder().build();
+    JsonObject body = Json.createObjectBuilder()
+        .add("id", 1)
+        .add("name", "Hello")
+        .build()
     when:
-    runAction(getStarsConfig(), jsonBody, snapshot)
+    runAction(getStarsConfig(), body, snapshot)
     then:
     0 * errorCallback.receive(_)
   }
