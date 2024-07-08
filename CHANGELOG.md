@@ -1,5 +1,7 @@
-## 2.5.8 (July 02, 2024)
+## 2.5.8 (July 09, 2024)
 * Bumped Sailor to 4.0.2
+* Bumped Postgresql library to 42.5.5
+* Bumped MySQL library to 8.4.0
 
 ## 2.5.7 (July 07, 2023)
 * Bumped Sailor to 4.0.1
