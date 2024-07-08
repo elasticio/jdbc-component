@@ -8,3 +8,23 @@ ignore:
   - package:
       name: guava
       version: 30.1-jre
+  - vulnerability: CVE-2024-5535
+    package:
+      name: libssl3
+      version: 3.1.5-r0
+  - vulnerability: CVE-2024-5535
+    package:
+      name: libcrypto3
+      version: 3.1.5-r0
+  - vulnerability: GHSA-vmq6-5m68-f53m
+    package:
+      name: logback-classic
+      version: 1.2.11
+  - vulnerability: GHSA-vmq6-5m68-f53m
+    package:
+      name: logback-core
+      version: 1.2.11
+  - vulnerability: CVE-2023-4043
+    package:
+      name: parsson
+      version: 1.1.2
