@@ -1,3 +1,6 @@
+## 2.5.9 (August 01, 2024)
+* Bumped Sailor to 4.0.3
+* 
 ## 2.5.8 (July 09, 2024)
 * Bumped Sailor to 4.0.2
 * Bumped Postgresql library to 42.5.5
