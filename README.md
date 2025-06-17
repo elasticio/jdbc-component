@@ -164,6 +164,12 @@ FROM users
 WHERE userid = @id:number AND language = @lang:string
 ```
 
+You can use aliases too:
+```sql
+SELECT users.id AS internal_id
+FROM internal_users users
+```
+
 Following types are supported:
  * ``string``
  * ``number``
