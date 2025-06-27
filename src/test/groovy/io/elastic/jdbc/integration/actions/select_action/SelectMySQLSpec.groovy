@@ -85,6 +85,13 @@ class SelectMySQLSpec extends Specification {
     return config;
   }
 
+  def getAliasStarsConfig() {
+    JsonObject config = TestUtils.getMysqlConfigurationBuilder()
+        .add("sqlQuery", "SELECT strs.id AS strsid from stars strs")
+        .build()
+    return config;
+  }
+
   def prepareStarsTable() {
     String sql = "DROP TABLE IF EXISTS stars"
     connection.createStatement().execute(sql);
@@ -108,6 +115,17 @@ class SelectMySQLSpec extends Specification {
         .build()
     when:
     runAction(getStarsConfig(), body, snapshot)
+    then:
+    0 * errorCallback.receive(_)
+  }
+
+  def "select with alias"() {
+    prepareStarsTable();
+    JsonObject snapshot = Json.createObjectBuilder().build();
+    JsonObject body = Json.createObjectBuilder()
+        .build()
+    when:
+    runAction(getAliasStarsConfig(), body, snapshot)
     then:
     0 * errorCallback.receive(_)
   }

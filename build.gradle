@@ -41,6 +41,7 @@ test {
 task integrationTest(type: Test) {
     testLogging {
         showStandardStreams = true
+        exceptionFormat "full"
     }
     filter() {
         includeTestsMatching "io.elastic.jdbc.integration.*"

@@ -298,7 +298,7 @@ public class Utils {
   public static JsonObjectBuilder getColumnDataByType(ResultSet rs, ResultSetMetaData metaData,
       int i, JsonObjectBuilder row) {
     try {
-      final String columnName = metaData.getColumnName(i);
+      final String columnName = metaData.getColumnLabel(i);
       if (null == rs.getObject(columnName)) {
         row.add(columnName, JsonValue.NULL);
         return row;
