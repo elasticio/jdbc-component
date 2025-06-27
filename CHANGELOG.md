@@ -1,4 +1,4 @@
-## 2.5.10 (June 20, 2025)
+## 2.5.10 (June 27, 2025)
 * Fixed the issue with aliases in the `Select Query` action ([#Issue 111](https://github.com/elasticio/jdbc-component/issues/111))
 
 ## 2.5.9 (August 01, 2024)
