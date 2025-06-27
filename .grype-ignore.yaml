@@ -28,3 +28,7 @@ ignore:
     package:
       name: parsson
       version: 1.1.2
+  - vulnerability: GHSA-735f-pc8j-v9w8
+    package:
+      name: protobuf-java
+      version: 3.25.1
