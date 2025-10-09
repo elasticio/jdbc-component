@@ -1,7 +1,7 @@
 {
   "title": "Database",
   "description": "Database JDBC connector",
-  "version": "2.5.11-dev.5",
+  "version": "2.5.11-dev.6",
   "credentials": {
     "verifier": "io.elastic.jdbc.JdbcCredentialsVerifier",
     "fields": {

@@ -69,7 +69,7 @@ repositories {
 dependencies {
     compile files("./lib/ojdbc6.jar")
     compile files("./lib/sqljdbc4.jar")
-    compile files("./lib/sailor-jvm-4.0.4-SNAPSHOT.8.jar")
+    compile files("./lib/sailor-jvm-4.0.4-SNAPSHOT.13.jar")
     // The following 3 dependencies are to workaround this: https://github.com/elasticio/sailor-jvm/issues/59
     compile 'com.fasterxml.jackson.core:jackson-core:2.10.1'
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.10.1'
