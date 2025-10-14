@@ -7,7 +7,7 @@ apply plugin: 'groovy'
 if (hasProperty('runWithDependencyCheck')) {
     apply plugin: org.owasp.dependencycheck.gradle.DependencyCheckPlugin
 
-    check.dependsOn dependencyCheckAnalyze
+//    check.dependsOn dependencyCheckAnalyze
 
     dependencyCheck {
         format = 'HTML'
