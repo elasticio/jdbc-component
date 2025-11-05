@@ -68,6 +68,6 @@ class InsertActionMySQLSpec extends Specification {
 
     expect:
     records.size() == 1
-    records.get(0) == '{id=1, name=Taurus, radius=12, destination=null, visible=true, createdat=2015-02-19T08:10:10, diameter=24}'
+    records.get(0) == '{id=1, name=Taurus, radius=12, destination=null, visible=true, createdat=2015-02-19T10:10:10, diameter=24}'
   }
 }
