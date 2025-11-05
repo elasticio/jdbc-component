@@ -116,7 +116,7 @@ class UpsertRowByPrimaryKeyMySQLSpec extends Specification {
 
     expect:
     records.size() == 1
-    records.get(0) == '{id=1, name=Taurus, date=2015-02-19T10:10:10, radius=123, destination=null, visible=true, ' +
+    records.get(0) == '{id=1, name=Taurus, date=2015-02-19T08:10:10, radius=123, destination=null, visible=true, ' +
             'visibledate=null}'
   }
 
