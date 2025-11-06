@@ -1,3 +1,6 @@
+## 2.5.11 (November 15, 2025)
+* Replaced the Oracle JDBC driver (ojdbc) from 6 to 8 (ojdbc8:21.5.0.0)
+
 ## 2.5.10 (June 27, 2025)
 * Fixed the issue with aliases in the `Select Query` action ([#Issue 111](https://github.com/elasticio/jdbc-component/issues/111))
 

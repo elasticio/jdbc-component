@@ -4,18 +4,6 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
 
-//if (hasProperty('runWithDependencyCheck')) {
-//    apply plugin: org.owasp.dependencycheck.gradle.DependencyCheckPlugin
-//
-//    check.dependsOn dependencyCheckAnalyze
-//
-//    dependencyCheck {
-//        format = 'HTML'
-//        failBuildOnCVSS = 8
-//        suppressionFile='./dependencyCheck-suppression.xml'
-//    }
-//}
-
 sourceSets {
     integrationTest {
         java.outputDir = file('build/classes/integrationtest')
@@ -67,8 +55,7 @@ repositories {
 }
 
 dependencies {
-    compile files("./lib/ojdbc6.jar")
-    compile files("./lib/sqljdbc4.jar")
+    compile 'com.oracle.database.jdbc:ojdbc8:21.5.0.0'
     compile files("./lib/sailor-jvm-5.0.0-SNAPSHOT.1.jar")
     // The following 3 dependencies are to workaround this: https://github.com/elasticio/sailor-jvm/issues/59
     compile 'com.fasterxml.jackson.core:jackson-core:2.10.1'
@@ -88,9 +75,6 @@ dependencies {
 buildscript {
     repositories {
         mavenCentral()
-    }
-    dependencies {
-        classpath 'org.owasp:dependency-check-gradle:7.1.0.1'
     }
 }
 

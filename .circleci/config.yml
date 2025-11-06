@@ -85,9 +85,6 @@ jobs:
           paths:
             - ~/.gradle/caches
             - ~/.gradle/wrapper
-#      - run:
-#          name: Audit Dependencies
-#          command: ./gradlew dependencyCheckAnalyze -PrunWithDependencyCheck
       - run:
           name: Run Unit Tests
           command: ./gradlew test --daemon
