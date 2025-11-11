@@ -325,7 +325,7 @@ Please use [**Select action**](#select-action) instead.
 2. Only following versions of database types are supported:
 - ``MySQL`` - compatible with MySQL Server 5.5, 5.6, 5.7 and 8.0.
 - ``PostgreSQL`` - compatible with PostgreSQL 8.2 and higher
-- ``Oracle`` - compatible with Oracle Database 8.1.7 - 12.1.0.2
+- ``Oracle`` - compatible with Oracle Database 8.1.7 - 21.3.0
 - ``MSSQL`` - compatible with Microsoft SQL Server 2008 R2 and higher
 3. The current implementation of the action ``Upsert By Primary Key`` doesn't mark non-nullable fields as required fields at a dynamic metadata. In case of updating such fields with an empty value you will get SQL Exception ``Cannot insert the value NULL into...``. You should manually fill in all non-nullable fields with previous data, if you want to update part of columns in a row, even if data in that fields doesn't change. 
 4. The current implementation of the action ``Execute stored procedure`` doesn't support ResultSet MSSQL output.
