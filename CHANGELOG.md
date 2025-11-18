@@ -1,4 +1,4 @@
-## 2.5.11 (November 19, 2025)
+## 2.5.11 (November 18, 2025)
 * Replaced the Oracle JDBC driver (ojdbc) from 6 to 8 (ojdbc8:21.5.0.0)
 * Updated Sailor to 5.0.0
 
