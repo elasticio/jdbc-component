@@ -36,3 +36,11 @@ ignore:
     package:
       name: zlib
       version: 1.3.1-r2
+  - vulnerability: CVE-2022-21511
+    package:
+      name: ojdbc8
+      version: 21.5.0.0
+  - vulnerability: CVE-2022-21510
+    package:
+      name: ojdbc8
+      version: 21.5.0.0
