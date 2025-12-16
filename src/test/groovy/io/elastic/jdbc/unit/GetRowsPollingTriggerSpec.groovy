@@ -13,7 +13,6 @@ class GetRowsPollingTriggerSpec extends Specification {
 
     def setup() {
         trigger = new GetRowsPollingTrigger()
-        // Fixed default time for testing: 2023-01-01 12:00:00
         defaultTimestamp = Timestamp.valueOf("2023-01-01 12:00:00.000")
     }
 
