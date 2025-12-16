@@ -18,7 +18,6 @@ import jakarta.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class GetRowsPollingTrigger implements Function {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetRowsPollingTrigger.class);
@@ -26,7 +25,7 @@ public class GetRowsPollingTrigger implements Function {
   private static final String PROPERTY_POLLING_FIELD = "pollingField";
   private static final String PROPERTY_POLLING_VALUE = "pollingValue";
   private static final String PROPERTY_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-  private static final String DATETIME_REGEX = "(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})(\\.(\\d{1,3}))?";
+  private static final String DATETIME_REGEX = "(\\d{4})-(\\d{2})-(\\d{2})( (\\d{2}):(\\d{2}):(\\d{2})(\\.(\\d{1,3}))?)?";
 
   @Override
   public final void execute(ExecutionParameters parameters) {
@@ -45,22 +44,10 @@ public class GetRowsPollingTrigger implements Function {
     if (Utils.getNonNullString(configuration, PROPERTY_POLLING_FIELD).length() != 0) {
       pollingField = configuration.getString(PROPERTY_POLLING_FIELD);
     }
-    Timestamp pollingValue;
     Timestamp cts = new java.sql.Timestamp(cDate.getTimeInMillis());
     String formattedDate = new SimpleDateFormat(PROPERTY_DATETIME_FORMAT).format(cts);
 
-    if (snapshot.containsKey(PROPERTY_POLLING_VALUE) && Utils
-        .getNonNullString(snapshot, PROPERTY_POLLING_VALUE).matches(DATETIME_REGEX)) {
-      pollingValue = Timestamp.valueOf(snapshot.getString(PROPERTY_POLLING_VALUE));
-     } else if (configuration.containsKey(PROPERTY_POLLING_VALUE) && Utils
-        .getNonNullString(configuration, PROPERTY_POLLING_VALUE).matches(DATETIME_REGEX)) {
-      pollingValue = Timestamp.valueOf(configuration.getString(PROPERTY_POLLING_VALUE));
-    } else {
-      LOGGER.trace(
-          "There is an empty value for Start Polling From at the config and snapshot. So, we set Current Date = "
-              + formattedDate);
-      pollingValue = cts;
-    }
+    Timestamp pollingValue = getPollingValue(configuration, snapshot, cts);
 
     LOGGER.info("Executing row polling trigger");
     try {
@@ -90,6 +77,30 @@ public class GetRowsPollingTrigger implements Function {
     } catch (SQLException e) {
       LOGGER.error("Failed to make request");
       throw new RuntimeException(e);
+    }
+  }
+
+  public Timestamp getPollingValue(JsonObject configuration, JsonObject snapshot, Timestamp defaultTimestamp) {
+    if (snapshot.containsKey(PROPERTY_POLLING_VALUE) && Utils
+        .getNonNullString(snapshot, PROPERTY_POLLING_VALUE).matches(DATETIME_REGEX)) {
+      String val = snapshot.getString(PROPERTY_POLLING_VALUE);
+      if (val.length() <= 10) {
+        val += " 00:00:00";
+      }
+      return Timestamp.valueOf(val);
+    } else if (configuration.containsKey(PROPERTY_POLLING_VALUE) && Utils
+        .getNonNullString(configuration, PROPERTY_POLLING_VALUE).matches(DATETIME_REGEX)) {
+      String val = configuration.getString(PROPERTY_POLLING_VALUE);
+      if (val.length() <= 10) {
+        val += " 00:00:00";
+      }
+      return Timestamp.valueOf(val);
+    } else {
+      String formattedDate = new SimpleDateFormat(PROPERTY_DATETIME_FORMAT).format(defaultTimestamp);
+      LOGGER.trace(
+          "There is an empty value for Start Polling From at the config and snapshot. So, we set Current Date = "
+              + formattedDate);
+      return defaultTimestamp;
     }
   }
 
