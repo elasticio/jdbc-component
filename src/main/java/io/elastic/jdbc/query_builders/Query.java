@@ -284,13 +284,14 @@ public abstract class Query {
 
   public ArrayList getRowsExecutePolling(Connection connection, String sql) throws SQLException {
     try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+      LOGGER.debug("Binding pollingValue: {}", pollingValue);
       stmt.setTimestamp(1, pollingValue);
       stmt.setInt(2, countNumber);
       try (ResultSet rs = stmt.executeQuery()) {
         ArrayList listResult = new ArrayList();
-        JsonObjectBuilder row = Json.createObjectBuilder();
         ResultSetMetaData metaData = rs.getMetaData();
         while (rs.next()) {
+          JsonObjectBuilder row = Json.createObjectBuilder();
           for (int i = 1; i <= metaData.getColumnCount(); i++) {
             row = Utils.getColumnDataByType(rs, metaData, i, row);
             if (metaData.getColumnName(i).toUpperCase().equals(pollingField.toUpperCase())) {

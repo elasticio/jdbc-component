@@ -25,7 +25,7 @@ public class MySQL extends Query {
     sql.append(tableName);
     sql.append(" WHERE ");
     sql.append(pollingField);
-    sql.append(" > ?");
+    sql.append(" > CONVERT(?, DATETIME(3))");
     if (orderField != null) {
       sql.append(" ORDER BY ").append(orderField).append(" ASC");
     }

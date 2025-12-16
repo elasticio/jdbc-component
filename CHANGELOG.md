@@ -1,5 +1,8 @@
 ## 2.5.12 (December 19, 2025)
 * Fix issue in the `Get rows polling` trigger ([#Issue 117](https://github.com/elasticio/jdbc-component/issues/117))
+* Fix MySQL timestamp comparison in polling trigger by using CONVERT(?, DATETIME(3)) for exact precision matching.
+* Fix JsonObjectBuilder reuse bug in getRowsExecutePolling method to prevent data corruption.
+* Fix maxPollingValue initialization in GetRowsPollingTrigger to ensure accurate snapshot updates.
 
 ## 2.5.11 (November 18, 2025)
 * Replaced the Oracle JDBC driver (ojdbc) from 6 to 8 (ojdbc8:21.5.0.0)

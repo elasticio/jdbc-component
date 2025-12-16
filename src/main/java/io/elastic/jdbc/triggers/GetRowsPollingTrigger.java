@@ -56,7 +56,7 @@ public class GetRowsPollingTrigger implements Function {
       Query query = queryFactory.getQuery(dbEngine);
       query.from(tableName).orderBy(pollingField)
           .rowsPolling(pollingField, pollingValue);
-      query.setMaxPollingValue(cts);
+      query.setMaxPollingValue(pollingValue);
       ArrayList<JsonObject> resultList = query.executePolling(connection);
 
       for (int i = 0; i < resultList.size(); i++) {
