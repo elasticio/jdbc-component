@@ -26,9 +26,9 @@ public class SelectTrigger implements Function {
   private static final String LAST_POLL_PLACEHOLDER = "%%EIO_LAST_POLL%%";
   private static final String SQL_QUERY_VALUE = "sqlQuery";
   private static final String PROPERTY_POLLING_VALUE = "pollingValue";
-  private static final String PROPERTY_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss.sss";
+  private static final String PROPERTY_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
   private static final String PROPERTY_SKIP_NUMBER = "skipNumber";
-  private static final String DATETIME_REGEX = "(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})(\\.(\\d{1,3}))?";
+  private static final String DATETIME_REGEX = "(\\d{4})-(\\d{2})-(\\d{2})( (\\d{2}):(\\d{2}):(\\d{2})(\\.(\\d{1,9}))?)?";
 
   @Override
   public final void execute(ExecutionParameters parameters) {
@@ -43,22 +43,9 @@ public class SelectTrigger implements Function {
     cDate.set(cDate.get(Calendar.YEAR), cDate.get(Calendar.MONTH), cDate.get(Calendar.DATE), 0, 0,
         0);
     String dbEngine = configuration.getString(PROPERTY_DB_ENGINE);
-    Timestamp pollingValue;
     Timestamp cts = new java.sql.Timestamp(cDate.getTimeInMillis());
 
-    String formattedDate = new SimpleDateFormat(PROPERTY_DATETIME_FORMAT).format(cts);
-    if (configuration.containsKey(PROPERTY_POLLING_VALUE) && Utils
-        .getNonNullString(configuration, PROPERTY_POLLING_VALUE).matches(DATETIME_REGEX)) {
-      pollingValue = Timestamp.valueOf(configuration.getString(PROPERTY_POLLING_VALUE));
-    } else if (snapshot.containsKey(PROPERTY_POLLING_VALUE) && Utils
-        .getNonNullString(snapshot, LAST_POLL_PLACEHOLDER).matches(DATETIME_REGEX)) {
-      pollingValue = Timestamp.valueOf(snapshot.getString(LAST_POLL_PLACEHOLDER));
-    } else {
-      LOGGER.info(
-          "There is an empty value for Start Polling From at the config and snapshot. So, we set Current Date = "
-              + formattedDate);
-      pollingValue = cts;
-    }
+    Timestamp pollingValue = getPollingValue(configuration, snapshot, cts);
     LOGGER.debug("EIO_LAST_POLL = {}", pollingValue);
 
     if (snapshot.get(PROPERTY_SKIP_NUMBER) != null) {
@@ -69,8 +56,10 @@ public class SelectTrigger implements Function {
       QueryFactory queryFactory = new QueryFactory();
       Query query = queryFactory.getQuery(dbEngine);
       sqlQuery = Query.preProcessSelect(sqlQuery);
-      if (sqlQuery.contains(LAST_POLL_PLACEHOLDER)) {
-        sqlQuery = sqlQuery.replace(LAST_POLL_PLACEHOLDER, "?");
+      String lowerCaseQuery = sqlQuery.toLowerCase();
+      if (lowerCaseQuery.contains(LAST_POLL_PLACEHOLDER.toLowerCase())) {
+        sqlQuery = sqlQuery.replaceAll("(?i)'" + Pattern.quote(LAST_POLL_PLACEHOLDER) + "'", "?");
+        sqlQuery = sqlQuery.replaceAll("(?i)" + Pattern.quote(LAST_POLL_PLACEHOLDER), "?");
         query.selectPolling(sqlQuery, pollingValue);
       }
       Connection connection = Utils.getConnection(configuration);
@@ -92,6 +81,39 @@ public class SelectTrigger implements Function {
       LOGGER.error("Failed to make request");
       throw new RuntimeException(e);
     }
+  }
+
+  public Timestamp getPollingValue(JsonObject configuration, JsonObject snapshot, Timestamp defaultTimestamp) {
+    String val = null;
+    if (snapshot.containsKey(LAST_POLL_PLACEHOLDER)) {
+      val = snapshot.getString(LAST_POLL_PLACEHOLDER);
+    } else if (snapshot.containsKey(PROPERTY_POLLING_VALUE)) {
+      val = snapshot.getString(PROPERTY_POLLING_VALUE);
+    } else if (configuration.containsKey(PROPERTY_POLLING_VALUE)) {
+      val = configuration.getString(PROPERTY_POLLING_VALUE);
+    }
+
+    if (val != null && !val.isEmpty()) {
+      val = val.trim();
+      if (val.matches(DATETIME_REGEX)) {
+        if (val.length() <= 10) {
+          val += " 00:00:00";
+        }
+        try {
+          return Timestamp.valueOf(val);
+        } catch (IllegalArgumentException e) {
+          LOGGER.warn("Failed to parse polling value '{}' with Timestamp.valueOf, falling back to default.", val);
+        }
+      } else {
+        LOGGER.warn("Polling value '{}' does not match expected format {}, falling back to default.", val,
+            DATETIME_REGEX);
+      }
+    }
+
+    String formattedDate = new SimpleDateFormat(PROPERTY_DATETIME_FORMAT).format(defaultTimestamp);
+    LOGGER.trace(
+        "Using default polling value (Today Midnight): " + formattedDate);
+    return defaultTimestamp;
   }
 
   private void checkConfig(JsonObject config) {
