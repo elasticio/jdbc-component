@@ -97,7 +97,79 @@ class GetRowsPollingTriggerSpec extends Specification {
         def result = trigger.getPollingValue(config, snapshot, defaultTimestamp)
 
         then:
-        // matching the expectation from the issue: should detect date and treat as start of day
         result == Timestamp.valueOf("2020-05-15 00:00:00.000")
+    }
+
+    def "should handle leading and trailing whitespace"() {
+        given:
+        JsonObject snapshot = Json.createObjectBuilder()
+                .add("pollingValue", "  2022-01-01 10:00:00.000  ")
+                .build()
+        JsonObject config = Json.createObjectBuilder().build()
+
+        when:
+        def result = trigger.getPollingValue(config, snapshot, defaultTimestamp)
+
+        then:
+        result == Timestamp.valueOf("2022-01-01 10:00:00.000")
+    }
+
+    def "should accept standard timestamp without milliseconds"() {
+        given:
+        JsonObject snapshot = Json.createObjectBuilder()
+                .add("pollingValue", "2023-10-27 10:20:30")
+                .build()
+        JsonObject config = Json.createObjectBuilder().build()
+
+        when:
+        def result = trigger.getPollingValue(config, snapshot, defaultTimestamp)
+
+        then:
+        result == Timestamp.valueOf("2023-10-27 10:20:30")
+    }
+
+    def "should accept high-precision timestamps (up to 9 digits)"() {
+        given:
+        JsonObject snapshot = Json.createObjectBuilder()
+                .add("pollingValue", "2023-10-27 10:20:30.123456789")
+                .build()
+        JsonObject config = Json.createObjectBuilder().build()
+
+        when:
+        def result = trigger.getPollingValue(config, snapshot, defaultTimestamp)
+
+        then:
+        result == Timestamp.valueOf("2023-10-27 10:20:30.123456789")
+    }
+
+    def "should fallback to default when date is logically invalid (e.g. Month 13)"() {
+        given:
+        JsonObject snapshot = Json.createObjectBuilder()
+                .add("pollingValue", "2023-13-01 10:00:00") // Matches regex digits but invalid date
+                .build()
+        JsonObject config = Json.createObjectBuilder().build()
+
+        when:
+        def result = trigger.getPollingValue(config, snapshot, defaultTimestamp)
+
+        then:
+        result == defaultTimestamp
+    }
+
+    def "should fallback to default when snapshot is invalid, even if config is valid"() {
+        given:
+        JsonObject snapshot = Json.createObjectBuilder()
+                .add("pollingValue", "not-a-date")
+                .build()
+        JsonObject config = Json.createObjectBuilder()
+                .add("pollingValue", "2020-01-01 10:00:00")
+                .build()
+
+        when:
+        def result = trigger.getPollingValue(config, snapshot, defaultTimestamp)
+
+        then:
+        // Critical: should NOT use config if snapshot exists because it might re-poll old data
+        result == defaultTimestamp
     }
 }

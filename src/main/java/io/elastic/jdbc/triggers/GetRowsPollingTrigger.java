@@ -25,7 +25,7 @@ public class GetRowsPollingTrigger implements Function {
   private static final String PROPERTY_POLLING_FIELD = "pollingField";
   private static final String PROPERTY_POLLING_VALUE = "pollingValue";
   private static final String PROPERTY_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-  private static final String DATETIME_REGEX = "(\\d{4})-(\\d{2})-(\\d{2})( (\\d{2}):(\\d{2}):(\\d{2})(\\.(\\d{1,3}))?)?";
+  private static final String DATETIME_REGEX = "(\\d{4})-(\\d{2})-(\\d{2})( (\\d{2}):(\\d{2}):(\\d{2})(\\.(\\d{1,9}))?)?";
 
   @Override
   public final void execute(ExecutionParameters parameters) {
@@ -45,8 +45,6 @@ public class GetRowsPollingTrigger implements Function {
       pollingField = configuration.getString(PROPERTY_POLLING_FIELD);
     }
     Timestamp cts = new java.sql.Timestamp(cDate.getTimeInMillis());
-    String formattedDate = new SimpleDateFormat(PROPERTY_DATETIME_FORMAT).format(cts);
-
     Timestamp pollingValue = getPollingValue(configuration, snapshot, cts);
 
     LOGGER.info("Executing row polling trigger");
@@ -66,7 +64,7 @@ public class GetRowsPollingTrigger implements Function {
             .emitData(new Message.Builder().body(resultList.get(i)).build());
       }
       if (resultList.size() > 0) {
-        formattedDate = query.getMaxPollingValue().toString();
+        String formattedDate = query.getMaxPollingValue().toString();
         snapshot = Json.createObjectBuilder()
             .add(PROPERTY_TABLE_NAME, tableName)
             .add(PROPERTY_POLLING_FIELD, pollingField)
@@ -81,27 +79,34 @@ public class GetRowsPollingTrigger implements Function {
   }
 
   public Timestamp getPollingValue(JsonObject configuration, JsonObject snapshot, Timestamp defaultTimestamp) {
-    if (snapshot.containsKey(PROPERTY_POLLING_VALUE) && Utils
-        .getNonNullString(snapshot, PROPERTY_POLLING_VALUE).matches(DATETIME_REGEX)) {
-      String val = snapshot.getString(PROPERTY_POLLING_VALUE);
-      if (val.length() <= 10) {
-        val += " 00:00:00";
-      }
-      return Timestamp.valueOf(val);
-    } else if (configuration.containsKey(PROPERTY_POLLING_VALUE) && Utils
-        .getNonNullString(configuration, PROPERTY_POLLING_VALUE).matches(DATETIME_REGEX)) {
-      String val = configuration.getString(PROPERTY_POLLING_VALUE);
-      if (val.length() <= 10) {
-        val += " 00:00:00";
-      }
-      return Timestamp.valueOf(val);
-    } else {
-      String formattedDate = new SimpleDateFormat(PROPERTY_DATETIME_FORMAT).format(defaultTimestamp);
-      LOGGER.trace(
-          "There is an empty value for Start Polling From at the config and snapshot. So, we set Current Date = "
-              + formattedDate);
-      return defaultTimestamp;
+    String val = null;
+    if (snapshot.containsKey(PROPERTY_POLLING_VALUE)) {
+      val = snapshot.getString(PROPERTY_POLLING_VALUE);
+    } else if (configuration.containsKey(PROPERTY_POLLING_VALUE)) {
+      val = configuration.getString(PROPERTY_POLLING_VALUE);
     }
+
+    if (val != null && !val.isEmpty()) {
+      val = val.trim();
+      if (val.matches(DATETIME_REGEX)) {
+        if (val.length() <= 10) {
+          val += " 00:00:00";
+        }
+        try {
+          return Timestamp.valueOf(val);
+        } catch (IllegalArgumentException e) {
+          LOGGER.warn("Failed to parse polling value '{}' with Timestamp.valueOf, falling back to default.", val);
+        }
+      } else {
+        LOGGER.warn("Polling value '{}' does not match expected format {}, falling back to default.", val,
+            DATETIME_REGEX);
+      }
+    }
+
+    String formattedDate = new SimpleDateFormat(PROPERTY_DATETIME_FORMAT).format(defaultTimestamp);
+    LOGGER.trace(
+        "Using default polling value (Today Midnight): " + formattedDate);
+    return defaultTimestamp;
   }
 
   private void checkConfig(JsonObject config) {
