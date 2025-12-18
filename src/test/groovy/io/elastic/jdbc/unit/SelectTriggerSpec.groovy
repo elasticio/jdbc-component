@@ -128,7 +128,4 @@ class SelectTriggerSpec extends Specification {
         then:
         result == Timestamp.valueOf("2023-10-27 10:20:30.123456789")
     }
-
-    // Since SelectTrigger.execute is hard to test without mocking Connection/Query, 
-    // I will verify the logic if I can, but for now I've verified getPollingValue.
 }
