@@ -9,3 +9,4 @@ tests.log
 tests.properties
 tests.script
 .env
+.DS_Store

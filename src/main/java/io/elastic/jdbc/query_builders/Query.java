@@ -193,11 +193,10 @@ public abstract class Query {
       }
     }
 
-    String sqlSELECT =
-        "    SELECT" +
-            "        *" +
-            "    FROM " + tableName +
-            "    WHERE " + idColumn + " = ?";
+    String sqlSELECT = "    SELECT" +
+        "        *" +
+        "    FROM " + tableName +
+        "    WHERE " + idColumn + " = ?";
     String sqlInsert = "INSERT INTO " + tableName +
         " (" + keys.toString() + ")" +
         " VALUES (" + values.toString() + ")";
@@ -284,24 +283,20 @@ public abstract class Query {
 
   public ArrayList getRowsExecutePolling(Connection connection, String sql) throws SQLException {
     try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+      LOGGER.debug("Binding pollingValue: {}", pollingValue);
       stmt.setTimestamp(1, pollingValue);
       stmt.setInt(2, countNumber);
       try (ResultSet rs = stmt.executeQuery()) {
         ArrayList listResult = new ArrayList();
-        JsonObjectBuilder row = Json.createObjectBuilder();
         ResultSetMetaData metaData = rs.getMetaData();
         while (rs.next()) {
+          JsonObjectBuilder row = Json.createObjectBuilder();
           for (int i = 1; i <= metaData.getColumnCount(); i++) {
             row = Utils.getColumnDataByType(rs, metaData, i, row);
-            if (metaData.getColumnName(i).toUpperCase().equals(pollingField.toUpperCase())) {
-              if (maxPollingValue.before(rs.getTimestamp(i))) {
-                if (rs.getString(metaData.getColumnName(i)).length() > 10) {
-                  maxPollingValue = java.sql.Timestamp
-                      .valueOf(rs.getString(metaData.getColumnName(i)));
-                } else {
-                  maxPollingValue = java.sql.Timestamp
-                      .valueOf(rs.getString(metaData.getColumnName(i)) + " 00:00:00");
-                }
+            if (metaData.getColumnName(i).equalsIgnoreCase(pollingField)) {
+              Timestamp currentTimestamp = rs.getTimestamp(i);
+              if (currentTimestamp != null && maxPollingValue.before(currentTimestamp)) {
+                maxPollingValue = currentTimestamp;
               }
             }
           }
@@ -346,8 +341,7 @@ public abstract class Query {
             .append(p)
             .append(" => :")
             .append(p)
-            .append(", ")
-        );
+            .append(", "));
 
     String result = statementArgsStructure.toString();
     if (procedureParams.size() > 0) {
@@ -401,22 +395,22 @@ public abstract class Query {
     }
   }
 
-  protected JsonObjectBuilder addResultSetToJson(JsonObjectBuilder jsonBuilder, ResultSet resultSet, String name)  throws SQLException{
+  protected JsonObjectBuilder addResultSetToJson(JsonObjectBuilder jsonBuilder, ResultSet resultSet, String name)
+      throws SQLException {
     JsonArrayBuilder array = Json.createArrayBuilder();
 
-    Map<String, String> params =
-        IntStream.range(1, resultSet.getMetaData().getColumnCount() + 1)
-            .mapToObj(i -> {
-              try {
-                return new ProcedureParameter(resultSet.getMetaData().getColumnName(i),
-                    Direction.OUT, resultSet.getMetaData().getColumnType(i));
-              } catch (SQLException e) {
-                throw new IllegalArgumentException(e);
-              }
-            })
-            .collect(Collectors.toMap(ProcedureParameter::getName, p -> Utils
-                .cleanJsonType(
-                    Utils.detectColumnType(p.getType(), ""))));
+    Map<String, String> params = IntStream.range(1, resultSet.getMetaData().getColumnCount() + 1)
+        .mapToObj(i -> {
+          try {
+            return new ProcedureParameter(resultSet.getMetaData().getColumnName(i),
+                Direction.OUT, resultSet.getMetaData().getColumnType(i));
+          } catch (SQLException e) {
+            throw new IllegalArgumentException(e);
+          }
+        })
+        .collect(Collectors.toMap(ProcedureParameter::getName, p -> Utils
+            .cleanJsonType(
+                Utils.detectColumnType(p.getType(), ""))));
 
     while (resultSet.next()) {
       JsonObjectBuilder entity = Json.createObjectBuilder();

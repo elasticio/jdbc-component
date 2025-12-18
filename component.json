@@ -1,7 +1,7 @@
 {
   "title": "Database",
   "description": "Database JDBC connector",
-  "version": "2.5.11",
+  "version": "2.5.12-dev.4",
   "credentials": {
     "verifier": "io.elastic.jdbc.JdbcCredentialsVerifier",
     "fields": {
@@ -155,7 +155,7 @@
             }
           }
         },
-        "out":{
+        "out": {
           "type": "object",
           "required": false,
           "properties": {
@@ -202,14 +202,14 @@
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProvider"
         },
-        "reboundEnabled" : {
+        "reboundEnabled": {
           "viewClass": "SelectView",
           "note": "Default is No",
           "label": "Enable Rebound",
           "required": false,
-          "model" : {
-            "Yes" : "Yes",
-            "No" : "No"
+          "model": {
+            "Yes": "Yes",
+            "No": "No"
           }
         }
       },
@@ -227,14 +227,14 @@
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProvider"
         },
-        "reboundEnabled" : {
+        "reboundEnabled": {
           "viewClass": "SelectView",
           "note": "Default is No",
           "label": "Enable Rebound",
           "required": false,
-          "model" : {
-            "Yes" : "Yes",
-            "No" : "No"
+          "model": {
+            "Yes": "Yes",
+            "No": "No"
           }
         }
       },
@@ -256,14 +256,14 @@
           "label": "Don`t throw Error on an Empty Result",
           "viewClass": "CheckBoxView"
         },
-        "reboundEnabled" : {
+        "reboundEnabled": {
           "viewClass": "SelectView",
           "note": "Default is No",
           "label": "Enable Rebound",
           "required": false,
-          "model" : {
-            "Yes" : "Yes",
-            "No" : "No"
+          "model": {
+            "Yes": "Yes",
+            "No": "No"
           }
         }
       },
