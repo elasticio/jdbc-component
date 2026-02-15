@@ -121,7 +121,10 @@ public abstract class Query {
       throws SQLException {
     try (PreparedStatement stmt = connection.prepareStatement(sqlQuery)) {
       if (pollingValue != null) {
-        stmt.setTimestamp(1, pollingValue);
+        int paramCount = stmt.getParameterMetaData().getParameterCount();
+        for (int i = 1; i <= paramCount; i++) {
+          stmt.setTimestamp(i, pollingValue);
+        }
       }
       try (ResultSet rs = stmt.executeQuery()) {
         ArrayList listResult = new ArrayList();
