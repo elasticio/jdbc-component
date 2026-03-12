@@ -172,4 +172,32 @@ class GetRowsPollingTriggerSpec extends Specification {
         // Critical: should NOT use config if snapshot exists because it might re-poll old data
         result == defaultTimestamp
     }
+
+    def "should fallback to default when pollingValue is empty string"() {
+        given:
+        JsonObject snapshot = Json.createObjectBuilder().build()
+        JsonObject config = Json.createObjectBuilder()
+                .add("pollingValue", "")
+                .build()
+
+        when:
+        def result = trigger.getPollingValue(config, snapshot, defaultTimestamp)
+
+        then:
+        result == defaultTimestamp
+    }
+
+    def "should fallback to default when pollingValue is just whitespace"() {
+        given:
+        JsonObject snapshot = Json.createObjectBuilder().build()
+        JsonObject config = Json.createObjectBuilder()
+                .add("pollingValue", "   ")
+                .build()
+
+        when:
+        def result = trigger.getPollingValue(config, snapshot, defaultTimestamp)
+
+        then:
+        result == defaultTimestamp
+    }
 }

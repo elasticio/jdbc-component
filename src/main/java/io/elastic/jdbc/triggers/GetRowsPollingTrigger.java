@@ -36,8 +36,7 @@ public class GetRowsPollingTrigger implements Function {
     checkConfig(configuration);
     String pollingField = "";
     Calendar cDate = Calendar.getInstance();
-    cDate.set(cDate.get(Calendar.YEAR), cDate.get(Calendar.MONTH), cDate.get(Calendar.DATE), 0, 0,
-        0);
+    cDate.setTimeInMillis(0);
     String dbEngine = configuration.getString(Utils.CFG_DB_ENGINE);
     String tableName = configuration.getString(PROPERTY_TABLE_NAME);
 

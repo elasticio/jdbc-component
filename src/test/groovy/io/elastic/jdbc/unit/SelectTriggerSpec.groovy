@@ -128,4 +128,32 @@ class SelectTriggerSpec extends Specification {
         then:
         result == Timestamp.valueOf("2023-10-27 10:20:30.123456789")
     }
+
+    def "should fallback to default when snapshot key exists but is invalid"() {
+        given:
+        JsonObject snapshot = Json.createObjectBuilder()
+                .add("%%EIO_LAST_POLL%%", "invalid-timestamp")
+                .build()
+        JsonObject config = Json.createObjectBuilder().build()
+
+        when:
+        def result = trigger.getPollingValue(config, snapshot, defaultTimestamp)
+
+        then:
+        result == defaultTimestamp
+    }
+
+    def "should fallback to default when config value is an empty string"() {
+        given:
+        JsonObject snapshot = Json.createObjectBuilder().build()
+        JsonObject config = Json.createObjectBuilder()
+                .add("pollingValue", "")
+                .build()
+
+        when:
+        def result = trigger.getPollingValue(config, snapshot, defaultTimestamp)
+
+        then:
+        result == defaultTimestamp
+    }
 }
