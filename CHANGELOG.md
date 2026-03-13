@@ -10,8 +10,8 @@
 * Fix maxPollingValue initialization in GetRowsPollingTrigger to ensure accurate snapshot updates.
 * Fix: `Get Rows Polling Trigger` now correctly defaults to Unix Epoch (1970-01-01) for the first execution.
 * Docs: Updated `Select Trigger` documentation to clarify that it defaults to today's midnight.
-* Docs: Completed a professional and grammatical overhaul of `README.md`.
 * Tests: Added unit test cases to verify trigger fallback behaviors for missing or invalid inputs.
+* Fix Incorrect SQL Parameter Binding Order in NewSelectAction ([#Issue 123](https://github.com/elasticio/jdbc-component/issues/123))
 
 ## 2.5.11 (November 18, 2025)
 * Replaced the Oracle JDBC driver (ojdbc) from 6 to 8 (ojdbc8:21.5.0.0)

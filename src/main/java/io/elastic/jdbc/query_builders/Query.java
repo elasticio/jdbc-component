@@ -141,6 +141,36 @@ public abstract class Query {
     }
   }
 
+  public ArrayList executeSelectQuery(Connection connection, String sqlQuery, JsonObject body, List<String> orderedParams)
+      throws SQLException {
+    try (PreparedStatement stmt = connection.prepareStatement(sqlQuery)) {
+      int i = 1;
+      if (orderedParams != null && !orderedParams.isEmpty()) {
+        for (String paramName : orderedParams) {
+          Utils.setStatementParam(stmt, i, paramName, body);
+          i++;
+        }
+      } else if (stmt.getParameterMetaData().getParameterCount() != 0) {
+        for (Entry<String, JsonValue> entry : body.entrySet()) {
+          Utils.setStatementParam(stmt, i, entry.getKey(), body);
+          i++;
+        }
+      }
+      try (ResultSet rs = stmt.executeQuery()) {
+        JsonObjectBuilder row = Json.createObjectBuilder();
+        ArrayList listResult = new ArrayList();
+        ResultSetMetaData metaData = rs.getMetaData();
+        while (rs.next()) {
+          for (i = 1; i <= metaData.getColumnCount(); i++) {
+            row = Utils.getColumnDataByType(rs, metaData, i, row);
+          }
+          listResult.add(row.build());
+        }
+        return listResult;
+      }
+    }
+  }
+
   public ArrayList executeSelectQuery(Connection connection, String sqlQuery, JsonObject body)
       throws SQLException {
     try (PreparedStatement stmt = connection.prepareStatement(sqlQuery)) {

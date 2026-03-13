@@ -295,6 +295,18 @@ public class Utils {
     return columnTypes;
   }
 
+  public static List<String> getParametersOrder(String sqlQuery) {
+    List<String> orderedParams = new ArrayList<>();
+    Pattern pattern = Pattern.compile(Utils.VARS_REGEXP);
+    Matcher matcher = pattern.matcher(sqlQuery);
+    while (matcher.find()) {
+      String[] result = matcher.group().split(":");
+      String name = result[0].substring(1);
+      orderedParams.add(name);
+    }
+    return orderedParams;
+  }
+
   public static JsonObjectBuilder getColumnDataByType(ResultSet rs, ResultSetMetaData metaData,
       int i, JsonObjectBuilder row) {
     try {
