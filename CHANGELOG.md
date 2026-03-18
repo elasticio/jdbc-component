@@ -1,4 +1,4 @@
-## 2.5.12 (December 19, 2025)
+## 2.5.12 (March 18, 2026)
 * Updated Sailor to 5.0.1 to address the issue when the component failed to execute when there was an array in any of the preceding steps passthrough data. See [#Issue 100](https://github.com/elasticio/jdbc-component/issues/100)
 * Fix issue in the `Select` trigger ([#Issue 118](https://github.com/elasticio/jdbc-component/issues/118))
 * Improvements for `Select` trigger: support case-insensitive `%%EIO_LAST_POLL%%` placeholder, handle quoted placeholders, and support date-only/high-precision polling values.
