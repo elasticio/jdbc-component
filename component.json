@@ -15,7 +15,7 @@
           "oracle": "Oracle",
           "mssql": "MSSQL"
         },
-        "note": "Please Select Database Type"
+        "note": "Please select a database type"
       },
       "host": {
         "viewClass": "TextFieldView",
@@ -25,7 +25,7 @@
       },
       "port": {
         "viewClass": "TextFieldView",
-        "label": "Connection port",
+        "label": "Port",
         "required": false,
         "placeholder": "Connection port"
       },
@@ -49,7 +49,7 @@
       },
       "configurationProperties": {
         "viewClass": "TextFieldView",
-        "label": "Configuration properties",
+        "label": "Additional configuration properties",
         "required": false,
         "placeholder": "useUnicode=true&serverTimezone=UTC"
       }
@@ -59,19 +59,19 @@
     "getRowsPolling": {
       "main": "io.elastic.jdbc.triggers.GetRowsPollingTrigger",
       "title": "Get Rows Polling",
-      "description": "Executes an operation that polling potentially multiple rows from the database from last timestamp snapshot",
+      "description": "Executes an operation that polls multiple rows from the database since the last record.",
       "type": "polling",
       "fields": {
         "tableName": {
           "viewClass": "SelectView",
-          "note": "Select a Table",
+          "note": "Select a table",
           "label": "Tables List",
           "required": true,
           "model": "io.elastic.jdbc.providers.TableNameProvider"
         },
         "pollingField": {
           "viewClass": "SelectView",
-          "note": "Select a Timestamp (or similar) Column",
+          "note": "Select a timestamp column",
           "label": "Timestamp (or similar) Column",
           "model": "io.elastic.jdbc.providers.TimeStampColumnNamesProvider",
           "required": true,
@@ -92,7 +92,7 @@
     "selectTrigger": {
       "main": "io.elastic.jdbc.triggers.SelectTrigger",
       "title": "Select",
-      "description": "Executes a SELECT statement that fetches potentially multiple rows from the database",
+      "description": "Executes a custom SELECT statement for incremental polling.",
       "type": "polling",
       "fields": {
         "sqlQuery": {
@@ -100,12 +100,12 @@
           "label": "SQL Query",
           "required": true,
           "placeholder": "SELECT * FROM films WHERE created > '%%EIO_LAST_POLL%%'",
-          "note": "Before executing the statement the %%EIO_LAST_POLL%% will be replaced with ISO Date of the last execution"
+          "note": "Before execution, the %%EIO_LAST_POLL%% placeholder will be replaced with the ISO date of the last successful execution."
         },
         "pollingValue": {
           "viewClass": "TextFieldView",
           "label": "Start Polling From (optional)",
-          "note": "Defaults to today's midnight if empty",
+          "note": "Defaults to today at midnight if empty",
           "required": false,
           "placeholder": "2026-03-12 00:00:00.000"
         }
@@ -144,7 +144,7 @@
     "customQuery": {
       "main": "io.elastic.jdbc.actions.CustomQuery",
       "title": "Execute custom query",
-      "description": "Executes provided sql query string as is",
+      "description": "Executes the provided SQL query exactly as provided.",
       "metadata": {
         "in": {
           "type": "object",
@@ -175,7 +175,7 @@
     "lookupRowByPrimaryKey": {
       "main": "io.elastic.jdbc.actions.LookupRowByPrimaryKey",
       "title": "Lookup Row By Primary Key",
-      "description": "Executes an operation that should fetch exactly one row from the database by primary key",
+      "description": "Fetches a single row from the database using its primary key.",
       "fields": {
         "tableName": {
           "viewClass": "SelectView",
@@ -185,7 +185,7 @@
           "model": "io.elastic.jdbc.providers.TableNameProvider"
         },
         "nullableResult": {
-          "label": "Don`t throw Error on an Empty Result",
+          "label": "Do not throw error on empty result",
           "viewClass": "CheckBoxView"
         }
       },
@@ -194,7 +194,7 @@
     "upsertRowByPrimaryKey": {
       "main": "io.elastic.jdbc.actions.UpsertRowByPrimaryKey",
       "title": "Upsert Row By Primary Key",
-      "description": "Executes upsert by primary key",
+      "description": "Updates an existing row or inserts a new one based on the primary key.",
       "fields": {
         "tableName": {
           "viewClass": "SelectView",
@@ -219,7 +219,7 @@
     "insert": {
       "main": "io.elastic.jdbc.actions.InsertAction",
       "title": "Insert",
-      "description": "Executes insert value",
+      "description": "Inserts a new row into the specified table.",
       "fields": {
         "tableName": {
           "viewClass": "SelectView",
@@ -244,7 +244,7 @@
     "deleteRowByPrimaryKey": {
       "main": "io.elastic.jdbc.actions.DeleteRowByPrimaryKey",
       "title": "Delete Row By Primary Key",
-      "description": "Executes an operation that should remove exactly one row from the database by primary key",
+      "description": "Removes a single row from the database using its primary key.",
       "fields": {
         "tableName": {
           "viewClass": "SelectView",
@@ -254,7 +254,7 @@
           "model": "io.elastic.jdbc.providers.TableNameProvider"
         },
         "nullableResult": {
-          "label": "Don`t throw Error on an Empty Result",
+          "label": "Do not throw error on empty result",
           "viewClass": "CheckBoxView"
         },
         "reboundEnabled": {
@@ -281,10 +281,10 @@
           "label": "SQL Query",
           "required": true,
           "placeholder": "SELECT * FROM films WHERE watched = @watched:boolean AND created = @created:date",
-          "note": "You can use parameters of message body as <i>@value:type</i>"
+          "note": "Use message body parameters with the syntax <i>@value:type</i> (e.g., @id:number)."
         },
         "nullableResult": {
-          "label": "Don`t throw Error on an Empty Result",
+          "label": "Do not throw error on empty result",
           "viewClass": "CheckBoxView"
         }
       },
@@ -293,14 +293,14 @@
     "newSelectAction": {
       "main": "io.elastic.jdbc.actions.NewSelectAction",
       "title": "Select Query",
-      "description": "Executes a SELECT statement that fetches potentially multiple rows from the database",
+      "description": "Executes a SELECT statement to fetch multiple rows.",
       "fields": {
         "sqlQuery": {
           "viewClass": "TextAreaView",
           "label": "SQL Query",
           "required": true,
           "placeholder": "SELECT * FROM films WHERE watched = @watched:boolean AND created = @created:date",
-          "note": "You can use parameters of message body as <i>@value:type</i>"
+          "note": "Use message body parameters with the syntax <i>@value:type</i> (e.g., @id:number)."
         },
         "emitBehaviour": {
           "label": "Emit Behaviour",
@@ -345,7 +345,7 @@
     "executeStoredProcedure": {
       "main": "io.elastic.jdbc.actions.ExecuteStoredProcedure",
       "title": "Execute stored procedure",
-      "description": "Executing selected stored procedure from selected DB schema",
+      "description": "Executes the selected stored procedure from the specified database schema.",
       "fields": {
         "schemaName": {
           "viewClass": "SelectView",

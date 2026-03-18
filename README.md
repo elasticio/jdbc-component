@@ -37,7 +37,7 @@ The following properties are required to configure database credentials:
 
 *   **DB Engine**: Select the database type (MySQL, PostgreSQL, Oracle, or MSSQL).
 *   **Connection URI**: The hostname or IP address of the database server (e.g., `acme.com`).
-*   **Connection Port**: (Optional) The port number for the server instance. Defaults are:
+*   **Port**: (Optional) The port number for the server instance. Defaults are:
     *   `3306`: MySQL
     *   `5432`: PostgreSQL
     *   `1521`: Oracle
@@ -45,7 +45,7 @@ The following properties are required to configure database credentials:
 *   **Database Name**: The name of the specific database to interact with.
 *   **User**: The username with the necessary permissions.
 *   **Password**: The password for the specified user.
-*   **Configuration Properties**: (Optional) Additional connection strings, such as `useUnicode=true&serverTimezone=UTC`.
+*   **Additional configuration properties**: (Optional) Additional connection strings, such as `useUnicode=true&serverTimezone=UTC`.
 
 > [!WARNING]
 > Configuration properties may not be validated during the initial "Verify Credentials" step. Ensure all input is accurate to avoid runtime errors.
@@ -53,7 +53,7 @@ The following properties are required to configure database credentials:
 ## Triggers
 
 ### Get Rows Polling Trigger
-Polls data from a specific table based on a `DATE` or `TIMESTAMP` column.
+Executes an operation that polls multiple rows from the database since the last record.
 
 The `%%EIO_LAST_POLL%%` placeholder functions similarly to the Select Trigger, tracking the last processed record to ensure only new data is retrieved.
 
@@ -69,7 +69,7 @@ If no snapshot exists and the `Start Polling From` field is empty, the trigger d
 *   **Start Polling From**: (Optional) Manually set the beginning time for polling. Defaults to the Unix Epoch (1970-01-01).
 
 ### Select Trigger
-Allows providing a custom `SELECT` query that uses a timestamp-based `WHERE` clause for incremental polling.
+Executes a custom SELECT statement for incremental polling.
 
 Before execution, the `%%EIO_LAST_POLL%%` placeholder is replaced with either the ISO date of the last successful execution or the maximum value from the last polled dataset (e.g., `2018-08-01T00:00:00.000`).
 
@@ -87,11 +87,10 @@ Maintained for backward compatibility. We recommend migrating to the modern [Sel
 ## Actions
 
 ### Delete Row By Primary Key
-Deletes a specific row using its Primary Key. Returns the count of affected rows.
+Removes a single row from the database using its primary key. Returns the count of affected rows.
 
 ### Execute Custom Query
-Executes a raw SQL query string. 
-
+Executes the provided SQL query exactly as provided.
 > [!IMPORTANT]
 > SQL requests are executed according to the chosen JDBC driver's specification. Multiple statements are executed within a single transaction; if any statement fails, the entire transaction is rolled back.
 
@@ -99,21 +98,21 @@ Executes a raw SQL query string.
 *   **query**: The SQL string to execute.
 
 ### Execute Stored Procedure
-Calls a stored procedure within a selected schema. Metadata is generated automatically based on `IN`, `OUT`, and `IN OUT` parameters.
+Executes the selected stored procedure from the specified database schema. Metadata is generated automatically based on `IN`, `OUT`, and `IN OUT` parameters.
 
 *   **Supported Array Types**: `CURSOR` (SQL) and `REF CURSOR` (Oracle). Results are returned as JSON objects.
 *   **MSSQL Note**: `@RETURN_VALUE` is currently not processed.
 
 ### Insert Action
-Inserts values into the selected table. Fields with `auto-increment` or `auto-calculated` properties are excluded from the metadata.
+Inserts a new row into the specified table. Fields with `auto-increment` or `auto-calculated` properties are excluded from the metadata.
 
 ### Lookup Row By Primary Key
-Fetches a single row from a table using its Primary Key.
+Fetches a single row from the database using its primary key.
 
-*   **Don't throw Error on an Empty Result**: If enabled, emits an empty object instead of an error when no row is found.
+*   **Do not throw error on empty result**: If enabled, emits an empty object instead of an error when no row is found.
 
 ### Select Action
-Executes a `SELECT` query that can return multiple results. 
+Executes a SELECT statement to fetch multiple rows. 
 
 To prevent SQL injection, this action uses **Prepared Statements**. You must explicitly define the type for each variable using the format `@variable_name:type`.
 
@@ -131,7 +130,7 @@ SELECT * FROM users WHERE userid = @id:number AND language = @lang:string
 *   **Expect Single**: Emits one message for one row. Throws an error if multiple rows are found.
 
 ### Upsert Row By Primary Key
-Performs a `SELECT` by Primary Key. If a record exists, it executes an `UPDATE`; otherwise, it executes an `INSERT`. All non-nullable fields should be provided to ensure success.
+Updates an existing row or inserts a new one based on the primary key. All non-nullable fields should be provided to ensure success.
 
 ---
 
