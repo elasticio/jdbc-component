@@ -11,6 +11,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -121,7 +122,10 @@ public abstract class Query {
       throws SQLException {
     try (PreparedStatement stmt = connection.prepareStatement(sqlQuery)) {
       if (pollingValue != null) {
-        stmt.setTimestamp(1, pollingValue);
+        int paramCount = stmt.getParameterMetaData().getParameterCount();
+        for (int i = 1; i <= paramCount; i++) {
+          stmt.setTimestamp(i, pollingValue);
+        }
       }
       try (ResultSet rs = stmt.executeQuery()) {
         ArrayList listResult = new ArrayList();
@@ -129,6 +133,36 @@ public abstract class Query {
         ResultSetMetaData metaData = rs.getMetaData();
         while (rs.next()) {
           for (int i = 1; i <= metaData.getColumnCount(); i++) {
+            row = Utils.getColumnDataByType(rs, metaData, i, row);
+          }
+          listResult.add(row.build());
+        }
+        return listResult;
+      }
+    }
+  }
+
+  public ArrayList executeSelectQuery(Connection connection, String sqlQuery, JsonObject body, List<String> orderedParams)
+      throws SQLException {
+    try (PreparedStatement stmt = connection.prepareStatement(sqlQuery)) {
+      int i = 1;
+      if (orderedParams != null && !orderedParams.isEmpty()) {
+        for (String paramName : orderedParams) {
+          Utils.setStatementParam(stmt, i, paramName, body);
+          i++;
+        }
+      } else if (stmt.getParameterMetaData().getParameterCount() != 0) {
+        for (Entry<String, JsonValue> entry : body.entrySet()) {
+          Utils.setStatementParam(stmt, i, entry.getKey(), body);
+          i++;
+        }
+      }
+      try (ResultSet rs = stmt.executeQuery()) {
+        JsonObjectBuilder row = Json.createObjectBuilder();
+        ArrayList listResult = new ArrayList();
+        ResultSetMetaData metaData = rs.getMetaData();
+        while (rs.next()) {
+          for (i = 1; i <= metaData.getColumnCount(); i++) {
             row = Utils.getColumnDataByType(rs, metaData, i, row);
           }
           listResult.add(row.build());
@@ -193,11 +227,10 @@ public abstract class Query {
       }
     }
 
-    String sqlSELECT =
-        "    SELECT" +
-            "        *" +
-            "    FROM " + tableName +
-            "    WHERE " + idColumn + " = ?";
+    String sqlSELECT = "    SELECT" +
+        "        *" +
+        "    FROM " + tableName +
+        "    WHERE " + idColumn + " = ?";
     String sqlInsert = "INSERT INTO " + tableName +
         " (" + keys.toString() + ")" +
         " VALUES (" + values.toString() + ")";
@@ -284,24 +317,20 @@ public abstract class Query {
 
   public ArrayList getRowsExecutePolling(Connection connection, String sql) throws SQLException {
     try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+      LOGGER.debug("Binding pollingValue: {}", pollingValue);
       stmt.setTimestamp(1, pollingValue);
       stmt.setInt(2, countNumber);
       try (ResultSet rs = stmt.executeQuery()) {
         ArrayList listResult = new ArrayList();
-        JsonObjectBuilder row = Json.createObjectBuilder();
         ResultSetMetaData metaData = rs.getMetaData();
         while (rs.next()) {
+          JsonObjectBuilder row = Json.createObjectBuilder();
           for (int i = 1; i <= metaData.getColumnCount(); i++) {
             row = Utils.getColumnDataByType(rs, metaData, i, row);
-            if (metaData.getColumnName(i).toUpperCase().equals(pollingField.toUpperCase())) {
-              if (maxPollingValue.before(rs.getTimestamp(i))) {
-                if (rs.getString(metaData.getColumnName(i)).length() > 10) {
-                  maxPollingValue = java.sql.Timestamp
-                      .valueOf(rs.getString(metaData.getColumnName(i)));
-                } else {
-                  maxPollingValue = java.sql.Timestamp
-                      .valueOf(rs.getString(metaData.getColumnName(i)) + " 00:00:00");
-                }
+            if (metaData.getColumnName(i).equalsIgnoreCase(pollingField)) {
+              Timestamp currentTimestamp = rs.getTimestamp(i);
+              if (currentTimestamp != null && maxPollingValue.before(currentTimestamp)) {
+                maxPollingValue = currentTimestamp;
               }
             }
           }
@@ -346,8 +375,7 @@ public abstract class Query {
             .append(p)
             .append(" => :")
             .append(p)
-            .append(", ")
-        );
+            .append(", "));
 
     String result = statementArgsStructure.toString();
     if (procedureParams.size() > 0) {
@@ -401,22 +429,22 @@ public abstract class Query {
     }
   }
 
-  protected JsonObjectBuilder addResultSetToJson(JsonObjectBuilder jsonBuilder, ResultSet resultSet, String name)  throws SQLException{
+  protected JsonObjectBuilder addResultSetToJson(JsonObjectBuilder jsonBuilder, ResultSet resultSet, String name)
+      throws SQLException {
     JsonArrayBuilder array = Json.createArrayBuilder();
 
-    Map<String, String> params =
-        IntStream.range(1, resultSet.getMetaData().getColumnCount() + 1)
-            .mapToObj(i -> {
-              try {
-                return new ProcedureParameter(resultSet.getMetaData().getColumnName(i),
-                    Direction.OUT, resultSet.getMetaData().getColumnType(i));
-              } catch (SQLException e) {
-                throw new IllegalArgumentException(e);
-              }
-            })
-            .collect(Collectors.toMap(ProcedureParameter::getName, p -> Utils
-                .cleanJsonType(
-                    Utils.detectColumnType(p.getType(), ""))));
+    Map<String, String> params = IntStream.range(1, resultSet.getMetaData().getColumnCount() + 1)
+        .mapToObj(i -> {
+          try {
+            return new ProcedureParameter(resultSet.getMetaData().getColumnName(i),
+                Direction.OUT, resultSet.getMetaData().getColumnType(i));
+          } catch (SQLException e) {
+            throw new IllegalArgumentException(e);
+          }
+        })
+        .collect(Collectors.toMap(ProcedureParameter::getName, p -> Utils
+            .cleanJsonType(
+                Utils.detectColumnType(p.getType(), ""))));
 
     while (resultSet.next()) {
       JsonObjectBuilder entity = Json.createObjectBuilder();

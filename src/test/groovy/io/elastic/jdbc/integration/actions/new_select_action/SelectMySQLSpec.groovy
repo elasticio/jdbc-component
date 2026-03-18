@@ -111,4 +111,16 @@ class SelectMySQLSpec extends Specification {
     0 * errorCallback.receive(*_)
   }
 
+  def "one select with reversed parameter order"() {
+    prepareStarsTable();
+    JsonObject snapshot = Json.createObjectBuilder().build();
+    JsonObject body = Json.createObjectBuilder()
+        .add("name", "Hello")
+        .add("id", 1)
+        .build()
+    when:
+    runAction(getStarsConfig(), body, snapshot)
+    then:
+    0 * errorCallback.receive(*_)
+  }
 }

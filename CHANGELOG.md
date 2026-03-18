@@ -1,3 +1,18 @@
+## 2.5.12 (March 18, 2026)
+* Updated Sailor to 5.0.1 to address the issue when the component failed to execute when there was an array in any of the preceding steps passthrough data. See [#Issue 100](https://github.com/elasticio/jdbc-component/issues/100)
+* Fix issue in the `Select` trigger ([#Issue 118](https://github.com/elasticio/jdbc-component/issues/118))
+* Improvements for `Select` trigger: support case-insensitive `%%EIO_LAST_POLL%%` placeholder, handle quoted placeholders, and support date-only/high-precision polling values.
+* Fix issue in the `Get rows polling` trigger ([#Issue 117](https://github.com/elasticio/jdbc-component/issues/117))
+* Improved Date/Timestamp parsing in `Get rows polling` trigger to support fractional seconds (up to 9 digits) and date-only formats (e.g., YYYY-MM-DD).
+* Enhanced snapshot accuracy and safety by using direct `ResultSet.getTimestamp()` access, preventing string-parsing errors during polling.
+* Fix MySQL timestamp comparison in polling trigger by using CONVERT(?, DATETIME(3)) for exact precision matching.
+* Fix JsonObjectBuilder reuse bug in getRowsExecutePolling method to prevent data corruption.
+* Fix maxPollingValue initialization in GetRowsPollingTrigger to ensure accurate snapshot updates.
+* Fix: `Get Rows Polling Trigger` now correctly defaults to Unix Epoch (1970-01-01) for the first execution.
+* Docs: Updated `Select Trigger` documentation to clarify that it defaults to today's midnight.
+* Tests: Added unit test cases to verify trigger fallback behaviors for missing or invalid inputs.
+* Fix Incorrect SQL Parameter Binding Order in NewSelectAction ([#Issue 123](https://github.com/elasticio/jdbc-component/issues/123))
+
 ## 2.5.11 (November 18, 2025)
 * Replaced the Oracle JDBC driver (ojdbc) from 6 to 8 (ojdbc8:21.5.0.0)
 * Updated Sailor to 5.0.0

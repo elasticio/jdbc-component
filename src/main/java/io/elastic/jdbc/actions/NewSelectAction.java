@@ -10,6 +10,7 @@ import io.elastic.jdbc.utils.Utils;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
@@ -44,6 +45,7 @@ public class NewSelectAction implements Function {
     }
 
     Utils.columnTypes = Utils.getVariableTypes(sqlQuery);
+    List<String> orderedParams = Utils.getParametersOrder(sqlQuery);
     LOGGER.info("Executing select action");
     LOGGER.debug("Detected column types");
     try {
@@ -55,7 +57,7 @@ public class NewSelectAction implements Function {
       Connection connection = Utils.getConnection(configuration);
 
       JsonObject queryBody = removeProperty(body,PROPERTY_ALLOW_ZERO_RESULT);
-      resultList = query.executeSelectQuery(connection, sqlQuery, queryBody);
+      resultList = query.executeSelectQuery(connection, sqlQuery, queryBody, orderedParams);
       switch (emitBehaviour) {
         case "fetchAll":
           emitAllData(resultList, eventEmitter);

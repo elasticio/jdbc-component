@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonString;
@@ -46,6 +47,7 @@ public class SelectAction implements Function {
     }
 
     Utils.columnTypes = Utils.getVariableTypes(sqlQuery);
+    List<String> orderedParams = Utils.getParametersOrder(sqlQuery);
     LOGGER.info("Executing select action");
     LOGGER.debug("Detected column types");
     try {
@@ -55,7 +57,7 @@ public class SelectAction implements Function {
       LOGGER.debug("Got SQL Query");
       ArrayList<JsonObject> resultList;
       Connection connection = Utils.getConnection(configuration);
-      resultList = query.executeSelectQuery(connection, sqlQuery, body);
+      resultList = query.executeSelectQuery(connection, sqlQuery, body, orderedParams);
       for (int i = 0; i < resultList.size(); i++) {
         LOGGER.debug("Columns count: {} from {}", i + 1, resultList.size());
         LOGGER.info("Emitting data...");
