@@ -197,7 +197,7 @@ public class MSSQL extends Query {
           try {
             addValueToResultJson(resultBuilder, stmt, procedureParams, param.getName());
           } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to add procedure output value for parameter {}: {}", param.getName(), e.getMessage(), e);
           }
         });
 

@@ -1,3 +1,7 @@
+## 2.5.13 (August 20, 2026)
+* Bumped Sailor dependency to 5.0.2.
+* Internal code changes and improvements.
+
 ## 2.5.12 (March 18, 2026)
 * Updated Sailor to 5.0.1 to address the issue when the component failed to execute when there was an array in any of the preceding steps passthrough data. See [#Issue 100](https://github.com/elasticio/jdbc-component/issues/100)
 * Fix issue in the `Select` trigger ([#Issue 118](https://github.com/elasticio/jdbc-component/issues/118))

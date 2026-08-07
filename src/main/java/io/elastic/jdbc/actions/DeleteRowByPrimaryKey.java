@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 public class DeleteRowByPrimaryKey implements Function {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(LookupRowByPrimaryKey.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DeleteRowByPrimaryKey.class);
   private static final String PROPERTY_DB_ENGINE = "dbEngine";
   private static final String PROPERTY_TABLE_NAME = "tableName";
   private static final String PROPERTY_ID_COLUMN = "idColumn";
