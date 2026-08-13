@@ -1,4 +1,4 @@
-## 2.5.13 (August 20, 2026)
+## 2.5.13 (August 13, 2026)
 * Bumped Sailor dependency to 5.0.2.
 * Internal code changes and improvements.
 
