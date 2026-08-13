@@ -71,7 +71,7 @@ public class Utils {
       try {
         if(!con.isClosed()) con.close();
       } catch (SQLException e) {
-        e.printStackTrace();
+        LOGGER.error("Failed to close JDBC connection on shutdown hook", e);
       }
     }));
     return con;

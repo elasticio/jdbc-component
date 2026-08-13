@@ -70,6 +70,7 @@ public class NewSelectAction implements Function {
           break;
       }
     } catch (SQLException e) {
+      LOGGER.error("Failed to execute SQL Query", e);
       throw new RuntimeException(e);
     }
   }

@@ -16,8 +16,12 @@ import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Oracle extends Query {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(Oracle.class);
 
   public ArrayList executePolling(Connection connection) throws SQLException {
     validateQuery();
@@ -160,7 +164,7 @@ public class Oracle extends Query {
           try {
             addValueToResultJson(resultBuilder, stmt, procedureParams, param.getName());
           } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to add procedure output value for parameter {}: {}", param.getName(), e.getMessage(), e);
           }
         });
 
